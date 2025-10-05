@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/color_scheme.dart';
 import '../../../core/utils/constants.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Home screen with SOS button and main features
 class HomeScreen extends StatefulWidget {
@@ -26,10 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Navigation items (without SOS which will be in the middle)
   final List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.home, label: 'Home'),
-    _NavItem(icon: Icons.map, label: 'Track'),
-    _NavItem(icon: Icons.support_agent, label: 'Support'),
-    _NavItem(icon: Icons.person, label: 'Profile'),
+    _NavItem(icon: Icons.location_on, label: 'Track me'),
+    _NavItem(icon: LucideIcons.users, label: 'Friends'),
+    _NavItem(icon: Icons.phone_callback, label: 'Fake Call'),
+    _NavItem(icon:  LucideIcons.contact, label: 'Helpline'),
   ];
 
   @override
@@ -38,11 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildHomeContent(),
+          // _buildHomeContent(),
           _buildTrackContent(),
+           _buildFriendsContent(),
           _buildSosContent(),
-          _buildSupportContent(),
-          _buildProfileContent(),
+            _buildFakeCallContent(),
+             _buildHelplineContent(),
+          // _buildSupportContent(),
+          // _buildProfileContent(),
         ],
       ),
       bottomNavigationBar: _buildCustomBottomNavBar(),
@@ -86,12 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         if (screenIndex == 3) { // Support
           // Navigate to chat screen using the existing route
-          context.push(AppRoutes.helpSupport);
-        } else if (screenIndex == 4) { // Profile
-          context.push(AppRoutes.profile);
-        } else {
+          context.push(AppRoutes.fake);
+        } 
+        // else if (screenIndex == 4) { // Profile
+        //   // context.push(AppRoutes.profile);
+        // } else {
           setState(() => _selectedIndex = screenIndex);
-        }
+        // }
       },  
       child: SizedBox(
         width: 70.w,
@@ -313,6 +318,15 @@ class _HomeScreenState extends State<HomeScreen> {
   // Placeholder content for other tabs
   Widget _buildTrackContent() {
     return const Center(child: Text('Track Content'));
+  }
+  Widget _buildFriendsContent() {
+    return const Center(child: Text('friends Content'));
+  }
+  Widget _buildFakeCallContent() {
+    return const Center(child: Text('Fake call Content'));
+  }
+  Widget _buildHelplineContent() {
+    return const Center(child: Text('Helpline Content'));
   }
 
   Widget _buildSosContent() {

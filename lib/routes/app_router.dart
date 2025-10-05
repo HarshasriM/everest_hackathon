@@ -1,4 +1,6 @@
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
+import 'package:everest_hackathon/features/fake_call/bloc/fake_call_bloc.dart';
+import 'package:everest_hackathon/features/fake_call/presentations/fake_call_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -54,6 +56,14 @@ class AppRouter {
         builder: (context, state) => BlocProvider.value(
           value: sl<AuthBloc>(),
           child: const ProfileSetupScreen(),
+        ),
+      ),
+      //fake call
+       GoRoute(
+        path: AppRoutes.fake,
+        builder: (context, state) => BlocProvider.value(
+          value: FakeCallBloc(),
+          child:  FakeCallScreen(),
         ),
       ),
         // Nested routes

@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/features/fake_call/bloc/fake_call_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +23,7 @@ class SHEApp extends StatelessWidget {
             BlocProvider(
               create: (_) => sl<AuthBloc>(),
             ),
+            BlocProvider(create: (_)=> FakeCallBloc())
           ],
           child: MaterialApp.router(
             title: 'SHE - Safety Help Emergency',
