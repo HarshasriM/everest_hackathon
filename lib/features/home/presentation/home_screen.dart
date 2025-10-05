@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/custom_app_bar.dart';
 import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: SHEAppBar(),
       body: IndexedStack(
         index: _selectedIndex,
         children: [
