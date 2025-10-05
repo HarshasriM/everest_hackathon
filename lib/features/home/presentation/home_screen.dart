@@ -44,8 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildSosContent(),
           _buildFakeCallContent(),
           _buildHelplineContent(),
-          // _buildSupportContent(),
-          // _buildProfileContent(),
         ],
       ),
       bottomNavigationBar: _buildCustomBottomNavBar(),
@@ -155,15 +153,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.sos, size: 24.sp, color: Colors.white),
-                  Text(
-                    'SOS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10.sp,
-                    ),
-                  ),
+                  Icon(Icons.sos, size: 36.sp, color: Colors.white),
+                  // Text(
+                  //   'SOS',
+                  //   style: TextStyle(
+                  //     color: Colors.white,
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 10.sp,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -181,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFriendsContent() {
-    return const Center(child: Text('Friends Screen'));
+    return const Center(child: Text('Trusted contacts Screen'));
   }
 
   Widget _buildSosContent() {
