@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             width: 75.w,
             height: 75.w,
-            margin: EdgeInsets.only(top: 2.h),
+            margin: EdgeInsets.only(bottom: 3.h),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: AppColorScheme.emergencyGradient,
