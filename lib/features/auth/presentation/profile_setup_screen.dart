@@ -392,8 +392,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     SizedBox(height: 12.h),
                     
                     TextButton(
-                      onPressed: _isLoading ? null : _handleSaveProfile,
-                      child: const Text('Save & Continue Later'),
+                      onPressed: _isLoading ? null : () => context.go(AppRoutes.home),
+                      child: const Text('skip'),
                     ),
                     
                     SizedBox(height: 20.h),

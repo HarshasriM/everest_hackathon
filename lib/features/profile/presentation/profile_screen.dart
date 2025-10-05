@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/dependency_injection/di_container.dart';
 import '../../../core/utils/constants.dart';
 import '../../../routes/app_routes.dart';
-import '../../../shared/widgets/primary_button.dart';
 import '../../../shared/widgets/section_title.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
