@@ -1,6 +1,8 @@
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
 import 'package:everest_hackathon/features/fake_call/bloc/fake_call_bloc.dart';
+import 'package:everest_hackathon/features/fake_call/presentations/fake_call_input_screen.dart';
 import 'package:everest_hackathon/features/fake_call/presentations/fake_call_screen.dart';
+import 'package:everest_hackathon/features/fake_call/presentations/incoming_call_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -66,10 +68,26 @@ class AppRouter {
           child:  FakeCallScreen(),
         ),
       ),
+      GoRoute(
+  path: AppRoutes.incoming,
+  builder: (context, state) {
+    final bloc = state.extra as FakeCallBloc;
+    return BlocProvider.value(
+      value: bloc,
+      child: const IncomingCallScreen(),
+    );
+  },
+),
+
+      
         // Nested routes
       GoRoute(
         path: AppRoutes.helpSupport,
         builder: (context, state) => const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
+      ),
+      GoRoute(
+        path: AppRoutes.fakecallInput,
+        builder:(context,state) => FakeCallInputScreen()
       ),
       GoRoute(
         path: AppRoutes.sos,

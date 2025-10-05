@@ -1,6 +1,8 @@
 import 'package:everest_hackathon/features/fake_call/presentations/incoming_call_screen.dart';
+import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../bloc/fake_call_bloc.dart';
 import '../bloc/fake_call_event.dart';
 import '../bloc/fake_call_state.dart';
@@ -14,10 +16,13 @@ class FakeCallScreen extends StatelessWidget {
     return BlocListener<FakeCallBloc, FakeCallState>(
       listener: (context, state) {
         if (state is IncomingCall) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => IncomingCallScreen()),
-          );
+        //  context.push(AppRoutes.incoming);
+        context.push(
+  AppRoutes.incoming,
+  extra: context.read<FakeCallBloc>(),
+);
+
+
         }
       },
       child: BlocBuilder<FakeCallBloc, FakeCallState>(

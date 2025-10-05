@@ -20,16 +20,27 @@ class FakeCallBloc extends Bloc<FakeCallEvent, FakeCallState> {
       emit(CallerSet(name: _callerName, phone: _phoneNumber, duration: _duration));
     });
 
-    on<ScheduleCall>((event, emit) {
-      emit(CallScheduled(name: _callerName, phone: _phoneNumber, duration: _duration));
+    // on<ScheduleCall>((event, emit) {
+    //   emit(CallScheduled(name: _callerName, phone: _phoneNumber, duration: _duration));
       
-      // Schedule the incoming call
-      Timer(Duration(seconds: _duration), () {
-        add(StartIncomingCall());
-      });
-    });
+    //   // Schedule the incoming call
+    //   Timer(Duration(seconds: _duration), () {
+    //     add(StartIncomingCall());
+    //   });
+    // });
+
+    on<ScheduleCall>((event, emit) {
+  emit(CallScheduled(name: _callerName, phone: _phoneNumber, duration: _duration));
+  
+  _timer?.cancel();
+  _timer = Timer(Duration(seconds: _duration), () {
+    add(StartIncomingCall());
+  });
+});
+
 
     on<StartIncomingCall>((event, emit) {
+       print("IncomingCall emitted with $_callerName ($_phoneNumber)");
       emit(IncomingCall(name: _callerName, phone: _phoneNumber));
     });
 
