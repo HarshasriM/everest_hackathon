@@ -174,6 +174,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             prefixText: '+91 ',
                             counterText: '',
                           ),
+                          onChanged: (value) {
+                            if (value.length == 10) {
+                              _handleSendOtp();
+                            }
+                          },
                           validator: Validators.validatePhoneNumber,
                           onFieldSubmitted: (_) => _handleSendOtp(),
                         ),
