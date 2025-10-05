@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -56,6 +57,10 @@ class AppRouter {
         ),
       ),
         // Nested routes
+      GoRoute(
+        path: AppRoutes.helpSupport,
+        builder: (context, state) => const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
+      ),
       GoRoute(
         path: AppRoutes.sos,
         builder: (context, state) => const SosScreen(),
