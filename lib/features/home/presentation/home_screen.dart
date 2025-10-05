@@ -1,4 +1,5 @@
 import 'package:everest_hackathon/custom_app_bar.dart';
+import 'package:everest_hackathon/features/track/presentation/track_screen.dart';
 import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -74,10 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
           // First two items
           _buildNavItem(0, 0),
           _buildNavItem(1, 1),
-          
+
           // SOS button in the middle
           _buildNavSosButton(),
-          
+
           // Last two items (index 2 and 3 in navItems, but 3 and 4 in screen stack)
           _buildNavItem(2, 3),
           _buildNavItem(3, 4),
@@ -90,16 +91,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int navIndex, int screenIndex) {
     return InkWell(
       onTap: () {
-        if (screenIndex == 3) { // Support
+        if (screenIndex == 3) {
+          // Support
           // Navigate to chat screen using the existing route
+
           context.push(AppRoutes.fake);
-        } 
-        // else if (screenIndex == 4) { // Profile
-        //   // context.push(AppRoutes.profile);
-        // } else {
+       
+        } else {
           setState(() => _selectedIndex = screenIndex);
-        // }
-      },  
+        }
+      },
+
       child: SizedBox(
         width: 70.w,
         height: 70.h,
@@ -157,11 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.sos,
-                    size: 24.sp,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.sos, size: 24.sp, color: Colors.white),
                   Text(
                     'SOS',
                     style: TextStyle(
@@ -195,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          
+
           // Emergency Contacts Section
           SliverToBoxAdapter(
             child: Padding(
@@ -216,7 +214,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.5),
                       ),
                     ),
                     child: Text(
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          
+
           // Quick Actions Section
           SliverToBoxAdapter(
             child: Padding(
@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          
+
           // Safety Tips Section
           SliverToBoxAdapter(
             child: Padding(
@@ -275,7 +275,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.5),
                       ),
                     ),
                     child: Text(
@@ -309,17 +311,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: 8.h),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
 
-  // Placeholder content for other tabs
+  // Track content with Google Maps
   Widget _buildTrackContent() {
-    return const Center(child: Text('Track Content'));
+    return const TrackScreen();
   }
   Widget _buildFriendsContent() {
     return const Center(child: Text('friends Content'));
