@@ -13,15 +13,23 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+// Bottom navigation item model
+class _NavItem {
+  final IconData icon;
+  final String label;
+
+  _NavItem({required this.icon, required this.label});
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<_BottomNavItem> _navItems = [
-    _BottomNavItem(icon: Icons.home, label: 'Home'),
-    _BottomNavItem(icon: Icons.map, label: 'Track'),
-    _BottomNavItem(icon: Icons.emergency, label: 'SOS'),
-    _BottomNavItem(icon: Icons.support_agent, label: 'Support'),
-    _BottomNavItem(icon: Icons.person, label: 'Profile'),
+  // Navigation items (without SOS which will be in the middle)
+  final List<_NavItem> _navItems = [
+    _NavItem(icon: Icons.home, label: 'Home'),
+    _NavItem(icon: Icons.map, label: 'Track'),
+    _NavItem(icon: Icons.support_agent, label: 'Support'),
+    _NavItem(icon: Icons.person, label: 'Profile'),
   ];
 
   @override
@@ -37,31 +45,131 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildProfileContent(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          if (index == 2) {
-            // Navigate to SOS screen
-            context.push(AppRoutes.sos);
-          } else if (index == 4) {
-            // Navigate to Profile screen
-            context.push(AppRoutes.profile);
-          } else {
-            setState(() => _selectedIndex = index);
-          }
-        },
-        items: _navItems.map((item) {
-          return BottomNavigationBarItem(
-            icon: Icon(item.icon),
-            label: item.label,
-          );
-        }).toList(),
-      ),
-      floatingActionButton: _buildSosButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }
 
+  Widget _buildCustomBottomNavBar() {
+    return Container(
+      height: 80.h,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // First two items
+          _buildNavItem(0, 0),
+          _buildNavItem(1, 1),
+          
+          // SOS button in the middle
+          _buildNavSosButton(),
+          
+          // Last two items (index 2 and 3 in navItems, but 3 and 4 in screen stack)
+          _buildNavItem(2, 3),
+          _buildNavItem(3, 4),
+        ],
+      ),
+    );
+  }
+
+  // Build individual nav item
+  Widget _buildNavItem(int navIndex, int screenIndex) {
+    return InkWell(
+      onTap: () {
+        if (screenIndex == 4) { // Profile
+          context.push(AppRoutes.profile);
+        } else {
+          setState(() => _selectedIndex = screenIndex);
+        }
+      },
+      child: SizedBox(
+        width: 70.w,
+        height: 70.h,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _navItems[navIndex].icon,
+              color: _selectedIndex == screenIndex
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey,
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              _navItems[navIndex].label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: _selectedIndex == screenIndex
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build SOS button for the nav bar
+  Widget _buildNavSosButton() {
+    return SizedBox(
+      width: 70.w,
+      height: 70.h,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            width: 60.w,
+            height: 60.w,
+            margin: EdgeInsets.only(top: 5.h),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppColorScheme.emergencyGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColorScheme.sosRedColor.withOpacity(0.4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: InkWell(
+              onTap: () => context.push(AppRoutes.sos),
+              borderRadius: BorderRadius.circular(30.r),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.sos,
+                    size: 24.sp,
+                    color: Colors.white,
+                  ),
+                  Text(
+                    'SOS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Content for each tab
   Widget _buildHomeContent() {
     return SafeArea(
       child: CustomScrollView(
@@ -78,113 +186,95 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           
-          // Content
-          SliverPadding(
-            padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Welcome Card
-                Card(
-                  child: Padding(
+          // Emergency Contacts Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Emergency Contacts',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  SizedBox(height: 16.h),
+                  // Emergency contacts cards would go here
+                  Container(
+                    width: double.infinity,
                     padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome back!',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Your safety is our priority',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                SizedBox(height: 24.h),
-                
-                // Quick Actions
-                Text(
-                  'Quick Actions',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16.w,
-                  crossAxisSpacing: 16.w,
-                  childAspectRatio: 1.2,
-                  children: [
-                    _buildFeatureCard(
-                      icon: Icons.phone_in_talk,
-                      title: 'Fake Call',
-                      subtitle: 'Simulate incoming call',
-                      color: Colors.purple,
-                      onTap: () {},
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.location_on,
-                      title: 'Share Location',
-                      subtitle: 'Share live location',
-                      color: Colors.blue,
-                      onTap: () {},
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.local_hospital,
-                      title: 'Helplines',
-                      subtitle: 'Emergency contacts',
-                      color: Colors.green,
-                      onTap: () {},
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.report,
-                      title: 'Report',
-                      subtitle: 'File a report',
-                      color: Colors.orange,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                
-                SizedBox(height: 24.h),
-                
-                // Safety Tips
-                Text(
-                  'Safety Tips',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                
-                Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.lightbulb_outline,
-                        color: Theme.of(context).colorScheme.primary,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                       ),
                     ),
-                    title: const Text('Personal Safety Tips'),
-                    subtitle: const Text('Learn how to stay safe'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {},
+                    child: Text(
+                      'Add your emergency contacts here',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
-                ),
-                
-                SizedBox(height: 100.h), // Space for FAB
-              ]),
+                ],
+              ),
+            ),
+          ),
+          
+          // Quick Actions Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quick Actions',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  SizedBox(height: 16.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildQuickActionItem(Icons.call, 'Call'),
+                      _buildQuickActionItem(Icons.message, 'Message'),
+                      _buildQuickActionItem(Icons.location_on, 'Location'),
+                      _buildQuickActionItem(Icons.camera_alt, 'Camera'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Safety Tips Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Safety Tips',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  SizedBox(height: 16.h),
+                  // Safety tips cards would go here
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Text(
+                      'Safety tips and guidelines will appear here',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -192,127 +282,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTrackContent() {
-    return const Center(
-      child: Text('Track Me Feature - Coming Soon'),
+  Widget _buildQuickActionItem(IconData icon, String label) {
+    return Column(
+      children: [
+        Container(
+          width: 60.w,
+          height: 60.w,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 30.sp,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
     );
+  }
+
+  // Placeholder content for other tabs
+  Widget _buildTrackContent() {
+    return const Center(child: Text('Track Content'));
   }
 
   Widget _buildSosContent() {
-    return const Center(
-      child: Text('SOS Screen'),
-    );
+    return const Center(child: Text('SOS Content'));
   }
 
   Widget _buildSupportContent() {
-    return const Center(
-      child: Text('Support & AI Assistant - Coming Soon'),
-    );
+    return const Center(child: Text('Support Content'));
   }
 
   Widget _buildProfileContent() {
-    return const Center(
-      child: Text('Profile Screen'),
-    );
+    return const Center(child: Text('Profile Content'));
   }
-
-  Widget _buildFeatureCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 36.w,
-                height: 36.h,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 24.sp,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSosButton() {
-    return Container(
-      width: 80.w,
-      height: 80.h,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: AppColorScheme.emergencyGradient,
-        boxShadow: [
-          BoxShadow(
-            color: AppColorScheme.sosRedColor.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.sos),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sos,
-              size: 32.sp,
-              color: Colors.white,
-            ),
-            Text(
-              'SOS',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem {
-  final IconData icon;
-  final String label;
-
-  _BottomNavItem({required this.icon, required this.label});
 }
