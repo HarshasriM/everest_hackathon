@@ -1,10 +1,10 @@
+import 'package:everest_hackathon/features/track/presentation/track_screen.dart';
 import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/color_scheme.dart';
 import '../../../core/utils/constants.dart';
-import '../../track/presentation/track_screen.dart';
 
 /// Home screen with SOS button and main features
 class HomeScreen extends StatefulWidget {
