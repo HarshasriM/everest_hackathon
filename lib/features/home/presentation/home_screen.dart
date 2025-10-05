@@ -84,12 +84,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int navIndex, int screenIndex) {
     return InkWell(
       onTap: () {
-        if (screenIndex == 4) { // Profile
+        if (screenIndex == 3) { // Support
+          // Navigate to chat screen using the existing route
+          context.push(AppRoutes.helpSupport);
+        } else if (screenIndex == 4) { // Profile
           context.push(AppRoutes.profile);
         } else {
           setState(() => _selectedIndex = screenIndex);
         }
-      },
+      },  
       child: SizedBox(
         width: 70.w,
         height: 70.h,
