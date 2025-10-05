@@ -161,6 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           enabled: !_isLoading,
+                          autofillHints: const [AutofillHints.telephoneNumber],
+                          textInputAction: TextInputAction.done,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),

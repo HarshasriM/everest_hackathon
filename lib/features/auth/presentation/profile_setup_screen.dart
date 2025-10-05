@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -133,7 +134,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.push('/home');
+                context.push(AppRoutes.home);
                 _saveAndComplete();
               },
               child: const Text('Continue Anyway'),

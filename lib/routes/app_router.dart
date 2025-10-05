@@ -19,18 +19,18 @@ class AppRouter {
   
   static GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
     routes: [
       // Splash Screen
       GoRoute(
-        path: '/splash',
+        path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
       ),
       
       // Authentication Routes
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         builder: (context, state) => BlocProvider(
           create: (_) => sl<AuthBloc>(),
           child: const LoginScreen(),
@@ -38,7 +38,7 @@ class AppRouter {
       ),
       
       GoRoute(
-        path: '/otp-verification',
+        path: AppRoutes.otpVerification,
         builder: (context, state) {
           final phoneNumber = state.extra as String? ?? '';
           return BlocProvider.value(
@@ -49,28 +49,26 @@ class AppRouter {
       ),
       
       GoRoute(
-        path: '/profile-setup',
+        path: AppRoutes.profileSetup,
         builder: (context, state) => BlocProvider.value(
           value: sl<AuthBloc>(),
           child: const ProfileSetupScreen(),
         ),
       ),
-      
+        // Nested routes
+      GoRoute(
+        path: AppRoutes.sos,
+        builder: (context, state) => const SosScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
       // Main App Routes
       GoRoute(
-        path: '/home',
+        path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
-        routes: [
-          // Nested routes
-          GoRoute(
-            path: 'sos',
-            builder: (context, state) => const SosScreen(),
-          ),
-          GoRoute(
-            path: 'profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-        ],
+      
       ),
     ],
     

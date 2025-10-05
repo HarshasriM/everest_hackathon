@@ -1,6 +1,5 @@
 import 'dart:math';
 import '../../../core/network/api_client.dart';
-import '../../../core/network/api_endpoints.dart';
 import '../../../core/utils/logger.dart';
 import '../../models/auth_model.dart';
 import '../../models/user_model.dart';

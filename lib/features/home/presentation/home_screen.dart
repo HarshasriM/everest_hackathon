@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -41,10 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) {
           if (index == 2) {
             // Navigate to SOS screen
-            context.push('/home/sos');
+            context.push(AppRoutes.sos);
           } else if (index == 4) {
             // Navigate to Profile screen
-            context.push('/home/profile');
+            context.push(AppRoutes.profile);
           } else {
             setState(() => _selectedIndex = index);
           }
@@ -232,8 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 48.w,
-                height: 48.h,
+                width: 36.w,
+                height: 36.h,
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -283,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       child: FloatingActionButton(
-        onPressed: () => context.push('/home/sos'),
+        onPressed: () => context.push(AppRoutes.sos),
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Column(

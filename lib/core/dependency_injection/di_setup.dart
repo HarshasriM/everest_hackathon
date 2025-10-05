@@ -1,10 +1,9 @@
-import 'package:get_it/get_it.dart';
+
 import '../../core/network/api_client.dart';
 import '../../core/services/app_preferences_service.dart';
 import '../../data/datasources/remote/auth_remote_source.dart';
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/repositories/sos_repository.dart';
 import '../../domain/usecases/auth/send_otp_usecase.dart';
 import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
