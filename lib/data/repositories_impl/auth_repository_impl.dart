@@ -25,13 +25,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> sendOtp(OtpRequestEntity request) async {
     try {
       Logger.info('Sending OTP to ${request.phoneNumber}');
+      Logger.info('Full phone number: ${request.fullPhoneNumber}');
 
-      final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
+      await _remoteSource.sendOtp(request.fullPhoneNumber);
 
-      if (!response.success) {
-        throw Exception(response.message);
-      }
-
+      // OtpSendResponseModel doesn't have success property, just check if we got a response
+      // If there's an error, the remote source will throw an exception
       Logger.info('OTP sent successfully');
     } catch (e) {
       Logger.error('Failed to send OTP', error: e);
@@ -44,26 +43,29 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       Logger.info('Verifying OTP for ${verification.phoneNumber}');
 
+      // Ensure phone number has country code (same format as send OTP)
+      String phoneNumber = verification.phoneNumber;
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+91$phoneNumber';
+      }
+
+      Logger.debug('Formatted phone number for verification: $phoneNumber');
+
       // Create verification request model
       final request = OtpVerificationRequestModel(
-        phoneNumber: verification.phoneNumber,
+        phoneNumber: phoneNumber,
         otp: verification.otp,
-        deviceId: verification.deviceId,
-        deviceName: verification.deviceName,
-        fcmToken: verification.fcmToken,
       );
 
       // Verify OTP with remote source
       final authModel = await _remoteSource.verifyOtp(request);
 
-      // Save authentication data
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
+      // Save user ID (no tokens in current implementation)
       await _preferencesService.saveUserId(authModel.userId);
 
-      // If new user, fetch/create profile
-      if (authModel.isNewUser) {
-        Logger.info('New user detected, creating profile');
+      // Check if profile is complete, if not it's a new user
+      if (!authModel.isProfileComplete) {
+        Logger.info('New user detected or profile incomplete');
       } else {
         // Fetch existing user profile
         final userModel = await _remoteSource.getUserProfile(authModel.userId);
@@ -133,14 +135,20 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       Logger.info('Refreshing authentication token');
 
-      final authModel = await _remoteSource.refreshToken(refreshToken);
+      // For now, just check if user is still authenticated
+      // In a real implementation, you would call the refresh token API
+      final isAuth = await isAuthenticated();
+      if (!isAuth) {
+        throw Exception('User not authenticated');
+      }
 
-      // Update stored tokens
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
-
+      final user = await getCurrentUser();
       Logger.info('Token refresh successful');
-      return authModel.toEntity();
+      return AuthEntity(
+        userId: user?.id ?? '',
+        isProfileComplete: user?.isProfileComplete ?? false,
+        user: user,
+      );
     } catch (e) {
       Logger.error('Failed to refresh token', error: e);
       rethrow;
@@ -176,7 +184,11 @@ class AuthRepositoryImpl implements AuthRepository {
       Logger.info('Updating user profile');
 
       final userModel = UserModel.fromEntity(user);
-      final updatedModel = await _remoteSource.updateProfile(userModel);
+      final profileData = userModel.toJson();
+      final updatedModel = await _remoteSource.updateProfile(
+        user.id,
+        profileData,
+      );
 
       // Update cache
       _cachedUser = updatedModel.toEntity();

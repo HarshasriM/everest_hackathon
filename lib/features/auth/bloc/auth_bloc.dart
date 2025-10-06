@@ -133,13 +133,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await _authRepository.getCurrentUser();
 
       if (user != null) {
-        if (authEntity.isNewUser || !user.hasRequiredInfo) {
+        // Check if profile is complete based on user data
+        if (!user.hasRequiredInfo) {
           emit(AuthState.profileIncomplete(user: user));
         } else {
           emit(
             AuthState.authenticated(
               user: user,
-              isNewUser: authEntity.isNewUser,
+              isNewUser: !authEntity.isProfileComplete,
             ),
           );
         }
@@ -218,7 +219,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final hasUser = state.maybeWhen(
         profileIncomplete: (_) => true,
-        authenticated: (_, __) => true,
+        authenticated: (_, _) => true,
         orElse: () => false,
       );
 

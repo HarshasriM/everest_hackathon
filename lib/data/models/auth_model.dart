@@ -1,38 +1,67 @@
 import '../../domain/entities/auth_entity.dart';
+import 'user_model.dart';
 
-/// Authentication data model
+/// OTP Send Response Model
+class OtpSendResponseModel {
+  final String message;
+  final String sid;
+
+  const OtpSendResponseModel({required this.message, required this.sid});
+
+  factory OtpSendResponseModel.fromJson(Map<String, dynamic> json) {
+    try {
+      return OtpSendResponseModel(
+        message: json['message']?.toString() ?? 'OTP sent successfully',
+        sid: json['sid']?.toString() ?? '',
+      );
+    } catch (e) {
+      throw Exception('Failed to parse OTP response: $e. JSON: $json');
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'message': message, 'sid': sid};
+  }
+}
+
+/// OTP Verify Response Model (Auth Model)
 class AuthModel {
+  final String message;
   final String userId;
-  final String accessToken;
-  final String refreshToken;
-  final DateTime expiresAt;
-  final bool isNewUser;
+  final UserModel? user;
+  final bool isProfileComplete;
 
   const AuthModel({
+    required this.message,
     required this.userId,
-    required this.accessToken,
-    required this.refreshToken,
-    required this.expiresAt,
-    required this.isNewUser,
+    this.user,
+    required this.isProfileComplete,
   });
 
   factory AuthModel.fromJson(Map<String, dynamic> json) {
-    return AuthModel(
-      userId: json['userId'] as String,
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
-      expiresAt: DateTime.parse(json['expiresAt'] as String),
-      isNewUser: json['isNewUser'] as bool,
-    );
+    try {
+      return AuthModel(
+        message: json['message']?.toString() ?? 'Authentication successful',
+        userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
+        user: json['user'] != null
+            ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
+            : null,
+        isProfileComplete:
+            json['isProfileComplete'] as bool? ??
+            json['profileComplete'] as bool? ??
+            false,
+      );
+    } catch (e) {
+      throw Exception('Failed to parse auth response: $e. JSON: $json');
+    }
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'message': message,
       'userId': userId,
-      'accessToken': accessToken,
-      'refreshToken': refreshToken,
-      'expiresAt': expiresAt.toIso8601String(),
-      'isNewUser': isNewUser,
+      'user': user?.toJson(),
+      'isProfileComplete': isProfileComplete,
     };
   }
 
@@ -40,59 +69,30 @@ class AuthModel {
   AuthEntity toEntity() {
     return AuthEntity(
       userId: userId,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      expiresAt: expiresAt,
-      isNewUser: isNewUser,
+      isProfileComplete: isProfileComplete,
+      user: user?.toEntity(),
     );
   }
 
   // Create from entity
   factory AuthModel.fromEntity(AuthEntity entity) {
     return AuthModel(
+      message: 'Success',
       userId: entity.userId,
-      accessToken: entity.accessToken,
-      refreshToken: entity.refreshToken,
-      expiresAt: entity.expiresAt,
-      isNewUser: entity.isNewUser,
+      user: entity.user != null ? UserModel.fromEntity(entity.user!) : null,
+      isProfileComplete: entity.isProfileComplete,
     );
   }
 }
 
-/// OTP response model
-class OtpResponseModel {
-  final bool success;
-  final String message;
-  final String? requestId;
-  final int? expiresInSeconds;
-  final int? resendAfterSeconds;
+/// OTP request model
+class OtpRequestModel {
+  final String phoneNumber;
 
-  const OtpResponseModel({
-    required this.success,
-    required this.message,
-    this.requestId,
-    this.expiresInSeconds,
-    this.resendAfterSeconds,
-  });
-
-  factory OtpResponseModel.fromJson(Map<String, dynamic> json) {
-    return OtpResponseModel(
-      success: json['success'] as bool,
-      message: json['message'] as String,
-      requestId: json['requestId'] as String?,
-      expiresInSeconds: json['expiresInSeconds'] as int?,
-      resendAfterSeconds: json['resendAfterSeconds'] as int?,
-    );
-  }
+  const OtpRequestModel({required this.phoneNumber});
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'requestId': requestId,
-      'expiresInSeconds': expiresInSeconds,
-      'resendAfterSeconds': resendAfterSeconds,
-    };
+    return {'phoneNumber': phoneNumber};
   }
 }
 
@@ -100,43 +100,13 @@ class OtpResponseModel {
 class OtpVerificationRequestModel {
   final String phoneNumber;
   final String otp;
-  final String? deviceId;
-  final String? deviceName;
-  final String? deviceType;
-  final String? fcmToken;
-  final String? appVersion;
 
   const OtpVerificationRequestModel({
     required this.phoneNumber,
     required this.otp,
-    this.deviceId,
-    this.deviceName,
-    this.deviceType,
-    this.fcmToken,
-    this.appVersion,
   });
 
-  factory OtpVerificationRequestModel.fromJson(Map<String, dynamic> json) {
-    return OtpVerificationRequestModel(
-      phoneNumber: json['phoneNumber'] as String,
-      otp: json['otp'] as String,
-      deviceId: json['deviceId'] as String?,
-      deviceName: json['deviceName'] as String?,
-      deviceType: json['deviceType'] as String?,
-      fcmToken: json['fcmToken'] as String?,
-      appVersion: json['appVersion'] as String?,
-    );
-  }
-
   Map<String, dynamic> toJson() {
-    return {
-      'phoneNumber': phoneNumber,
-      'otp': otp,
-      'deviceId': deviceId,
-      'deviceName': deviceName,
-      'deviceType': deviceType,
-      'fcmToken': fcmToken,
-      'appVersion': appVersion,
-    };
+    return {'phoneNumber': phoneNumber, 'otp': otp};
   }
 }

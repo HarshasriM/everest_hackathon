@@ -6,13 +6,17 @@ import 'dio_interceptors.dart';
 /// Central API client using Dio for all network requests
 class ApiClient {
   late final Dio _dio;
-  
+
   ApiClient({String? baseUrl}) {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl ?? EnvironmentConfig.baseUrl,
-        connectTimeout: Duration(milliseconds: EnvironmentConfig.connectionTimeout),
-        receiveTimeout: Duration(milliseconds: EnvironmentConfig.receiveTimeout),
+        connectTimeout: Duration(
+          milliseconds: EnvironmentConfig.connectionTimeout,
+        ),
+        receiveTimeout: Duration(
+          milliseconds: EnvironmentConfig.receiveTimeout,
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -168,7 +172,9 @@ class ApiClient {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return Exception('Connection timeout. Please check your internet connection.');
+        return Exception(
+          'Connection timeout. Please check your internet connection.',
+        );
       case DioExceptionType.badResponse:
         return _handleResponseError(error.response);
       case DioExceptionType.cancel:
@@ -185,9 +191,28 @@ class ApiClient {
       return Exception('No response from server');
     }
 
+    // Debug: Log response details
+    if (kDebugMode) {
+      print('Response Status: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      print('Response Data Type: ${response.data.runtimeType}');
+    }
+
+    // Handle different response data types
+    String errorMessage = 'Unknown error occurred';
+
+    if (response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+      errorMessage = data['message'] ?? data['error'] ?? errorMessage;
+    } else if (response.data is String) {
+      errorMessage = response.data as String;
+    }
+
     switch (response.statusCode) {
       case 400:
-        return Exception(response.data['message'] ?? 'Bad request');
+        return Exception(
+          errorMessage.isNotEmpty ? errorMessage : 'Bad request',
+        );
       case 401:
         return Exception('Unauthorized. Please login again.');
       case 403:
@@ -195,7 +220,9 @@ class ApiClient {
       case 404:
         return Exception('Resource not found');
       case 422:
-        return Exception(response.data['message'] ?? 'Validation error');
+        return Exception(
+          errorMessage.isNotEmpty ? errorMessage : 'Validation error',
+        );
       case 429:
         return Exception('Too many requests. Please try again later.');
       case 500:
@@ -203,7 +230,7 @@ class ApiClient {
       case 503:
         return Exception('Service unavailable. Please try again later.');
       default:
-        return Exception(response.data['message'] ?? 'Unknown error occurred');
+        return Exception(errorMessage);
     }
   }
 
