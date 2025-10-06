@@ -28,11 +28,10 @@ class AuthRepositoryImpl implements AuthRepository {
       
       final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
       
-      if (!response.success) {
-        throw Exception(response.message);
-      }
+      // Store the session ID if needed (we can store it as part of auth token for now)
+      // In production, you might want to add a dedicated method for this
       
-      Logger.info('OTP sent successfully');
+      Logger.info('OTP sent successfully: ${response.message}');
     } catch (e) {
       Logger.error('Failed to send OTP', error: e);
       rethrow;
@@ -48,27 +47,19 @@ class AuthRepositoryImpl implements AuthRepository {
       final request = OtpVerificationRequestModel(
         phoneNumber: verification.phoneNumber,
         otp: verification.otp,
-        deviceId: verification.deviceId,
-        deviceName: verification.deviceName,
-        fcmToken: verification.fcmToken,
       );
       
       // Verify OTP with remote source
       final authModel = await _remoteSource.verifyOtp(request);
       
-      // Save authentication data
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
+      // Save user ID and mark as authenticated
       await _preferencesService.saveUserId(authModel.userId);
+      // Authentication is implicit when we have a user ID
       
-      // If new user, fetch/create profile
-      if (authModel.isNewUser) {
-        Logger.info('New user detected, creating profile');
-      } else {
-        // Fetch existing user profile
-        final userModel = await _remoteSource.getUserProfile(authModel.userId);
-        _cachedUser = userModel.toEntity();
-        await _preferencesService.saveUserData(userModel.toJson());
+      // If profile is complete, save user data
+      if (authModel.isProfileComplete && authModel.user != null) {
+        _cachedUser = authModel.user!.toEntity();
+        await _preferencesService.saveUserData(authModel.user!.toJson());
       }
       
       Logger.info('OTP verification successful');
@@ -133,14 +124,18 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       Logger.info('Refreshing authentication token');
       
-      final authModel = await _remoteSource.refreshToken(refreshToken);
+      // For now, we don't have a refresh token endpoint
+      // Just return the current auth state
+      final userId = await _preferencesService.getUserId();
+      if (userId == null) {
+        throw Exception('No user ID found');
+      }
       
-      // Update stored tokens
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
-      
-      Logger.info('Token refresh successful');
-      return authModel.toEntity();
+      return AuthEntity(
+        userId: userId,
+        isProfileComplete: _cachedUser != null,
+        user: _cachedUser,
+      );
     } catch (e) {
       Logger.error('Failed to refresh token', error: e);
       rethrow;
@@ -175,8 +170,19 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       Logger.info('Updating user profile');
       
-      final userModel = UserModel.fromEntity(user);
-      final updatedModel = await _remoteSource.updateProfile(userModel);
+      // Convert entity to profile data map
+      final profileData = {
+        'name': user.name,
+        'email': user.email,
+        'address': user.address,
+        'emergencyContacts': user.emergencyContacts.map((contact) => {
+          'name': contact.name,
+          'phoneNumber': contact.phoneNumber,
+          'relationship': contact.relationship,
+        }).toList(),
+      };
+      
+      final updatedModel = await _remoteSource.updateProfile(user.id, profileData);
       
       // Update cache
       _cachedUser = updatedModel.toEntity();

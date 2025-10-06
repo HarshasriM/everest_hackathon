@@ -30,18 +30,29 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            final user = state.maybeWhen(
-              authenticated: (user, _) => user,
-              orElse: () => null,
+        body: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            state.maybeWhen(
+              unauthenticated: () {
+                // Navigate to login after successful logout
+                context.go(AppRoutes.login);
+              },
+              orElse: () {},
             );
-            
-            if (user == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
+          },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              final user = state.maybeWhen(
+                authenticated: (user, _) => user,
+                profileIncomplete: (user) => user,
+                orElse: () => null,
               );
-            }
+              
+              if (user == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
             
             return SingleChildScrollView(
               padding: EdgeInsets.all(AppConstants.defaultPadding.w),
@@ -222,7 +233,8 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             );
-          },
+            },
+          ),
         ),
       ),
     );

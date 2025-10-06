@@ -131,25 +131,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       });
       
       final authEntity = await _verifyOtpUseCase(VerifyOtpParams(
-        phoneNumber: phoneNumber,
+        phoneNumber: '+91$phoneNumber',
         otp: otp,
       ));
       
-      // Fetch user profile
-      final user = await _authRepository.getCurrentUser();
-      
-      if (user != null) {
-        if (authEntity.isNewUser || !user.hasRequiredInfo) {
-          emit(AuthState.profileIncomplete(user: user));
-        } else {
+      // Check if profile is complete
+      if (!authEntity.isProfileComplete) {
+        // Profile needs to be completed
+        emit(AuthState.profileIncomplete(
+          user: authEntity.user ?? UserEntity.empty(),
+        ));
+      } else {
+        // Profile is complete, user is authenticated
+        final user = authEntity.user ?? await _authRepository.getCurrentUser();
+        if (user != null) {
           emit(AuthState.authenticated(
             user: user,
-            isNewUser: authEntity.isNewUser,
+            isNewUser: false,
           ));
+        } else {
+          emit(AuthState.profileIncomplete(user: UserEntity.empty()));
         }
-      } else {
-        // Create new user if not exists
-        emit(AuthState.profileIncomplete(user: UserEntity.empty()));
       }
       
     } catch (e) {

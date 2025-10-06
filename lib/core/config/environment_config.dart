@@ -14,11 +14,11 @@ class EnvironmentConfig {
   static String get baseUrl {
     switch (environment) {
       case 'production':
-        return 'https://api.she-safety.com';
+        return 'https://everest-hackathon.onrender.com';
       case 'staging':
-        return 'https://staging-api.she-safety.com';
+        return 'https://everest-hackathon.onrender.com';
       default:
-        return 'https://dev-api.she-safety.com';
+        return 'https://everest-hackathon.onrender.com';
     }
   }
 

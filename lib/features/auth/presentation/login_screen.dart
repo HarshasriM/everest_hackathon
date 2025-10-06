@@ -55,7 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
               setState(() {
                 _isLoading = false;
               });
-              context.go('${AppRoutes.otpVerification}?phone=$phoneNumber');
+              // Make sure we're passing the phone number correctly
+              final phone = phoneNumber.trim();
+              debugPrint('Navigating to OTP screen with phone: $phone');
+              context.go('${AppRoutes.otpVerification}?phone=$phone', extra: phone);
             },
             error: (message, phoneNumber) {
               setState(() {
@@ -161,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           enabled: !_isLoading,
-                          autofillHints: const [AutofillHints.telephoneNumber],
+                          autofillHints: const [AutofillHints.telephoneNumberLocal],
                           textInputAction: TextInputAction.done,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -169,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                           decoration: InputDecoration(
                             labelText: 'Phone Number',
-                            hintText: '9999999999',
+                            hintText: 'Enter phone number',
                             prefixIcon: const Icon(Icons.phone_outlined),
                             prefixText: '+91 ',
                             counterText: '',

@@ -35,10 +35,11 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Handle the API response format
     return UserModel(
-      id: json['id'] as String,
-      phoneNumber: json['phoneNumber'] as String,
-      name: json['name'] as String,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      phoneNumber: json['phoneNumber'] as String? ?? '',
+      name: json['name'] as String? ?? '',
       email: json['email'] as String?,
       profileImageUrl: json['profileImageUrl'] as String?,
       dateOfBirth: json['dateOfBirth'] != null 
@@ -51,11 +52,15 @@ class UserModel {
               .toList() ?? const [],
       isProfileComplete: json['isProfileComplete'] as bool? ?? false,
       isVerified: json['isVerified'] as bool? ?? false,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.parse(json['lastLoginAt'] as String)
           : null,
-      settings: UserSettingsModel.fromJson(json['settings'] as Map<String, dynamic>),
+      settings: json['settings'] != null
+          ? UserSettingsModel.fromJson(json['settings'] as Map<String, dynamic>)
+          : UserSettingsModel.defaults(),
     );
   }
 
@@ -147,10 +152,10 @@ class EmergencyContactModel {
 
   factory EmergencyContactModel.fromJson(Map<String, dynamic> json) {
     return EmergencyContactModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      phoneNumber: json['phoneNumber'] as String,
-      relationship: json['relationship'] as String,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      phoneNumber: json['phoneNumber'] as String? ?? '',
+      relationship: json['relationship'] as String? ?? '',
       isPrimary: json['isPrimary'] as bool? ?? false,
       canReceiveSosAlerts: json['canReceiveSosAlerts'] as bool? ?? true,
       canTrackLocation: json['canTrackLocation'] as bool? ?? false,
@@ -228,16 +233,16 @@ class UserSettingsModel {
 
   factory UserSettingsModel.fromJson(Map<String, dynamic> json) {
     return UserSettingsModel(
-      languageCode: json['languageCode'] as String,
-      sosButtonEnabled: json['sosButtonEnabled'] as bool,
-      shakeToSos: json['shakeToSos'] as bool,
-      voiceActivation: json['voiceActivation'] as bool,
-      autoSendLocation: json['autoSendLocation'] as bool,
-      discreteMode: json['discreteMode'] as bool,
-      sosCountdown: json['sosCountdown'] as int,
-      biometricLock: json['biometricLock'] as bool,
-      notificationsEnabled: json['notificationsEnabled'] as bool,
-      emergencyMessage: json['emergencyMessage'] as String,
+      languageCode: json['languageCode'] as String? ?? 'en',
+      sosButtonEnabled: json['sosButtonEnabled'] as bool? ?? true,
+      shakeToSos: json['shakeToSos'] as bool? ?? false,
+      voiceActivation: json['voiceActivation'] as bool? ?? false,
+      autoSendLocation: json['autoSendLocation'] as bool? ?? true,
+      discreteMode: json['discreteMode'] as bool? ?? false,
+      sosCountdown: json['sosCountdown'] as int? ?? 5,
+      biometricLock: json['biometricLock'] as bool? ?? false,
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      emergencyMessage: json['emergencyMessage'] as String? ?? 'I am in an emergency situation and need help!',
     );
   }
 
