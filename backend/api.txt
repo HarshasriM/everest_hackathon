@@ -2,7 +2,7 @@ cd backend
 npm install
 npm run dev
 
-http://localhost:5000/api/auth/send-otp
+https://everest-hackathon.onrender.com/api/auth/send-otp
 
 request:{
     "phoneNumber":"+919347206960"
@@ -13,7 +13,9 @@ response:{
     "sid": "VE6d9c8f376d7dc78a7bc79d96a90311c5"
 }
 
-http://localhost:5000/api/auth/verify-otp
+
+
+https://everest-hackathon.onrender.com/api/auth/verify-otp
 
 
 request:{
@@ -37,7 +39,9 @@ response:{
 }
 
 
-http://localhost:5000/api/users/{userId}
+
+
+https://everest-hackathon.onrender.com/api/users/{userId}
 
 request :{
    "name":"Meda Harsha Sri",
