@@ -8,6 +8,11 @@ import '../../domain/usecases/auth/send_otp_usecase.dart';
 import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
 import '../../features/track/bloc/track_bloc.dart';
+import '../../features/contacts/presentation/bloc/contacts_bloc.dart';
+import '../../features/contacts/domain/repositories/contacts_repository.dart';
+import '../../features/contacts/data/repositories/contacts_repository_impl.dart';
+import '../../features/contacts/domain/usecases/get_contacts_usecase.dart';
+import '../../features/contacts/domain/usecases/add_contact_usecase.dart';
 import 'di_container.dart';
 
 /// Setup dependency injection
@@ -55,6 +60,9 @@ void _registerRepositories() {
     () => AuthRepositoryImpl(remoteSource: sl(), preferencesService: sl()),
   );
 
+  // Contacts Repository
+  sl.registerLazySingleton<ContactsRepository>(() => ContactsRepositoryImpl());
+
   //  Add SOS Repository when implemented
   // sl.registerLazySingleton<SosRepository>(
   //   () => SosRepositoryImpl(
@@ -68,8 +76,11 @@ void _registerRepositories() {
 void _registerUseCases() {
   // Auth Use Cases
   sl.registerLazySingleton<SendOtpUseCase>(() => SendOtpUseCase(sl()));
-
   sl.registerLazySingleton<VerifyOtpUseCase>(() => VerifyOtpUseCase(sl()));
+
+  // Contacts Use Cases
+  sl.registerLazySingleton<GetContactsUseCase>(() => GetContactsUseCase(sl()));
+  sl.registerLazySingleton<AddContactUseCase>(() => AddContactUseCase(sl()));
 }
 
 /// Register BLoCs
@@ -85,4 +96,13 @@ void _registerBlocs() {
 
   // Track BLoC
   sl.registerFactory<TrackBloc>(() => TrackBloc(locationService: sl()));
+
+  // Contacts BLoC
+  sl.registerFactory<ContactsBloc>(
+    () => ContactsBloc(
+      getContactsUseCase: sl(),
+      addContactUseCase: sl(),
+      repository: sl(),
+    ),
+  );
 }

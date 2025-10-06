@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/color_scheme.dart';
-import '../../../core/utils/constants.dart';
+
 import '../../track/presentation/track_screen.dart';
+import '../../contacts/presentation/contacts_screen.dart';
 
 /// Home screen with SOS button and main features
 class HomeScreen extends StatefulWidget {
@@ -93,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
         //   // Profile
         //   context.push(AppRoutes.profile);
         // } else {
-          setState(() => _selectedIndex = screenIndex);
+        setState(() => _selectedIndex = screenIndex);
         // }
       },
       child: SizedBox(
@@ -171,15 +172,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
   // Track content with Google Maps
   Widget _buildTrackContent() {
     return const TrackScreen();
   }
 
   Widget _buildFriendsContent() {
-    return const Center(child: Text('Trusted contacts Screen'));
+    return const ContactsScreen();
   }
 
   Widget _buildSosContent() {
