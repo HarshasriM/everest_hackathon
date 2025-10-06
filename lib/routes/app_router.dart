@@ -17,7 +17,7 @@ import '../features/profile/presentation/profile_screen.dart';
 /// App router configuration using go_router
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  
+
   static GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
@@ -28,7 +28,7 @@ class AppRouter {
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
       ),
-      
+
       // Authentication Routes
       GoRoute(
         path: AppRoutes.login,
@@ -37,7 +37,7 @@ class AppRouter {
           child: const LoginScreen(),
         ),
       ),
-      
+
       GoRoute(
         path: AppRoutes.otpVerification,
         builder: (context, state) {
@@ -48,7 +48,7 @@ class AppRouter {
           );
         },
       ),
-      
+
       GoRoute(
         path: AppRoutes.profileSetup,
         builder: (context, state) => BlocProvider.value(
@@ -56,10 +56,11 @@ class AppRouter {
           child: const ProfileSetupScreen(),
         ),
       ),
-        // Nested routes
+      // Nested routes
       GoRoute(
         path: AppRoutes.helpSupport,
-        builder: (context, state) => const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
+        builder: (context, state) =>
+            const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
       ),
       GoRoute(
         path: AppRoutes.sos,
@@ -72,26 +73,31 @@ class AppRouter {
       // Main App Routes
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
-      
+        builder: (context, state) => BlocProvider.value(
+          value: sl<AuthBloc>(),
+          child: const HomeScreen(),
+        ),
       ),
     ],
-    
+
     // Redirect logic based on authentication state
     redirect: (context, state) async {
       final authBloc = sl<AuthBloc>();
       final authState = authBloc.state;
-      
+
       final isOnSplash = state.matchedLocation == '/splash';
-      final isOnAuth = state.matchedLocation.startsWith('/login') ||
-                      state.matchedLocation.startsWith('/otp-verification');
-      final isOnProfileSetup = state.matchedLocation.startsWith('/profile-setup');
-      
+      final isOnAuth =
+          state.matchedLocation.startsWith('/login') ||
+          state.matchedLocation.startsWith('/otp-verification');
+      final isOnProfileSetup = state.matchedLocation.startsWith(
+        '/profile-setup',
+      );
+
       if (isOnSplash) {
         // Let splash screen handle navigation
         return null;
       }
-      
+
       return authState.maybeWhen(
         unauthenticated: () {
           // User is not authenticated
@@ -117,7 +123,7 @@ class AppRouter {
         orElse: () => null,
       );
     },
-    
+
     // Error page
   );
 }
@@ -136,17 +142,17 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _checkAuthStatus();
   }
-  
+
   Future<void> _checkAuthStatus() async {
     // Add the auth bloc and check status
     final authBloc = sl<AuthBloc>();
     authBloc.add(const AuthEvent.checkAuthStatus());
-    
+
     // Wait for auth check to complete
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (!mounted) return;
-    
+
     // Navigate based on auth state
     final state = authBloc.state;
     state.when(
@@ -161,7 +167,7 @@ class _SplashScreenState extends State<SplashScreen> {
       loading: () {},
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,7 +190,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // App Name
             Text(
               'SHE',
@@ -193,9 +199,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Tagline
             Text(
               'Safety Help Emergency',
@@ -203,9 +209,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            
+
             const SizedBox(height: 48),
-            
+
             // Loading indicator
             const CircularProgressIndicator(),
           ],
@@ -218,9 +224,9 @@ class _SplashScreenState extends State<SplashScreen> {
 /// Error screen widget
 class ErrorScreen extends StatelessWidget {
   final Exception? error;
-  
+
   const ErrorScreen({super.key, this.error});
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

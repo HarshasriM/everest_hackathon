@@ -55,7 +55,7 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _CheckAuthStatus value)?  checkAuthStatus,TResult Function( _SendOtp value)?  sendOtp,TResult Function( _ResendOtp value)?  resendOtp,TResult Function( _VerifyOtp value)?  verifyOtp,TResult Function( _UpdateProfile value)?  updateProfile,TResult Function( _AddEmergencyContact value)?  addEmergencyContact,TResult Function( _RemoveEmergencyContact value)?  removeEmergencyContact,TResult Function( _CompleteProfileSetup value)?  completeProfileSetup,TResult Function( _Logout value)?  logout,TResult Function( _DeleteAccount value)?  deleteAccount,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _CheckAuthStatus value)?  checkAuthStatus,TResult Function( _SendOtp value)?  sendOtp,TResult Function( _ResendOtp value)?  resendOtp,TResult Function( _VerifyOtp value)?  verifyOtp,TResult Function( _UpdateProfile value)?  updateProfile,TResult Function( _AddEmergencyContact value)?  addEmergencyContact,TResult Function( _UpdateEmergencyContact value)?  updateEmergencyContact,TResult Function( _RemoveEmergencyContact value)?  removeEmergencyContact,TResult Function( _CompleteProfileSetup value)?  completeProfileSetup,TResult Function( _Logout value)?  logout,TResult Function( _DeleteAccount value)?  deleteAccount,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
@@ -64,7 +64,8 @@ return sendOtp(_that);case _ResendOtp() when resendOtp != null:
 return resendOtp(_that);case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case _UpdateProfile() when updateProfile != null:
 return updateProfile(_that);case _AddEmergencyContact() when addEmergencyContact != null:
-return addEmergencyContact(_that);case _RemoveEmergencyContact() when removeEmergencyContact != null:
+return addEmergencyContact(_that);case _UpdateEmergencyContact() when updateEmergencyContact != null:
+return updateEmergencyContact(_that);case _RemoveEmergencyContact() when removeEmergencyContact != null:
 return removeEmergencyContact(_that);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup(_that);case _Logout() when logout != null:
 return logout(_that);case _DeleteAccount() when deleteAccount != null:
@@ -86,7 +87,7 @@ return deleteAccount(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _CheckAuthStatus value)  checkAuthStatus,required TResult Function( _SendOtp value)  sendOtp,required TResult Function( _ResendOtp value)  resendOtp,required TResult Function( _VerifyOtp value)  verifyOtp,required TResult Function( _UpdateProfile value)  updateProfile,required TResult Function( _AddEmergencyContact value)  addEmergencyContact,required TResult Function( _RemoveEmergencyContact value)  removeEmergencyContact,required TResult Function( _CompleteProfileSetup value)  completeProfileSetup,required TResult Function( _Logout value)  logout,required TResult Function( _DeleteAccount value)  deleteAccount,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _CheckAuthStatus value)  checkAuthStatus,required TResult Function( _SendOtp value)  sendOtp,required TResult Function( _ResendOtp value)  resendOtp,required TResult Function( _VerifyOtp value)  verifyOtp,required TResult Function( _UpdateProfile value)  updateProfile,required TResult Function( _AddEmergencyContact value)  addEmergencyContact,required TResult Function( _UpdateEmergencyContact value)  updateEmergencyContact,required TResult Function( _RemoveEmergencyContact value)  removeEmergencyContact,required TResult Function( _CompleteProfileSetup value)  completeProfileSetup,required TResult Function( _Logout value)  logout,required TResult Function( _DeleteAccount value)  deleteAccount,}){
 final _that = this;
 switch (_that) {
 case _CheckAuthStatus():
@@ -95,7 +96,8 @@ return sendOtp(_that);case _ResendOtp():
 return resendOtp(_that);case _VerifyOtp():
 return verifyOtp(_that);case _UpdateProfile():
 return updateProfile(_that);case _AddEmergencyContact():
-return addEmergencyContact(_that);case _RemoveEmergencyContact():
+return addEmergencyContact(_that);case _UpdateEmergencyContact():
+return updateEmergencyContact(_that);case _RemoveEmergencyContact():
 return removeEmergencyContact(_that);case _CompleteProfileSetup():
 return completeProfileSetup(_that);case _Logout():
 return logout(_that);case _DeleteAccount():
@@ -116,7 +118,7 @@ return deleteAccount(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _CheckAuthStatus value)?  checkAuthStatus,TResult? Function( _SendOtp value)?  sendOtp,TResult? Function( _ResendOtp value)?  resendOtp,TResult? Function( _VerifyOtp value)?  verifyOtp,TResult? Function( _UpdateProfile value)?  updateProfile,TResult? Function( _AddEmergencyContact value)?  addEmergencyContact,TResult? Function( _RemoveEmergencyContact value)?  removeEmergencyContact,TResult? Function( _CompleteProfileSetup value)?  completeProfileSetup,TResult? Function( _Logout value)?  logout,TResult? Function( _DeleteAccount value)?  deleteAccount,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _CheckAuthStatus value)?  checkAuthStatus,TResult? Function( _SendOtp value)?  sendOtp,TResult? Function( _ResendOtp value)?  resendOtp,TResult? Function( _VerifyOtp value)?  verifyOtp,TResult? Function( _UpdateProfile value)?  updateProfile,TResult? Function( _AddEmergencyContact value)?  addEmergencyContact,TResult? Function( _UpdateEmergencyContact value)?  updateEmergencyContact,TResult? Function( _RemoveEmergencyContact value)?  removeEmergencyContact,TResult? Function( _CompleteProfileSetup value)?  completeProfileSetup,TResult? Function( _Logout value)?  logout,TResult? Function( _DeleteAccount value)?  deleteAccount,}){
 final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
@@ -125,7 +127,8 @@ return sendOtp(_that);case _ResendOtp() when resendOtp != null:
 return resendOtp(_that);case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case _UpdateProfile() when updateProfile != null:
 return updateProfile(_that);case _AddEmergencyContact() when addEmergencyContact != null:
-return addEmergencyContact(_that);case _RemoveEmergencyContact() when removeEmergencyContact != null:
+return addEmergencyContact(_that);case _UpdateEmergencyContact() when updateEmergencyContact != null:
+return updateEmergencyContact(_that);case _RemoveEmergencyContact() when removeEmergencyContact != null:
 return removeEmergencyContact(_that);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup(_that);case _Logout() when logout != null:
 return logout(_that);case _DeleteAccount() when deleteAccount != null:
@@ -146,7 +149,7 @@ return deleteAccount(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checkAuthStatus,TResult Function( String phoneNumber)?  sendOtp,TResult Function()?  resendOtp,TResult Function( String phoneNumber,  String otp)?  verifyOtp,TResult Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult Function( EmergencyContactEntity contact)?  addEmergencyContact,TResult Function( String contactId)?  removeEmergencyContact,TResult Function()?  completeProfileSetup,TResult Function()?  logout,TResult Function()?  deleteAccount,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checkAuthStatus,TResult Function( String phoneNumber)?  sendOtp,TResult Function()?  resendOtp,TResult Function( String phoneNumber,  String otp)?  verifyOtp,TResult Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult Function( EmergencyContactEntity contact)?  addEmergencyContact,TResult Function( EmergencyContactEntity contact)?  updateEmergencyContact,TResult Function( String contactId)?  removeEmergencyContact,TResult Function()?  completeProfileSetup,TResult Function()?  logout,TResult Function()?  deleteAccount,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _SendOtp() when sendOtp != null:
@@ -154,7 +157,8 @@ return sendOtp(_that.phoneNumber);case _ResendOtp() when resendOtp != null:
 return resendOtp();case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile() when updateProfile != null:
 return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _AddEmergencyContact() when addEmergencyContact != null:
-return addEmergencyContact(_that.contact);case _RemoveEmergencyContact() when removeEmergencyContact != null:
+return addEmergencyContact(_that.contact);case _UpdateEmergencyContact() when updateEmergencyContact != null:
+return updateEmergencyContact(_that.contact);case _RemoveEmergencyContact() when removeEmergencyContact != null:
 return removeEmergencyContact(_that.contactId);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup();case _Logout() when logout != null:
 return logout();case _DeleteAccount() when deleteAccount != null:
@@ -176,7 +180,7 @@ return deleteAccount();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checkAuthStatus,required TResult Function( String phoneNumber)  sendOtp,required TResult Function()  resendOtp,required TResult Function( String phoneNumber,  String otp)  verifyOtp,required TResult Function( String name,  String? email,  String? address,  String? bloodGroup)  updateProfile,required TResult Function( EmergencyContactEntity contact)  addEmergencyContact,required TResult Function( String contactId)  removeEmergencyContact,required TResult Function()  completeProfileSetup,required TResult Function()  logout,required TResult Function()  deleteAccount,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checkAuthStatus,required TResult Function( String phoneNumber)  sendOtp,required TResult Function()  resendOtp,required TResult Function( String phoneNumber,  String otp)  verifyOtp,required TResult Function( String name,  String? email,  String? address,  String? bloodGroup)  updateProfile,required TResult Function( EmergencyContactEntity contact)  addEmergencyContact,required TResult Function( EmergencyContactEntity contact)  updateEmergencyContact,required TResult Function( String contactId)  removeEmergencyContact,required TResult Function()  completeProfileSetup,required TResult Function()  logout,required TResult Function()  deleteAccount,}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus():
 return checkAuthStatus();case _SendOtp():
@@ -184,7 +188,8 @@ return sendOtp(_that.phoneNumber);case _ResendOtp():
 return resendOtp();case _VerifyOtp():
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile():
 return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _AddEmergencyContact():
-return addEmergencyContact(_that.contact);case _RemoveEmergencyContact():
+return addEmergencyContact(_that.contact);case _UpdateEmergencyContact():
+return updateEmergencyContact(_that.contact);case _RemoveEmergencyContact():
 return removeEmergencyContact(_that.contactId);case _CompleteProfileSetup():
 return completeProfileSetup();case _Logout():
 return logout();case _DeleteAccount():
@@ -205,7 +210,7 @@ return deleteAccount();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checkAuthStatus,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function()?  resendOtp,TResult? Function( String phoneNumber,  String otp)?  verifyOtp,TResult? Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult? Function( EmergencyContactEntity contact)?  addEmergencyContact,TResult? Function( String contactId)?  removeEmergencyContact,TResult? Function()?  completeProfileSetup,TResult? Function()?  logout,TResult? Function()?  deleteAccount,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checkAuthStatus,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function()?  resendOtp,TResult? Function( String phoneNumber,  String otp)?  verifyOtp,TResult? Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult? Function( EmergencyContactEntity contact)?  addEmergencyContact,TResult? Function( EmergencyContactEntity contact)?  updateEmergencyContact,TResult? Function( String contactId)?  removeEmergencyContact,TResult? Function()?  completeProfileSetup,TResult? Function()?  logout,TResult? Function()?  deleteAccount,}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _SendOtp() when sendOtp != null:
@@ -213,7 +218,8 @@ return sendOtp(_that.phoneNumber);case _ResendOtp() when resendOtp != null:
 return resendOtp();case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile() when updateProfile != null:
 return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _AddEmergencyContact() when addEmergencyContact != null:
-return addEmergencyContact(_that.contact);case _RemoveEmergencyContact() when removeEmergencyContact != null:
+return addEmergencyContact(_that.contact);case _UpdateEmergencyContact() when updateEmergencyContact != null:
+return updateEmergencyContact(_that.contact);case _RemoveEmergencyContact() when removeEmergencyContact != null:
 return removeEmergencyContact(_that.contactId);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup();case _Logout() when logout != null:
 return logout();case _DeleteAccount() when deleteAccount != null:
@@ -553,6 +559,72 @@ class __$AddEmergencyContactCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? contact = null,}) {
   return _then(_AddEmergencyContact(
+contact: null == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
+as EmergencyContactEntity,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _UpdateEmergencyContact implements AuthEvent {
+  const _UpdateEmergencyContact({required this.contact});
+  
+
+ final  EmergencyContactEntity contact;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UpdateEmergencyContactCopyWith<_UpdateEmergencyContact> get copyWith => __$UpdateEmergencyContactCopyWithImpl<_UpdateEmergencyContact>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateEmergencyContact&&(identical(other.contact, contact) || other.contact == contact));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,contact);
+
+@override
+String toString() {
+  return 'AuthEvent.updateEmergencyContact(contact: $contact)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UpdateEmergencyContactCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory _$UpdateEmergencyContactCopyWith(_UpdateEmergencyContact value, $Res Function(_UpdateEmergencyContact) _then) = __$UpdateEmergencyContactCopyWithImpl;
+@useResult
+$Res call({
+ EmergencyContactEntity contact
+});
+
+
+
+
+}
+/// @nodoc
+class __$UpdateEmergencyContactCopyWithImpl<$Res>
+    implements _$UpdateEmergencyContactCopyWith<$Res> {
+  __$UpdateEmergencyContactCopyWithImpl(this._self, this._then);
+
+  final _UpdateEmergencyContact _self;
+  final $Res Function(_UpdateEmergencyContact) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? contact = null,}) {
+  return _then(_UpdateEmergencyContact(
 contact: null == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as EmergencyContactEntity,
   ));
