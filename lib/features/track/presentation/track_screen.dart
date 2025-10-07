@@ -44,6 +44,10 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
   }
 
   
@@ -127,26 +131,6 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
                 mapToolbarEnabled: false,
               ),
 
-              // Top gradient overlay
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 120.h,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.6),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
               // App Bar
               Positioned(
                 top: MediaQuery.of(context).padding.top + 10.h,
@@ -165,7 +149,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
                           Shadow(
                             offset: const Offset(0, 1),
                             blurRadius: 3,
-                            color: Colors.black.withValues(alpha: 0.5),
+                            color: Colors.black.withOpacity(0.5),
                           ),
                         ],
                       ),
@@ -197,7 +181,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               // Loading overlay
               if (state.isLoading)
                 Container(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withOpacity(0.3),
                   child: const Center(
                     child: CircularProgressIndicator(),
                   ),
@@ -206,7 +190,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               // Error overlay
               if (state.isError)
                 Container(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withOpacity(0.3),
                   child: Center(
                     child: _buildErrorWidget(context, state),
                   ),
@@ -227,7 +211,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -242,7 +226,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
@@ -317,27 +301,38 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  context.read<TrackBloc>().add(const TrackEvent.retry());
-                },
-                child: const Text('Retry'),
-              ),
-              if (state.maybeWhen(
-                permissionDenied: (status, _) => status == LocationPermissionStatus.denied,
-                orElse: () => false,
-              ))
+          // Fix: Wrap Row in a SizedBox with a defined width to avoid infinite width constraint
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: [
                 ElevatedButton(
                   onPressed: () {
-                    context.read<TrackBloc>().add(const TrackEvent.requestPermission());
+                    context.read<TrackBloc>().add(const TrackEvent.retry());
                   },
-                  child: const Text('Grant Permission'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(100.w, 40.h),
+                  ),
+                  child: const Text('Retry'),
                 ),
+                if (state.maybeWhen(
+                  permissionDenied: (status, _) => status == LocationPermissionStatus.denied,
+                  orElse: () => false,
+                ))
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<TrackBloc>().add(const TrackEvent.requestPermission());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(100.w, 40.h),
+                    ),
+                    child: const Text('Grant Permission'),
+                  ),
             ],
-          ),
+          )),
         ],
       ),
     );

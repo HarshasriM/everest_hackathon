@@ -27,12 +27,11 @@ class AuthRepositoryImpl implements AuthRepository {
       Logger.info('Sending OTP to ${request.phoneNumber}');
 
       final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
-
-      if (!response.success) {
-        throw Exception(response.message);
-      }
-
-      Logger.info('OTP sent successfully');
+      
+      // Store the session ID if needed (we can store it as part of auth token for now)
+      // In production, you might want to add a dedicated method for this
+      
+      Logger.info('OTP sent successfully: ${response.message}');
     } catch (e) {
       Logger.error('Failed to send OTP', error: e);
       rethrow;
@@ -48,27 +47,19 @@ class AuthRepositoryImpl implements AuthRepository {
       final request = OtpVerificationRequestModel(
         phoneNumber: verification.phoneNumber,
         otp: verification.otp,
-        deviceId: verification.deviceId,
-        deviceName: verification.deviceName,
-        fcmToken: verification.fcmToken,
       );
 
       // Verify OTP with remote source
       final authModel = await _remoteSource.verifyOtp(request);
-
-      // Save authentication data
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
+      
+      // Save user ID and mark as authenticated
       await _preferencesService.saveUserId(authModel.userId);
-
-      // If new user, fetch/create profile
-      if (authModel.isNewUser) {
-        Logger.info('New user detected, creating profile');
-      } else {
-        // Fetch existing user profile
-        final userModel = await _remoteSource.getUserProfile(authModel.userId);
-        _cachedUser = userModel.toEntity();
-        await _preferencesService.saveUserData(userModel.toJson());
+      // Authentication is implicit when we have a user ID
+      
+      // If profile is complete, save user data
+      if (authModel.isProfileComplete && authModel.user != null) {
+        _cachedUser = authModel.user!.toEntity();
+        await _preferencesService.saveUserData(authModel.user!.toJson());
       }
 
       Logger.info('OTP verification successful');
@@ -132,15 +123,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthEntity> refreshToken(String refreshToken) async {
     try {
       Logger.info('Refreshing authentication token');
-
-      final authModel = await _remoteSource.refreshToken(refreshToken);
-
-      // Update stored tokens
-      await _preferencesService.saveAuthToken(authModel.accessToken);
-      await _preferencesService.saveRefreshToken(authModel.refreshToken);
-
-      Logger.info('Token refresh successful');
-      return authModel.toEntity();
+      
+      // For now, we don't have a refresh token endpoint
+      // Just return the current auth state
+      final userId = await _preferencesService.getUserId();
+      if (userId == null) {
+        throw Exception('No user ID found');
+      }
+      
+      return AuthEntity(
+        userId: userId,
+        isProfileComplete: _cachedUser != null,
+        user: _cachedUser,
+      );
     } catch (e) {
       Logger.error('Failed to refresh token', error: e);
       rethrow;
@@ -174,10 +169,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> updateProfile(UserEntity user) async {
     try {
       Logger.info('Updating user profile');
-
-      final userModel = UserModel.fromEntity(user);
-      final updatedModel = await _remoteSource.updateProfile(userModel);
-
+      
+      // Convert entity to profile data map
+      final profileData = {
+        'name': user.name,
+        'email': user.email,
+      };
+      
+      final updatedModel = await _remoteSource.updateProfile(user.id, profileData);
+      
       // Update cache
       _cachedUser = updatedModel.toEntity();
       await _preferencesService.saveUserData(updatedModel.toJson());
@@ -187,169 +187,6 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       Logger.error('Failed to update profile', error: e);
       rethrow;
-    }
-  }
-
-  @override
-  Future<void> addEmergencyContact(EmergencyContactEntity contact) async {
-    try {
-      Logger.info('Adding emergency contact');
-
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Add contact to list
-      final updatedContacts = [...currentUser.emergencyContacts, contact];
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-
-      await updateProfile(updatedUser);
-
-      // Also save to preferences for offline access
-      final contactsList = await _preferencesService.getEmergencyContacts();
-      contactsList.add({
-        'id': contact.id,
-        'name': contact.name,
-        'phoneNumber': contact.phoneNumber,
-        'relationship': contact.relationship,
-        'isPrimary': contact.isPrimary,
-        'canReceiveSosAlerts': contact.canReceiveSosAlerts,
-        'canTrackLocation': contact.canTrackLocation,
-        'email': contact.email,
-      });
-      await _preferencesService.saveEmergencyContacts(contactsList);
-
-      Logger.info('Emergency contact added successfully');
-    } catch (e) {
-      Logger.error('Failed to add emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> removeEmergencyContact(String contactId) async {
-    try {
-      Logger.info('Removing emergency contact $contactId');
-
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Remove contact from list
-      final updatedContacts = currentUser.emergencyContacts
-          .where((c) => c.id != contactId)
-          .toList();
-
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-
-      await updateProfile(updatedUser);
-
-      Logger.info('Emergency contact removed successfully');
-    } catch (e) {
-      Logger.error('Failed to remove emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> updateEmergencyContact(EmergencyContactEntity contact) async {
-    try {
-      Logger.info('Updating emergency contact ${contact.id}');
-
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Update contact in list
-      final updatedContacts = currentUser.emergencyContacts.map((c) {
-        return c.id == contact.id ? contact : c;
-      }).toList();
-
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-
-      await updateProfile(updatedUser);
-
-      Logger.info('Emergency contact updated successfully');
-    } catch (e) {
-      Logger.error('Failed to update emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<List<EmergencyContactEntity>> getEmergencyContacts() async {
-    try {
-      // Try to get from current user
-      final currentUser = await getCurrentUser();
-      if (currentUser != null) {
-        return currentUser.emergencyContacts;
-      }
-
-      // Fallback to preferences for offline access
-      final contactsList = await _preferencesService.getEmergencyContacts();
-      return contactsList.map((data) {
-        return EmergencyContactEntity(
-          id: data['id'] ?? '',
-          name: data['name'] ?? '',
-          phoneNumber: data['phoneNumber'] ?? '',
-          relationship: data['relationship'] ?? '',
-          isPrimary: data['isPrimary'] ?? false,
-          canReceiveSosAlerts: data['canReceiveSosAlerts'] ?? true,
-          canTrackLocation: data['canTrackLocation'] ?? false,
-          email: data['email'],
-        );
-      }).toList();
-    } catch (e) {
-      Logger.error('Failed to get emergency contacts', error: e);
-      return [];
     }
   }
 
@@ -370,9 +207,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email: currentUser.email,
         profileImageUrl: currentUser.profileImageUrl,
         dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: currentUser.emergencyContacts,
         isProfileComplete: currentUser.isProfileComplete,
         isVerified: currentUser.isVerified,
         createdAt: currentUser.createdAt,

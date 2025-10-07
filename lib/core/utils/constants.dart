@@ -41,17 +41,6 @@ class AppConstants {
     'kn': 'ಕನ್ನಡ',
   };
   
-  // Relationships for emergency contacts
-  static const List<String> relationships = <String>[
-    'Parent',
-    'Spouse',
-    'Sibling',
-    'Friend',
-    'Relative',
-    'Guardian',
-    'Other',
-  ];
-  
   // Report categories
   static const List<String> reportCategories = <String>[
     'Harassment',

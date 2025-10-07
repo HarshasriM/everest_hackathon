@@ -1,22 +1,16 @@
 /// API endpoints for the SHE application
 class ApiEndpoints {
   // Authentication
-  static const String sendOtp = '/auth/send-otp';
-  static const String verifyOtp = '/auth/verify-otp';
-  static const String refreshToken = '/auth/refresh-token';
-  static const String logout = '/auth/logout';
+  static const String sendOtp = '/api/auth/send-otp';
+  static const String verifyOtp = '/api/auth/verify-otp';
+  static const String refreshToken = '/api/auth/refresh-token';
+  static const String logout = '/api/auth/logout';
 
   // User Management
-  static const String getUserProfile = '/users/profile';
-  static const String updateProfile = '/users/profile';
-  static const String deleteAccount = '/users/delete';
-  static const String uploadProfileImage = '/users/profile-image';
-
-  // Emergency Contacts
-  static const String getEmergencyContacts = '/contacts';
-  static const String addEmergencyContact = '/contacts';
-  static const String updateEmergencyContact = '/contacts/{id}';
-  static const String deleteEmergencyContact = '/contacts/{id}';
+  static String getUserProfile(String userId) => '/api/users/$userId';
+  static String updateProfile(String userId) => '/api/users/$userId';
+  static const String deleteAccount = '/api/users/delete';
+  static const String uploadProfileImage = '/api/users/profile-image';
 
   // SOS
   static const String triggerSos = '/sos/trigger';

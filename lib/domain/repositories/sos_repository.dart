@@ -45,7 +45,4 @@ abstract class SosRepository {
   
   /// Add media to SOS alert
   Future<void> addMediaToSos(String sosId, List<String> mediaUrls);
-  
-  /// Test emergency contacts (send test alert)
-  Future<void> testEmergencyContacts();
 }
