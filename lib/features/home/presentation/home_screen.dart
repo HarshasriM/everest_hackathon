@@ -116,7 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         setState(() => _selectedIndex = screenIndex);
 
+      }
       },
+    
 
       child: SizedBox(
         width: 70.w,
@@ -197,9 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTrackContent() {
     return const TrackScreen();
   }
-  Widget _buildFriendsContent() {
-    return const Center(child: Text('friends Content'));
-  }
+  // Widget _buildFriendsContent() {
+  //   return const Center(child: Text('friends Content'));
+  // }
   Widget _buildFakeCallContent() {
     return const Center(child: Text('Fake call Content'));
   }
@@ -215,11 +217,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return const Center(child: Text('SOS Content'));
   }
 
-  Widget _buildFakeCallContent() {
-    return const Center(child: Text('Fake Call Content'));
-  }
+  // Widget _buildFakeCallContent() {
+  //   return const Center(child: Text('Fake Call Content'));
+  // }
 
-  Widget _buildHelplineContent() {
-    return const Center(child: Text('Help line Content'));
-  }
+  // Widget _buildHelplineContent() {
+  //   return const Center(child: Text('Help line Content'));
+  // }
 }
