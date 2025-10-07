@@ -100,3 +100,33 @@ response:{
     }
 }
 
+
+https://everest-hackathon.onrender.com/api/users/update/UserId/ContactId
+
+request:{
+    "name": "Riya Singh",
+  "relationship": "Cousin",
+  "phoneNumber":"+919347206960"
+}
+
+response:{
+ "success": true,
+    "message": "Emergency contact updated successfully",
+    "data": {
+        "contact_id": "68e332921a5a274650bb7a4f",
+        "name": "Riya Singh",
+        "phoneNumber": "+91 9347325589"
+    }
+}
+
+
+https://everest-hackathon.onrender.com/api/users/delete/UserId/ContactId
+
+request:No request
+
+response:{
+    "success": true,
+    "message": "Emergency contact deleted successfully"
+}
+
+
