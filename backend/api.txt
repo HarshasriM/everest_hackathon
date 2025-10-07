@@ -1,18 +1,21 @@
+cd backend
 npm install
 npm run dev
 
-http://localhost:5000/api/auth/send-otp
+https://everest-hackathon.onrender.com/api/auth/send-otp
 
 request:{
     "phoneNumber":"+919347206960"
 }
 
-respone:{
+response:{
     "message": "OTP sent successfully",
     "sid": "VE6d9c8f376d7dc78a7bc79d96a90311c5"
 }
 
-http://localhost:5000/api/auth/verify-otp
+
+
+https://everest-hackathon.onrender.com/api/auth/verify-otp
 
 
 request:{
@@ -20,7 +23,7 @@ request:{
     "otp":"761610"
 }
 
-respone:{
+response:{
     "message": "OTP verified successfully",
     "userId": "68e258409e2279a8a28fbb2f",
     "user": {
@@ -33,4 +36,45 @@ respone:{
         "__v": 0
     },
     "isProfileComplete": false
+}
+
+
+
+
+https://everest-hackathon.onrender.com/api/users/{userId}
+
+request :{
+   "name":"Meda Harsha Sri",
+   "email":"medaharsha17@gmail.com",
+   "Address":"Nellore district",
+   "emergencyContacts":[{
+    "name":"Subramanyam",
+    "phoneNumber":"+91 9347325589",
+    "relationship":"Father"
+   }]
+}
+
+response : {
+    "message": "Profile updated successfully",
+    "user": {
+        "_id": "68e258409e2279a8a28fbb2f",
+        "phoneNumber": "+919347206960",
+        "isProfileComplete": true,
+        "isVerified": true,
+        "emergencyContacts": [
+            {
+                "name": "Subramanyam",
+                "phoneNumber": "+91 9347325589",
+                "relationship": "Father",
+                "isPrimary": false,
+                "canReceiveSosAlerts": true,
+                "canTrackLocation": false,
+                "_id": "68e323c8afffed643145eace"
+            }
+        ],
+        "createdAt": "2025-10-05T11:36:32.994Z",
+        "__v": 0,
+        "email": "medaharsha17@gmail.com",
+        "name": "Meda Harsha Sri"
+    }
 }

@@ -11,27 +11,27 @@ import '../models/user_model.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteSource _remoteSource;
   final AppPreferencesService _preferencesService;
-  
+
   // Cache current user in memory
   UserEntity? _cachedUser;
 
   AuthRepositoryImpl({
     required AuthRemoteSource remoteSource,
     required AppPreferencesService preferencesService,
-  })  : _remoteSource = remoteSource,
-        _preferencesService = preferencesService;
+  }) : _remoteSource = remoteSource,
+       _preferencesService = preferencesService;
 
   @override
   Future<void> sendOtp(OtpRequestEntity request) async {
     try {
       Logger.info('Sending OTP to ${request.phoneNumber}');
-      
+
       final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
-      
+
       if (!response.success) {
         throw Exception(response.message);
       }
-      
+
       Logger.info('OTP sent successfully');
     } catch (e) {
       Logger.error('Failed to send OTP', error: e);
@@ -43,7 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthEntity> verifyOtp(OtpVerificationEntity verification) async {
     try {
       Logger.info('Verifying OTP for ${verification.phoneNumber}');
-      
+
       // Create verification request model
       final request = OtpVerificationRequestModel(
         phoneNumber: verification.phoneNumber,
@@ -52,15 +52,15 @@ class AuthRepositoryImpl implements AuthRepository {
         deviceName: verification.deviceName,
         fcmToken: verification.fcmToken,
       );
-      
+
       // Verify OTP with remote source
       final authModel = await _remoteSource.verifyOtp(request);
-      
+
       // Save authentication data
       await _preferencesService.saveAuthToken(authModel.accessToken);
       await _preferencesService.saveRefreshToken(authModel.refreshToken);
       await _preferencesService.saveUserId(authModel.userId);
-      
+
       // If new user, fetch/create profile
       if (authModel.isNewUser) {
         Logger.info('New user detected, creating profile');
@@ -70,7 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
         _cachedUser = userModel.toEntity();
         await _preferencesService.saveUserData(userModel.toJson());
       }
-      
+
       Logger.info('OTP verification successful');
       return authModel.toEntity();
     } catch (e) {
@@ -86,13 +86,13 @@ class AuthRepositoryImpl implements AuthRepository {
       if (_cachedUser != null) {
         return _cachedUser;
       }
-      
+
       // Check if authenticated
       final isAuth = await isAuthenticated();
       if (!isAuth) {
         return null;
       }
-      
+
       // Try to get from preferences
       final userData = await _preferencesService.getUserData();
       if (userData != null) {
@@ -100,7 +100,7 @@ class AuthRepositoryImpl implements AuthRepository {
         _cachedUser = userModel.toEntity();
         return _cachedUser;
       }
-      
+
       // Fetch from remote if not in cache
       final userId = await _preferencesService.getUserId();
       if (userId != null) {
@@ -109,7 +109,7 @@ class AuthRepositoryImpl implements AuthRepository {
         await _preferencesService.saveUserData(userModel.toJson());
         return _cachedUser;
       }
-      
+
       return null;
     } catch (e) {
       Logger.error('Failed to get current user', error: e);
@@ -132,13 +132,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthEntity> refreshToken(String refreshToken) async {
     try {
       Logger.info('Refreshing authentication token');
-      
+
       final authModel = await _remoteSource.refreshToken(refreshToken);
-      
+
       // Update stored tokens
       await _preferencesService.saveAuthToken(authModel.accessToken);
       await _preferencesService.saveRefreshToken(authModel.refreshToken);
-      
+
       Logger.info('Token refresh successful');
       return authModel.toEntity();
     } catch (e) {
@@ -151,16 +151,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     try {
       Logger.info('Logging out user');
-      
+
       final userId = await _preferencesService.getUserId();
       if (userId != null) {
         await _remoteSource.logout(userId);
       }
-      
+
       // Clear local data
       await _preferencesService.clearAuthData();
       _cachedUser = null;
-      
+
       Logger.info('Logout successful');
     } catch (e) {
       Logger.error('Failed to logout', error: e);
@@ -174,14 +174,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> updateProfile(UserEntity user) async {
     try {
       Logger.info('Updating user profile');
-      
+
       final userModel = UserModel.fromEntity(user);
       final updatedModel = await _remoteSource.updateProfile(userModel);
-      
+
       // Update cache
       _cachedUser = updatedModel.toEntity();
       await _preferencesService.saveUserData(updatedModel.toJson());
-      
+
       Logger.info('Profile update successful');
       return _cachedUser!;
     } catch (e) {
@@ -194,12 +194,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> addEmergencyContact(EmergencyContactEntity contact) async {
     try {
       Logger.info('Adding emergency contact');
-      
+
       final currentUser = await getCurrentUser();
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       // Add contact to list
       final updatedContacts = [...currentUser.emergencyContacts, contact];
       final updatedUser = UserEntity(
@@ -218,9 +218,9 @@ class AuthRepositoryImpl implements AuthRepository {
         lastLoginAt: currentUser.lastLoginAt,
         settings: currentUser.settings,
       );
-      
+
       await updateProfile(updatedUser);
-      
+
       // Also save to preferences for offline access
       final contactsList = await _preferencesService.getEmergencyContacts();
       contactsList.add({
@@ -234,7 +234,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'email': contact.email,
       });
       await _preferencesService.saveEmergencyContacts(contactsList);
-      
+
       Logger.info('Emergency contact added successfully');
     } catch (e) {
       Logger.error('Failed to add emergency contact', error: e);
@@ -246,17 +246,17 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> removeEmergencyContact(String contactId) async {
     try {
       Logger.info('Removing emergency contact $contactId');
-      
+
       final currentUser = await getCurrentUser();
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       // Remove contact from list
       final updatedContacts = currentUser.emergencyContacts
           .where((c) => c.id != contactId)
           .toList();
-      
+
       final updatedUser = UserEntity(
         id: currentUser.id,
         phoneNumber: currentUser.phoneNumber,
@@ -273,9 +273,9 @@ class AuthRepositoryImpl implements AuthRepository {
         lastLoginAt: currentUser.lastLoginAt,
         settings: currentUser.settings,
       );
-      
+
       await updateProfile(updatedUser);
-      
+
       Logger.info('Emergency contact removed successfully');
     } catch (e) {
       Logger.error('Failed to remove emergency contact', error: e);
@@ -287,17 +287,17 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> updateEmergencyContact(EmergencyContactEntity contact) async {
     try {
       Logger.info('Updating emergency contact ${contact.id}');
-      
+
       final currentUser = await getCurrentUser();
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       // Update contact in list
       final updatedContacts = currentUser.emergencyContacts.map((c) {
         return c.id == contact.id ? contact : c;
       }).toList();
-      
+
       final updatedUser = UserEntity(
         id: currentUser.id,
         phoneNumber: currentUser.phoneNumber,
@@ -314,9 +314,9 @@ class AuthRepositoryImpl implements AuthRepository {
         lastLoginAt: currentUser.lastLoginAt,
         settings: currentUser.settings,
       );
-      
+
       await updateProfile(updatedUser);
-      
+
       Logger.info('Emergency contact updated successfully');
     } catch (e) {
       Logger.error('Failed to update emergency contact', error: e);
@@ -332,7 +332,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (currentUser != null) {
         return currentUser.emergencyContacts;
       }
-      
+
       // Fallback to preferences for offline access
       final contactsList = await _preferencesService.getEmergencyContacts();
       return contactsList.map((data) {
@@ -357,12 +357,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> updateSettings(UserSettings settings) async {
     try {
       Logger.info('Updating user settings');
-      
+
       final currentUser = await getCurrentUser();
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-      
+
       final updatedUser = UserEntity(
         id: currentUser.id,
         phoneNumber: currentUser.phoneNumber,
@@ -379,12 +379,12 @@ class AuthRepositoryImpl implements AuthRepository {
         lastLoginAt: currentUser.lastLoginAt,
         settings: settings,
       );
-      
+
       await updateProfile(updatedUser);
-      
+
       // Update language preference
       await _preferencesService.saveLanguageCode(settings.languageCode);
-      
+
       Logger.info('Settings updated successfully');
     } catch (e) {
       Logger.error('Failed to update settings', error: e);
@@ -396,19 +396,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteAccount() async {
     try {
       Logger.info('Deleting user account');
-      
+
       final userId = await _preferencesService.getUserId();
       if (userId == null) {
         throw Exception('User not authenticated');
       }
-      
+
       // In production, call remote API to delete account
       // await _remoteSource.deleteAccount(userId);
-      
+
       // Clear all local data
       await _preferencesService.clearAll();
       _cachedUser = null;
-      
+
       Logger.info('Account deleted successfully');
     } catch (e) {
       Logger.error('Failed to delete account', error: e);
