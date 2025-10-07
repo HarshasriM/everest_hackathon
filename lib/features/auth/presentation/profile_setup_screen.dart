@@ -5,13 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/constants.dart';
 import '../../../core/utils/validators.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/emergency_contact_card.dart';
-import '../widgets/add_contact_dialog.dart';
 
 /// Profile setup screen for new users
 class ProfileSetupScreen extends StatefulWidget {
@@ -27,7 +24,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   String? _selectedBloodGroup;
-  List<EmergencyContactEntity> _emergencyContacts = [];
   bool _isLoading = false;
 
   final List<String> _bloodGroups = [
@@ -48,14 +44,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         _emailController.text = user.email ?? '';
         _addressController.text = user.address ?? '';
         _selectedBloodGroup = user.bloodGroup;
-        _emergencyContacts = user.emergencyContacts;
       },
       authenticated: (user, _) {
         _nameController.text = user.name;
         _emailController.text = user.email ?? '';
         _addressController.text = user.address ?? '';
         _selectedBloodGroup = user.bloodGroup;
-        _emergencyContacts = user.emergencyContacts;
       },
       orElse: () {},
     );
@@ -87,25 +81,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
-  void _handleAddContact() async {
-    final contact = await showDialog<EmergencyContactEntity>(
-      context: context,
-      builder: (context) => const AddContactDialog(),
-    );
-    
-    if (contact != null) {
-      context.read<AuthBloc>().add(
-        AuthEvent.addEmergencyContact(contact: contact),
-      );
-    }
-  }
-
-  void _handleRemoveContact(String contactId) {
-    context.read<AuthBloc>().add(
-      AuthEvent.removeEmergencyContact(contactId: contactId),
-    );
-  }
-
   void _handleCompleteSetup() {
     // Only name is required
     if (_nameController.text.trim().isEmpty) {
@@ -113,33 +88,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         const SnackBar(
           content: Text('Please enter your name'),
           backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-    
-    // Show a warning if no emergency contacts are added, but allow to proceed
-    if (_emergencyContacts.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('No Emergency Contacts'),
-          content: const Text(
-            'You haven\'t added any emergency contacts. While optional, they are recommended for your safety. Do you want to continue anyway?'
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Add Contacts'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.push(AppRoutes.home);
-                _saveAndComplete();
-              },
-              child: const Text('Continue Anyway'),
-            ),
-          ],
         ),
       );
       return;
@@ -181,7 +129,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             profileIncomplete: (user) {
               setState(() {
                 _isLoading = false;
-                _emergencyContacts = user.emergencyContacts;
               });
             },
             error: (message, phoneNumber) {
@@ -308,80 +255,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     
                     SizedBox(height: 32.h),
                     
-                    // Emergency Contacts Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Emergency Contacts',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: _isLoading ? null : _handleAddContact,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add'),
-                        ),
-                      ],
-                    ),
-                    
-                    Text(
-                      'Add emergency contacts (optional, but recommended)',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    // Emergency Contacts List
-                    if (_emergencyContacts.isEmpty)
-                      Container(
-                        padding: EdgeInsets.all(24.w),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.group_add_outlined,
-                              size: 48.sp,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'No emergency contacts added',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _emergencyContacts.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 12.h),
-                        itemBuilder: (context, index) {
-                          final contact = _emergencyContacts[index];
-                          return EmergencyContactCard(
-                            contact: contact,
-                            onRemove: _isLoading 
-                                ? null 
-                                : () => _handleRemoveContact(contact.id),
-                          );
-                        },
-                      ),
-                    
-                    SizedBox(height: 32.h),
-                    
                     // Action Buttons
                     PrimaryButton(
                       text: 'Complete Setup',
@@ -433,12 +306,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     
     // Address
     if (_addressController.text.trim().isNotEmpty) {
-      optionalProgress += 1;
-      optionalFieldCount++;
-    }
-    
-    // Emergency Contacts
-    if (_emergencyContacts.isNotEmpty) {
       optionalProgress += 1;
       optionalFieldCount++;
     }

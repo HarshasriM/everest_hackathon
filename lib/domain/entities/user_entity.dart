@@ -8,7 +8,6 @@ class UserEntity {
   final DateTime? dateOfBirth;
   final String? bloodGroup;
   final String? address;
-  final List<EmergencyContactEntity> emergencyContacts;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
@@ -24,7 +23,6 @@ class UserEntity {
     this.dateOfBirth,
     this.bloodGroup,
     this.address,
-    this.emergencyContacts = const [],
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,
@@ -45,29 +43,6 @@ class UserEntity {
       settings: UserSettings.defaults(),
     );
   }
-}
-
-/// Emergency contact entity
-class EmergencyContactEntity {
-  final String id;
-  final String name;
-  final String phoneNumber;
-  final String relationship;
-  final bool isPrimary;
-  final bool canReceiveSosAlerts;
-  final bool canTrackLocation;
-  final String? email;
-
-  const EmergencyContactEntity({
-    required this.id,
-    required this.name,
-    required this.phoneNumber,
-    required this.relationship,
-    this.isPrimary = false,
-    this.canReceiveSosAlerts = true,
-    this.canTrackLocation = false,
-    this.email,
-  });
 }
 
 /// User settings entity

@@ -175,11 +175,6 @@ class AuthRepositoryImpl implements AuthRepository {
         'name': user.name,
         'email': user.email,
         'address': user.address,
-        'emergencyContacts': user.emergencyContacts.map((contact) => {
-          'name': contact.name,
-          'phoneNumber': contact.phoneNumber,
-          'relationship': contact.relationship,
-        }).toList(),
       };
       
       final updatedModel = await _remoteSource.updateProfile(user.id, profileData);
@@ -193,169 +188,6 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       Logger.error('Failed to update profile', error: e);
       rethrow;
-    }
-  }
-
-  @override
-  Future<void> addEmergencyContact(EmergencyContactEntity contact) async {
-    try {
-      Logger.info('Adding emergency contact');
-      
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-      
-      // Add contact to list
-      final updatedContacts = [...currentUser.emergencyContacts, contact];
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-      
-      await updateProfile(updatedUser);
-      
-      // Also save to preferences for offline access
-      final contactsList = await _preferencesService.getEmergencyContacts();
-      contactsList.add({
-        'id': contact.id,
-        'name': contact.name,
-        'phoneNumber': contact.phoneNumber,
-        'relationship': contact.relationship,
-        'isPrimary': contact.isPrimary,
-        'canReceiveSosAlerts': contact.canReceiveSosAlerts,
-        'canTrackLocation': contact.canTrackLocation,
-        'email': contact.email,
-      });
-      await _preferencesService.saveEmergencyContacts(contactsList);
-      
-      Logger.info('Emergency contact added successfully');
-    } catch (e) {
-      Logger.error('Failed to add emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> removeEmergencyContact(String contactId) async {
-    try {
-      Logger.info('Removing emergency contact $contactId');
-      
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-      
-      // Remove contact from list
-      final updatedContacts = currentUser.emergencyContacts
-          .where((c) => c.id != contactId)
-          .toList();
-      
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-      
-      await updateProfile(updatedUser);
-      
-      Logger.info('Emergency contact removed successfully');
-    } catch (e) {
-      Logger.error('Failed to remove emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> updateEmergencyContact(EmergencyContactEntity contact) async {
-    try {
-      Logger.info('Updating emergency contact ${contact.id}');
-      
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-      
-      // Update contact in list
-      final updatedContacts = currentUser.emergencyContacts.map((c) {
-        return c.id == contact.id ? contact : c;
-      }).toList();
-      
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
-        emergencyContacts: updatedContacts,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: currentUser.settings,
-      );
-      
-      await updateProfile(updatedUser);
-      
-      Logger.info('Emergency contact updated successfully');
-    } catch (e) {
-      Logger.error('Failed to update emergency contact', error: e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<List<EmergencyContactEntity>> getEmergencyContacts() async {
-    try {
-      // Try to get from current user
-      final currentUser = await getCurrentUser();
-      if (currentUser != null) {
-        return currentUser.emergencyContacts;
-      }
-      
-      // Fallback to preferences for offline access
-      final contactsList = await _preferencesService.getEmergencyContacts();
-      return contactsList.map((data) {
-        return EmergencyContactEntity(
-          id: data['id'] ?? '',
-          name: data['name'] ?? '',
-          phoneNumber: data['phoneNumber'] ?? '',
-          relationship: data['relationship'] ?? '',
-          isPrimary: data['isPrimary'] ?? false,
-          canReceiveSosAlerts: data['canReceiveSosAlerts'] ?? true,
-          canTrackLocation: data['canTrackLocation'] ?? false,
-          email: data['email'],
-        );
-      }).toList();
-    } catch (e) {
-      Logger.error('Failed to get emergency contacts', error: e);
-      return [];
     }
   }
 
@@ -378,7 +210,6 @@ class AuthRepositoryImpl implements AuthRepository {
         dateOfBirth: currentUser.dateOfBirth,
         bloodGroup: currentUser.bloodGroup,
         address: currentUser.address,
-        emergencyContacts: currentUser.emergencyContacts,
         isProfileComplete: currentUser.isProfileComplete,
         isVerified: currentUser.isVerified,
         createdAt: currentUser.createdAt,

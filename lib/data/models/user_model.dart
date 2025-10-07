@@ -10,7 +10,6 @@ class UserModel {
   final DateTime? dateOfBirth;
   final String? bloodGroup;
   final String? address;
-  final List<EmergencyContactModel> emergencyContacts;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
@@ -26,7 +25,6 @@ class UserModel {
     this.dateOfBirth,
     this.bloodGroup,
     this.address,
-    this.emergencyContacts = const [],
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,
@@ -47,9 +45,6 @@ class UserModel {
           : null,
       bloodGroup: json['bloodGroup'] as String?,
       address: json['address'] as String?,
-      emergencyContacts: (json['emergencyContacts'] as List<dynamic>?)
-              ?.map((e) => EmergencyContactModel.fromJson(e as Map<String, dynamic>))
-              .toList() ?? const [],
       isProfileComplete: json['isProfileComplete'] as bool? ?? false,
       isVerified: json['isVerified'] as bool? ?? false,
       createdAt: json['createdAt'] != null
@@ -74,7 +69,6 @@ class UserModel {
       'dateOfBirth': dateOfBirth?.toIso8601String(),
       'bloodGroup': bloodGroup,
       'address': address,
-      'emergencyContacts': emergencyContacts.map((e) => e.toJson()).toList(),
       'isProfileComplete': isProfileComplete,
       'isVerified': isVerified,
       'createdAt': createdAt.toIso8601String(),
@@ -94,9 +88,6 @@ class UserModel {
       dateOfBirth: dateOfBirth,
       bloodGroup: bloodGroup,
       address: address,
-      emergencyContacts: emergencyContacts
-          .map((contact) => contact.toEntity())
-          .toList(),
       isProfileComplete: isProfileComplete,
       isVerified: isVerified,
       createdAt: createdAt,
@@ -116,91 +107,11 @@ class UserModel {
       dateOfBirth: entity.dateOfBirth,
       bloodGroup: entity.bloodGroup,
       address: entity.address,
-      emergencyContacts: entity.emergencyContacts
-          .map((contact) => EmergencyContactModel.fromEntity(contact))
-          .toList(),
       isProfileComplete: entity.isProfileComplete,
       isVerified: entity.isVerified,
       createdAt: entity.createdAt,
       lastLoginAt: entity.lastLoginAt,
       settings: UserSettingsModel.fromEntity(entity.settings),
-    );
-  }
-}
-
-/// Emergency contact data model
-class EmergencyContactModel {
-  final String id;
-  final String name;
-  final String phoneNumber;
-  final String relationship;
-  final bool isPrimary;
-  final bool canReceiveSosAlerts;
-  final bool canTrackLocation;
-  final String? email;
-
-  const EmergencyContactModel({
-    required this.id,
-    required this.name,
-    required this.phoneNumber,
-    required this.relationship,
-    this.isPrimary = false,
-    this.canReceiveSosAlerts = true,
-    this.canTrackLocation = false,
-    this.email,
-  });
-
-  factory EmergencyContactModel.fromJson(Map<String, dynamic> json) {
-    return EmergencyContactModel(
-      id: json['_id'] as String? ?? json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      phoneNumber: json['phoneNumber'] as String? ?? '',
-      relationship: json['relationship'] as String? ?? '',
-      isPrimary: json['isPrimary'] as bool? ?? false,
-      canReceiveSosAlerts: json['canReceiveSosAlerts'] as bool? ?? true,
-      canTrackLocation: json['canTrackLocation'] as bool? ?? false,
-      email: json['email'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'phoneNumber': phoneNumber,
-      'relationship': relationship,
-      'isPrimary': isPrimary,
-      'canReceiveSosAlerts': canReceiveSosAlerts,
-      'canTrackLocation': canTrackLocation,
-      'email': email,
-    };
-  }
-
-  // Convert to entity
-  EmergencyContactEntity toEntity() {
-    return EmergencyContactEntity(
-      id: id,
-      name: name,
-      phoneNumber: phoneNumber,
-      relationship: relationship,
-      isPrimary: isPrimary,
-      canReceiveSosAlerts: canReceiveSosAlerts,
-      canTrackLocation: canTrackLocation,
-      email: email,
-    );
-  }
-
-  // Create from entity
-  factory EmergencyContactModel.fromEntity(EmergencyContactEntity entity) {
-    return EmergencyContactModel(
-      id: entity.id,
-      name: entity.name,
-      phoneNumber: entity.phoneNumber,
-      relationship: entity.relationship,
-      isPrimary: entity.isPrimary,
-      canReceiveSosAlerts: entity.canReceiveSosAlerts,
-      canTrackLocation: entity.canTrackLocation,
-      email: entity.email,
     );
   }
 }

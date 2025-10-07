@@ -204,8 +204,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: 40.h),
-                      
+        
                       // Icon
                       Center(
                         child: Container(
@@ -308,14 +307,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           padding: EdgeInsets.only(bottom: 20.h),
                           child: Column(
                             children: [
-                              Text(
-                                'For demo, use OTP: 123456',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
                               Text(
                                 'Didn\'t receive the code?',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

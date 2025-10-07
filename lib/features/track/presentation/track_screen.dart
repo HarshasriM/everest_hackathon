@@ -131,26 +131,6 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
                 mapToolbarEnabled: false,
               ),
 
-              // Top gradient overlay
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 120.h,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.6),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
               // App Bar
               Positioned(
                 top: MediaQuery.of(context).padding.top + 10.h,

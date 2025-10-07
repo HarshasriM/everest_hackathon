@@ -12,12 +12,6 @@ class ApiEndpoints {
   static const String deleteAccount = '/api/users/delete';
   static const String uploadProfileImage = '/api/users/profile-image';
 
-  // Emergency Contacts
-  static const String getEmergencyContacts = '/contacts';
-  static const String addEmergencyContact = '/contacts';
-  static const String updateEmergencyContact = '/contacts/{id}';
-  static const String deleteEmergencyContact = '/contacts/{id}';
-
   // SOS
   static const String triggerSos = '/sos/trigger';
   static const String cancelSos = '/sos/cancel';

@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../domain/entities/user_entity.dart';
 
 part 'auth_event.freezed.dart';
 
@@ -30,16 +29,6 @@ abstract class AuthEvent with _$AuthEvent {
     String? address,
     String? bloodGroup,
   }) = _UpdateProfile;
-  
-  /// Add emergency contact event
-  const factory AuthEvent.addEmergencyContact({
-    required EmergencyContactEntity contact,
-  }) = _AddEmergencyContact;
-  
-  /// Remove emergency contact event
-  const factory AuthEvent.removeEmergencyContact({
-    required String contactId,
-  }) = _RemoveEmergencyContact;
   
   /// Complete profile setup event
   const factory AuthEvent.completeProfileSetup() = _CompleteProfileSetup;

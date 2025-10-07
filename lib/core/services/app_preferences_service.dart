@@ -25,7 +25,6 @@ class AppPreferencesService {
   static const String _keyTokenExpiry = 'token_expiry';
   
   // Keys for shared preferences (non-sensitive data)
-  static const String _keyEmergencyContacts = 'emergency_contacts';
   static const String _keyLanguageCode = 'language_code';
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyFirstLaunch = 'first_launch';
@@ -222,57 +221,6 @@ class AppPreferencesService {
   Future<bool> get isAuthenticated async {
     final token = await getAuthToken();
     return token != null && token.isNotEmpty;
-  }
-
-  // Emergency Contacts - Memory storage with secure storage backup
-  Future<void> saveEmergencyContacts(List<Map<String, dynamic>> contacts) async {
-    try {
-      await _ensureInitialized();
-      final jsonStr = jsonEncode(contacts);
-      
-      // Store in memory
-      _memoryStorage[_keyEmergencyContacts] = jsonStr;
-      
-      // Try to store in secure storage as backup
-      try {
-        await _secureStorage.write(key: _keyEmergencyContacts, value: jsonStr);
-      } catch (e) {
-        Logger.error('Failed to save emergency contacts to secure storage', error: e);
-        // Continue with memory storage only
-      }
-    } catch (e) {
-      Logger.error('Failed to save emergency contacts', error: e);
-      rethrow;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getEmergencyContacts() async {
-    try {
-      await _ensureInitialized();
-      
-      String? data;
-      
-      // Try to get from secure storage first
-      try {
-        data = await _secureStorage.read(key: _keyEmergencyContacts);
-      } catch (e) {
-        Logger.error('Failed to read emergency contacts from secure storage', error: e);
-      }
-      
-      // If not found in secure storage, try memory
-      if (data == null) {
-        data = _memoryStorage[_keyEmergencyContacts] as String?;
-      }
-      
-      if (data != null && data.isNotEmpty) {
-        final decoded = jsonDecode(data);
-        return List<Map<String, dynamic>>.from(decoded);
-      }
-      return [];
-    } catch (e) {
-      Logger.error('Failed to get emergency contacts', error: e);
-      return [];
-    }
   }
 
   // App Settings - Memory storage (non-sensitive)
