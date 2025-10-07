@@ -78,3 +78,25 @@ response : {
         "name": "Meda Harsha Sri"
     }
 }
+
+
+https://everest-hackathon.onrender.com/api/users/add-emergency-contact
+
+request:
+    {
+    "userId":"68e258409e2279a8a28fbb2f",
+    "name":"Subramanyam",
+    "phoneNumber":"+919347206960",
+    "relationship":"Father"
+}
+
+response:{
+    "success": true,
+    "message": "Emergency contact added and notified successfully",
+    "data": {
+        "name": "Subramanyam",
+        "phoneNumber": "+919347206960",
+        "user": "68e258409e2279a8a28fbb2f"
+    }
+}
+
