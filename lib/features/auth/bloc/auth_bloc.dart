@@ -13,18 +13,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
   final SendOtpUseCase _sendOtpUseCase;
   final VerifyOtpUseCase _verifyOtpUseCase;
-  
+
   Timer? _resendTimer;
   String? _lastPhoneNumber;
-  
+
   AuthBloc({
     required AuthRepository authRepository,
     required SendOtpUseCase sendOtpUseCase,
     required VerifyOtpUseCase verifyOtpUseCase,
-  })  : _authRepository = authRepository,
-        _sendOtpUseCase = sendOtpUseCase,
-        _verifyOtpUseCase = verifyOtpUseCase,
-        super(const AuthState.initial()) {
+  }) : _authRepository = authRepository,
+       _sendOtpUseCase = sendOtpUseCase,
+       _verifyOtpUseCase = verifyOtpUseCase,
+       super(const AuthState.initial()) {
     on<AuthEvent>((event, emit) async {
       await event.when(
         checkAuthStatus: () => _onCheckAuthStatus(emit),
@@ -39,23 +39,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     });
   }
-  
+
   @override
   Future<void> close() {
     _resendTimer?.cancel();
     return super.close();
   }
-  
-  Future<void> _onCheckAuthStatus(
-    Emitter<AuthState> emit,
-  ) async {
+
+  Future<void> _onCheckAuthStatus(Emitter<AuthState> emit) async {
     try {
       emit(const AuthState.loading());
-      
+
       Logger.bloc('AuthBloc', 'CheckAuthStatus');
-      
+
       final isAuthenticated = await _authRepository.isAuthenticated();
-      
+
       if (isAuthenticated) {
         final user = await _authRepository.getCurrentUser();
         if (user != null) {
@@ -76,45 +74,38 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthState.unauthenticated());
     }
   }
-  
-  Future<void> _onSendOtp(
-    String phoneNumber,
-    Emitter<AuthState> emit,
-  ) async {
+
+  Future<void> _onSendOtp(String phoneNumber, Emitter<AuthState> emit) async {
     try {
       emit(const AuthState.otpSending());
-      
+
       Logger.bloc('AuthBloc', 'SendOtp', data: {'phone': phoneNumber});
-      
+
       _lastPhoneNumber = phoneNumber;
-      
+
       await _sendOtpUseCase(SendOtpParams(phoneNumber: phoneNumber));
-      
-      emit(AuthState.otpSent(
-        phoneNumber: phoneNumber,
-        resendCooldown: 30,
-      ));
-      
+
+      emit(AuthState.otpSent(phoneNumber: phoneNumber, resendCooldown: 30));
+
       // Start countdown timer
       _startResendTimer(emit);
-      
     } catch (e) {
       Logger.error('Error sending OTP', error: e);
-      emit(AuthState.error(
-        message: e.toString().replaceAll('Exception: ', ''),
-        phoneNumber: phoneNumber,
-      ));
+      emit(
+        AuthState.error(
+          message: e.toString().replaceAll('Exception: ', ''),
+          phoneNumber: phoneNumber,
+        ),
+      );
     }
   }
-  
-  Future<void> _onResendOtp(
-    Emitter<AuthState> emit,
-  ) async {
+
+  Future<void> _onResendOtp(Emitter<AuthState> emit) async {
     if (_lastPhoneNumber != null) {
       await _onSendOtp(_lastPhoneNumber!, emit);
     }
   }
-  
+
   Future<void> _onVerifyOtp(
     String phoneNumber,
     String otp,
@@ -151,16 +142,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthState.profileIncomplete(user: UserEntity.empty()));
         }
       }
-      
     } catch (e) {
       Logger.error('Error verifying OTP', error: e);
-      emit(AuthState.error(
-        message: e.toString().replaceAll('Exception: ', ''),
-        phoneNumber: phoneNumber,
-      ));
+      emit(
+        AuthState.error(
+          message: e.toString().replaceAll('Exception: ', ''),
+          phoneNumber: phoneNumber,
+        ),
+      );
     }
   }
-  
+
   Future<void> _onUpdateProfile(
     String name,
     String? email,
@@ -172,13 +164,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         authenticated: (user, isNewUser) => user,
         orElse: () => null,
       );
-      
+
       if (currentUser != null) {
-        
         emit(const AuthState.loading());
-        
+
         Logger.bloc('AuthBloc', 'UpdateProfile', data: {'name': name});
-        
+
         // Create updated user entity
         final updatedUser = UserEntity(
           id: currentUser.id,
@@ -193,9 +184,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           profileImageUrl: currentUser.profileImageUrl,
           dateOfBirth: currentUser.dateOfBirth,
         );
-        
+
         final savedUser = await _authRepository.updateProfile(updatedUser);
-        
+
         if (savedUser.hasRequiredInfo) {
           emit(AuthState.authenticated(user: savedUser, isNewUser: false));
         } else {
@@ -204,7 +195,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       Logger.error('Error updating profile', error: e);
-      emit(AuthState.error(message: e.toString().replaceAll('Exception: ', '')));
+      emit(
+        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
+      );
     }
   }
   
@@ -216,19 +209,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         profileIncomplete: (user) => user,
         orElse: () => null,
       );
-      
+
       if (user != null) {
-        
         // Validate profile completion
         if (user.name.isEmpty) {
           emit(const AuthState.error(message: 'Please enter your name'));
           return;
         }
-        
+
         // Emergency contacts are now optional
-        
+
         Logger.bloc('AuthBloc', 'CompleteProfileSetup');
-        
+
         // Mark profile as complete
         final updatedUser = UserEntity(
           id: user.id,
@@ -243,27 +235,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           lastLoginAt: DateTime.now(),
           settings: user.settings,
         );
-        
+
         final savedUser = await _authRepository.updateProfile(updatedUser);
-        
+
         emit(AuthState.authenticated(user: savedUser, isNewUser: false));
       }
     } catch (e) {
       Logger.error('Error completing profile setup', error: e);
-      emit(AuthState.error(message: e.toString().replaceAll('Exception: ', '')));
+      emit(
+        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
+      );
     }
   }
-  
-  Future<void> _onLogout(
-    Emitter<AuthState> emit,
-  ) async {
+
+  Future<void> _onLogout(Emitter<AuthState> emit) async {
     try {
       Logger.bloc('AuthBloc', 'Logout');
-      
+
       emit(const AuthState.loading());
-      
+
       await _authRepository.logout();
-      
+
       emit(const AuthState.unauthenticated());
     } catch (e) {
       Logger.error('Error during logout', error: e);
@@ -271,41 +263,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthState.unauthenticated());
     }
   }
-  
-  Future<void> _onDeleteAccount(
-    Emitter<AuthState> emit,
-  ) async {
+
+  Future<void> _onDeleteAccount(Emitter<AuthState> emit) async {
     try {
       Logger.bloc('AuthBloc', 'DeleteAccount');
-      
+
       emit(const AuthState.loading());
-      
+
       await _authRepository.deleteAccount();
-      
+
       emit(const AuthState.unauthenticated());
     } catch (e) {
       Logger.error('Error deleting account', error: e);
-      emit(AuthState.error(message: e.toString().replaceAll('Exception: ', '')));
+      emit(
+        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
+      );
     }
   }
-  
+
   void _startResendTimer(Emitter<AuthState> emit) {
     _resendTimer?.cancel();
-    
+
     int countdown = 30;
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       countdown--;
-      
+
       if (countdown <= 0) {
         timer.cancel();
       }
-      
+
       state.maybeWhen(
         otpSent: (phoneNumber, _) {
-          emit(AuthState.otpSent(
-            phoneNumber: phoneNumber,
-            resendCooldown: countdown,
-          ));
+          emit(
+            AuthState.otpSent(
+              phoneNumber: phoneNumber,
+              resendCooldown: countdown,
+            ),
+          );
         },
         orElse: () {},
       );
