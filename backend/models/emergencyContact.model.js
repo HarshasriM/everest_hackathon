@@ -4,11 +4,10 @@ const emergencyContactSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
   },
-  name: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  relationship: { type: String, required: true },
+  name: { type: String, },
+  phoneNumber: { type: String, },
+  relationship: { type: String, },
 });
 
 export default emergencyContactSchema;
