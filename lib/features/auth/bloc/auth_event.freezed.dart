@@ -140,14 +140,14 @@ return deleteAccount(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checkAuthStatus,TResult Function( String phoneNumber)?  sendOtp,TResult Function()?  resendOtp,TResult Function( String phoneNumber,  String otp)?  verifyOtp,TResult Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult Function()?  completeProfileSetup,TResult Function()?  logout,TResult Function()?  deleteAccount,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checkAuthStatus,TResult Function( String phoneNumber)?  sendOtp,TResult Function()?  resendOtp,TResult Function( String phoneNumber,  String otp)?  verifyOtp,TResult Function( String name,  String? email)?  updateProfile,TResult Function()?  completeProfileSetup,TResult Function()?  logout,TResult Function()?  deleteAccount,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _SendOtp() when sendOtp != null:
 return sendOtp(_that.phoneNumber);case _ResendOtp() when resendOtp != null:
 return resendOtp();case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile() when updateProfile != null:
-return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _CompleteProfileSetup() when completeProfileSetup != null:
+return updateProfile(_that.name,_that.email);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup();case _Logout() when logout != null:
 return logout();case _DeleteAccount() when deleteAccount != null:
 return deleteAccount();case _:
@@ -168,14 +168,14 @@ return deleteAccount();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checkAuthStatus,required TResult Function( String phoneNumber)  sendOtp,required TResult Function()  resendOtp,required TResult Function( String phoneNumber,  String otp)  verifyOtp,required TResult Function( String name,  String? email,  String? address,  String? bloodGroup)  updateProfile,required TResult Function()  completeProfileSetup,required TResult Function()  logout,required TResult Function()  deleteAccount,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checkAuthStatus,required TResult Function( String phoneNumber)  sendOtp,required TResult Function()  resendOtp,required TResult Function( String phoneNumber,  String otp)  verifyOtp,required TResult Function( String name,  String? email)  updateProfile,required TResult Function()  completeProfileSetup,required TResult Function()  logout,required TResult Function()  deleteAccount,}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus():
 return checkAuthStatus();case _SendOtp():
 return sendOtp(_that.phoneNumber);case _ResendOtp():
 return resendOtp();case _VerifyOtp():
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile():
-return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _CompleteProfileSetup():
+return updateProfile(_that.name,_that.email);case _CompleteProfileSetup():
 return completeProfileSetup();case _Logout():
 return logout();case _DeleteAccount():
 return deleteAccount();case _:
@@ -195,14 +195,14 @@ return deleteAccount();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checkAuthStatus,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function()?  resendOtp,TResult? Function( String phoneNumber,  String otp)?  verifyOtp,TResult? Function( String name,  String? email,  String? address,  String? bloodGroup)?  updateProfile,TResult? Function()?  completeProfileSetup,TResult? Function()?  logout,TResult? Function()?  deleteAccount,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checkAuthStatus,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function()?  resendOtp,TResult? Function( String phoneNumber,  String otp)?  verifyOtp,TResult? Function( String name,  String? email)?  updateProfile,TResult? Function()?  completeProfileSetup,TResult? Function()?  logout,TResult? Function()?  deleteAccount,}) {final _that = this;
 switch (_that) {
 case _CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _SendOtp() when sendOtp != null:
 return sendOtp(_that.phoneNumber);case _ResendOtp() when resendOtp != null:
 return resendOtp();case _VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.phoneNumber,_that.otp);case _UpdateProfile() when updateProfile != null:
-return updateProfile(_that.name,_that.email,_that.address,_that.bloodGroup);case _CompleteProfileSetup() when completeProfileSetup != null:
+return updateProfile(_that.name,_that.email);case _CompleteProfileSetup() when completeProfileSetup != null:
 return completeProfileSetup();case _Logout() when logout != null:
 return logout();case _DeleteAccount() when deleteAccount != null:
 return deleteAccount();case _:
@@ -415,13 +415,11 @@ as String,
 
 
 class _UpdateProfile implements AuthEvent {
-  const _UpdateProfile({required this.name, this.email, this.address, this.bloodGroup});
+  const _UpdateProfile({required this.name, this.email});
   
 
  final  String name;
  final  String? email;
- final  String? address;
- final  String? bloodGroup;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -433,16 +431,16 @@ _$UpdateProfileCopyWith<_UpdateProfile> get copyWith => __$UpdateProfileCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateProfile&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateProfile&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,email,address,bloodGroup);
+int get hashCode => Object.hash(runtimeType,name,email);
 
 @override
 String toString() {
-  return 'AuthEvent.updateProfile(name: $name, email: $email, address: $address, bloodGroup: $bloodGroup)';
+  return 'AuthEvent.updateProfile(name: $name, email: $email)';
 }
 
 
@@ -453,7 +451,7 @@ abstract mixin class _$UpdateProfileCopyWith<$Res> implements $AuthEventCopyWith
   factory _$UpdateProfileCopyWith(_UpdateProfile value, $Res Function(_UpdateProfile) _then) = __$UpdateProfileCopyWithImpl;
 @useResult
 $Res call({
- String name, String? email, String? address, String? bloodGroup
+ String name, String? email
 });
 
 
@@ -470,12 +468,10 @@ class __$UpdateProfileCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? email = freezed,Object? address = freezed,Object? bloodGroup = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? email = freezed,}) {
   return _then(_UpdateProfile(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String?,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
-as String?,bloodGroup: freezed == bloodGroup ? _self.bloodGroup : bloodGroup // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

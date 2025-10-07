@@ -26,8 +26,6 @@ abstract class AuthEvent with _$AuthEvent {
   const factory AuthEvent.updateProfile({
     required String name,
     String? email,
-    String? address,
-    String? bloodGroup,
   }) = _UpdateProfile;
   
   /// Complete profile setup event

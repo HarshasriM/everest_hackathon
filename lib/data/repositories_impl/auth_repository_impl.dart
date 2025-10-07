@@ -174,7 +174,6 @@ class AuthRepositoryImpl implements AuthRepository {
       final profileData = {
         'name': user.name,
         'email': user.email,
-        'address': user.address,
       };
       
       final updatedModel = await _remoteSource.updateProfile(user.id, profileData);
@@ -208,8 +207,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email: currentUser.email,
         profileImageUrl: currentUser.profileImageUrl,
         dateOfBirth: currentUser.dateOfBirth,
-        bloodGroup: currentUser.bloodGroup,
-        address: currentUser.address,
         isProfileComplete: currentUser.isProfileComplete,
         isVerified: currentUser.isVerified,
         createdAt: currentUser.createdAt,

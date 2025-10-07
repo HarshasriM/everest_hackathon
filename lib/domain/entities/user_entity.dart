@@ -6,8 +6,6 @@ class UserEntity {
   final String? email;
   final String? profileImageUrl;
   final DateTime? dateOfBirth;
-  final String? bloodGroup;
-  final String? address;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
@@ -21,8 +19,6 @@ class UserEntity {
     this.email,
     this.profileImageUrl,
     this.dateOfBirth,
-    this.bloodGroup,
-    this.address,
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,

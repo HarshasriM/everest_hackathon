@@ -8,8 +8,6 @@ class UserModel {
   final String? email;
   final String? profileImageUrl;
   final DateTime? dateOfBirth;
-  final String? bloodGroup;
-  final String? address;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
@@ -23,8 +21,6 @@ class UserModel {
     this.email,
     this.profileImageUrl,
     this.dateOfBirth,
-    this.bloodGroup,
-    this.address,
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,
@@ -43,8 +39,6 @@ class UserModel {
       dateOfBirth: json['dateOfBirth'] != null 
           ? DateTime.parse(json['dateOfBirth'] as String)
           : null,
-      bloodGroup: json['bloodGroup'] as String?,
-      address: json['address'] as String?,
       isProfileComplete: json['isProfileComplete'] as bool? ?? false,
       isVerified: json['isVerified'] as bool? ?? false,
       createdAt: json['createdAt'] != null
@@ -67,8 +61,6 @@ class UserModel {
       'email': email,
       'profileImageUrl': profileImageUrl,
       'dateOfBirth': dateOfBirth?.toIso8601String(),
-      'bloodGroup': bloodGroup,
-      'address': address,
       'isProfileComplete': isProfileComplete,
       'isVerified': isVerified,
       'createdAt': createdAt.toIso8601String(),
@@ -86,8 +78,6 @@ class UserModel {
       email: email,
       profileImageUrl: profileImageUrl,
       dateOfBirth: dateOfBirth,
-      bloodGroup: bloodGroup,
-      address: address,
       isProfileComplete: isProfileComplete,
       isVerified: isVerified,
       createdAt: createdAt,
@@ -105,8 +95,6 @@ class UserModel {
       email: entity.email,
       profileImageUrl: entity.profileImageUrl,
       dateOfBirth: entity.dateOfBirth,
-      bloodGroup: entity.bloodGroup,
-      address: entity.address,
       isProfileComplete: entity.isProfileComplete,
       isVerified: entity.isVerified,
       createdAt: entity.createdAt,

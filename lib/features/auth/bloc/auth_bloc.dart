@@ -31,8 +31,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         sendOtp: (phoneNumber) => _onSendOtp(phoneNumber, emit),
         resendOtp: () => _onResendOtp(emit),
         verifyOtp: (phoneNumber, otp) => _onVerifyOtp(phoneNumber, otp, emit),
-        updateProfile: (name, email, address, bloodGroup) => 
-            _onUpdateProfile(name, email, address, bloodGroup, emit),
+        updateProfile: (name, email) => 
+            _onUpdateProfile(name, email, emit),
         completeProfileSetup: () => _onCompleteProfileSetup(emit),
         logout: () => _onLogout(emit),
         deleteAccount: () => _onDeleteAccount(emit),
@@ -164,8 +164,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onUpdateProfile(
     String name,
     String? email,
-    String? address,
-    String? bloodGroup,
     Emitter<AuthState> emit,
   ) async {
     try {
@@ -187,8 +185,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           phoneNumber: currentUser.phoneNumber,
           name: name,
           email: email,
-          address: address,
-          bloodGroup: bloodGroup,
           isProfileComplete: true, // Only name is required
           isVerified: currentUser.isVerified,
           createdAt: currentUser.createdAt,
@@ -241,8 +237,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: user.email,
           profileImageUrl: user.profileImageUrl,
           dateOfBirth: user.dateOfBirth,
-          bloodGroup: user.bloodGroup,
-          address: user.address,
           isProfileComplete: true,
           isVerified: user.isVerified,
           createdAt: user.createdAt,
