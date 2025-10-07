@@ -17,6 +17,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
     with SingleTickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isDisposed = false;
+
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
   late Animation<Offset> _slideAnimation;
@@ -34,21 +35,13 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
   }
 
   void _playRingtone() async {
@@ -81,7 +74,10 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
     if (!_isDisposed) {
       _stopRingtone();
       context.read<FakeCallBloc>().add(StopCall());
-      Navigator.pop(context);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.pop(context);
+      });
     }
   }
 
@@ -89,14 +85,24 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
     if (!_isDisposed) {
       _stopRingtone();
       context.read<FakeCallBloc>().add(AcceptCall());
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) =>  CallingScreen()),
-      );
+
+      // Navigate safely after frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<FakeCallBloc>(),
+              child:const CallingScreen(),
+                          ),
+          ),
+          );
+        }
+      });
     }
   }
 
-  /// Function to get color based on caller name’s first letter
   Color _getAvatarColor(String name) {
     final colors = [
       Colors.blue,
@@ -146,19 +152,14 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF1a1a1a),
-                        Colors.black,
-                      ],
+                      colors: [Color(0xFF1a1a1a), Colors.black],
                     ),
                   ),
                 ),
-
                 Column(
                   children: [
                     const Spacer(flex: 2),
-
-                    // Caller Avatar with pulse animation
+                    // Caller Avatar
                     ScaleTransition(
                       scale: _pulseAnimation,
                       child: Container(
@@ -166,94 +167,50 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
                         height: 120,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.green.withOpacity(0.5),
-                            width: 3,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ],
+                          border: Border.all(color: Colors.green.withOpacity(0.5), width: 3),
+                          boxShadow: [BoxShadow(color: Colors.green.withOpacity(0.3), blurRadius: 20, spreadRadius: 5)],
                         ),
                         child: CircleAvatar(
                           backgroundColor: _getAvatarColor(callerName),
                           child: Text(
-                            callerName.isNotEmpty
-                                ? callerName[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 50,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
+                            style: const TextStyle(color: Colors.white, fontSize: 50, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 40),
-
-                    // Caller Information
+                    // Caller Info
                     SlideTransition(
                       position: _slideAnimation,
                       child: Column(
                         children: [
                           const Text(
                             "Incoming Call",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w300,
-                              letterSpacing: 1.2,
-                            ),
+                            style: TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w300),
                           ),
                           const SizedBox(height: 25),
                           Text(
                             callerName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.5,
-                            ),
-                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w400),
                           ),
                           const SizedBox(height: 15),
                           Text(
                             phoneNumber,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w300,
-                            ),
+                            style: const TextStyle(color: Colors.white70, fontSize: 20, fontWeight: FontWeight.w300),
                           ),
                         ],
                       ),
                     ),
-
                     const Spacer(flex: 3),
-
                     // Action Buttons
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildActionButton(
-                            icon: Icons.call_end,
-                            label: "Decline",
-                            color: Colors.red,
-                            onTap: () => _declineCall(context),
-                          ),
-                          _buildActionButton(
-                            icon: Icons.call,
-                            label: "Accept",
-                            color: Colors.green,
-                            onTap: () => _acceptCall(context),
-                          ),
+                          _buildActionButton(icon: Icons.call_end, label: "Decline", color: Colors.red, onTap: () => _declineCall(context)),
+                          _buildActionButton(icon: Icons.call, label: "Accept", color: Colors.green, onTap: () => _acceptCall(context)),
                         ],
                       ),
                     ),
@@ -268,12 +225,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildActionButton({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
     return Column(
       children: [
         GestureDetector(
@@ -281,35 +233,13 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
           child: Container(
             width: 75,
             height: 75,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 15,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 15, spreadRadius: 5)]),
             child: Icon(icon, size: 32, color: Colors.white),
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400)),
       ],
     );
-  }
-
-  String _getCurrentTime() {
-    final now = DateTime.now();
-    return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   }
 }
