@@ -7,14 +7,13 @@ const userSchema = new mongoose.Schema(
     name: { type: String },
     email: { type: String },
     profileImageUrl: { type: String },
-    dateOfBirth: { type: Date },
-    bloodGroup: { type: String },
     address: { type: String },
 
     emergencyContacts: {
       type: [emergencyContactSchema],
       default: [],
     },
+
 
     isProfileComplete: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
