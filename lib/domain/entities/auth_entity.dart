@@ -1,20 +1,18 @@
+import 'user_entity.dart';
+
 /// Authentication related entities
 class AuthEntity {
   final String userId;
-  final String accessToken;
-  final String refreshToken;
-  final DateTime expiresAt;
-  final bool isNewUser;
+  final String? sid; // Session ID from OTP send
+  final bool isProfileComplete;
+  final UserEntity? user;
 
   const AuthEntity({
     required this.userId,
-    required this.accessToken,
-    required this.refreshToken,
-    required this.expiresAt,
-    required this.isNewUser,
+    this.sid,
+    required this.isProfileComplete,
+    this.user,
   });
-
-  bool get isTokenExpired => DateTime.now().isAfter(expiresAt);
 }
 
 /// OTP request entity

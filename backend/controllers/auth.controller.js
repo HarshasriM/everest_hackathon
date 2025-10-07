@@ -53,7 +53,7 @@ export const verifyOtp = async (req, res) => {
       await user.save();
     }
 
-
+    req.session.user = { _id: user._id, name: user.name, phoneNumber: user.phoneNumber };
     res.status(200).json({
       message: "OTP verified successfully",
       userId: user._id,

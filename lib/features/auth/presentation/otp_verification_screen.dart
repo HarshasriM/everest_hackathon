@@ -36,6 +36,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void initState() {
     super.initState();
     _startResendTimer();
+    // Log the phone number for debugging
+    debugPrint('OTP Screen initialized with phone: ${widget.phoneNumber}');
   }
 
   @override
@@ -64,9 +66,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void _handleVerifyOtp() {
     final otp = _otpController.text;
     if (otp.length == EnvironmentConfig.otpLength) {
+      // Make sure we have a valid phone number
+      final phoneNumber = widget.phoneNumber.trim();
+      if (phoneNumber.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Phone number is missing. Please go back and try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
       context.read<AuthBloc>().add(
         AuthEvent.verifyOtp(
-          phoneNumber: widget.phoneNumber,
+          phoneNumber: phoneNumber,
           otp: otp,
         ),
       );
@@ -79,6 +93,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       _startResendTimer();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +130,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         color: Theme.of(context).colorScheme.error,
       ),
     );
-
+    // Format phone number for display
+    final formattedPhone = widget.phoneNumber.isEmpty ? 'Unknown' : widget.phoneNumber;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Verification'),
@@ -188,8 +204,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: 40.h),
-                      
+        
                       // Icon
                       Center(
                         child: Container(
@@ -229,7 +244,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        '+91 ${widget.phoneNumber}',
+                        '+91 $formattedPhone',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -292,14 +307,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           padding: EdgeInsets.only(bottom: 20.h),
                           child: Column(
                             children: [
-                              Text(
-                                'For demo, use OTP: 123456',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
                               Text(
                                 'Didn\'t receive the code?',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

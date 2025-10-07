@@ -30,18 +30,29 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            final user = state.maybeWhen(
-              authenticated: (user, _) => user,
-              orElse: () => null,
+        body: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            state.maybeWhen(
+              unauthenticated: () {
+                // Navigate to login after successful logout
+                context.go(AppRoutes.login);
+              },
+              orElse: () {},
             );
-            
-            if (user == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
+          },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              final user = state.maybeWhen(
+                authenticated: (user, _) => user,
+                profileIncomplete: (user) => user,
+                orElse: () => null,
               );
-            }
+              
+              if (user == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
             
             return SingleChildScrollView(
               padding: EdgeInsets.all(AppConstants.defaultPadding.w),
@@ -98,20 +109,6 @@ class ProfileScreen extends StatelessWidget {
                             icon: Icons.email_outlined,
                             title: 'Email',
                             value: user.email ?? 'Not set',
-                          ),
-                          _buildDivider(),
-                          _buildInfoRow(
-                            context,
-                            icon: Icons.location_on_outlined,
-                            title: 'Address',
-                            value: user.address ?? 'Not set',
-                          ),
-                          _buildDivider(),
-                          _buildInfoRow(
-                            context,
-                            icon: Icons.bloodtype_outlined,
-                            title: 'Blood Group',
-                            value: user.bloodGroup ?? 'Not set',
                           ),
                         ],
                       ),
@@ -222,7 +219,8 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             );
-          },
+            },
+          ),
         ),
       ),
     );

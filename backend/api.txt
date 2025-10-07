@@ -78,3 +78,55 @@ response : {
         "name": "Meda Harsha Sri"
     }
 }
+
+
+https://everest-hackathon.onrender.com/api/users/add-emergency-contact
+
+request:
+    {
+    "userId":"68e258409e2279a8a28fbb2f",
+    "name":"Subramanyam",
+    "phoneNumber":"+919347206960",
+    "relationship":"Father"
+}
+
+response:{
+    "success": true,
+    "message": "Emergency contact added and notified successfully",
+    "data": {
+        "name": "Subramanyam",
+        "phoneNumber": "+919347206960",
+        "user": "68e258409e2279a8a28fbb2f"
+    }
+}
+
+
+https://everest-hackathon.onrender.com/api/users/update/UserId/ContactId
+
+request:{
+    "name": "Riya Singh",
+  "relationship": "Cousin",
+  "phoneNumber":"+919347206960"
+}
+
+response:{
+ "success": true,
+    "message": "Emergency contact updated successfully",
+    "data": {
+        "contact_id": "68e332921a5a274650bb7a4f",
+        "name": "Riya Singh",
+        "phoneNumber": "+91 9347325589"
+    }
+}
+
+
+https://everest-hackathon.onrender.com/api/users/delete/UserId/ContactId
+
+request:No request
+
+response:{
+    "success": true,
+    "message": "Emergency contact deleted successfully"
+}
+
+
