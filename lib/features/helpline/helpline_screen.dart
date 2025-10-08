@@ -1,0 +1,300 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:animate_do/animate_do.dart';
+import './bloc/helpline_bloc.dart';
+import './bloc/helpline_event.dart';
+import './bloc/helpline_state.dart';
+import './helpline_card.dart';
+
+class HelplineScreen extends StatelessWidget {
+  const HelplineScreen({Key? key}) : super(key: key);
+
+  static const Color primaryColor = Color(0xFFE91E63); // Pink
+  static const Color secondaryColor = Color(0xFF9C27B0); // Purple
+  static const Color tertiaryColor = Color(0xFFFF5722); // Orange
+  static const Color backgroundColor = Color(0xFFFEF7FF);
+  static const Color surfaceColor = Color(0xFFFFFFFF);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isLargeScreen = size.width > 600;
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return CustomScrollView(
+            slivers: [
+              
+              SliverToBoxAdapter(
+                child: SafeArea(
+                  child: FadeInDown(
+                    duration: const Duration(milliseconds: 100),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
+                      ),
+                      color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "SHE Helpline",
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "Safety Help & Emergency Assistance",
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 🌸 National Helpline Info Box
+              // SliverToBoxAdapter(
+              //   child: Center(
+              //     child: SizedBox(
+              //       width: isLargeScreen ? 600 : size.width * 0.9,
+              //       child: Container(
+              //         margin: const EdgeInsets.only(top: 20, bottom: 10),
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 22, vertical: 20),
+              //         decoration: BoxDecoration(
+              //           gradient: const LinearGradient(
+              //             colors: [primaryColor, secondaryColor],
+              //             begin: Alignment.topLeft,
+              //             end: Alignment.bottomRight,
+              //           ),
+              //           borderRadius: BorderRadius.circular(20),
+              //           boxShadow: [
+              //             BoxShadow(
+              //               color: primaryColor.withOpacity(0.3),
+              //               blurRadius: 15,
+              //               offset: const Offset(0, 4),
+              //             ),
+              //           ],
+              //         ),
+              //         child: Row(
+              //           children: [
+              //             const Icon(Icons.phone_in_talk_rounded,
+              //                 color: Colors.white, size: 30),
+              //             const SizedBox(width: 14),
+              //             Expanded(
+              //               child: Column(
+              //                 crossAxisAlignment: CrossAxisAlignment.start,
+              //                 children: const [
+              //                   Text(
+              //                     'National Helpline Numbers',
+              //                     style: TextStyle(
+              //                       fontSize: 18,
+              //                       fontWeight: FontWeight.w600,
+              //                       color: Colors.white,
+              //                       letterSpacing: 0.5,
+              //                     ),
+              //                   ),
+              //                   SizedBox(height: 4),
+              //                   Text(
+              //                     'Immediate assistance available',
+              //                     style: TextStyle(
+              //                       fontSize: 12,
+              //                       color: Colors.white70,
+              //                     ),
+              //                   ),
+              //                 ],
+              //               ),
+              //             ),
+              //             Container(
+              //               padding: const EdgeInsets.all(8),
+              //               decoration: BoxDecoration(
+              //                 color: Colors.white.withOpacity(0.2),
+              //                 shape: BoxShape.circle,
+              //               ),
+              //               child: const Icon(Icons.shield_rounded,
+              //                   color: Colors.white, size: 22),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+
+              // 📞 Helpline List
+              SliverPadding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                sliver: BlocConsumer<HelplineBloc, HelplineState>(
+                  listener: (context, state) {
+                    if (state is HelplineError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  color: Colors.white),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(state.message)),
+                            ],
+                          ),
+                          backgroundColor: tertiaryColor,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is HelplineLoaded) {
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final helpline = state.helplines[index];
+                            final colors = [
+                              [const Color(0xFFFFF0F6), primaryColor],
+                              [const Color(0xFFF3E5F5), secondaryColor],
+                              [const Color(0xFFFFF3E0), tertiaryColor],
+                              [const Color(0xFFE8F5E9), Colors.green],
+                            ];
+                            final colorPair = colors[index % colors.length];
+
+                            return Center(
+                              child: SizedBox(
+                                width: isLargeScreen
+                                    ? 600
+                                    : size.width * 0.9,
+                                child: FadeInUp(
+                                  delay: Duration(milliseconds: 100 * index),
+                                  duration:
+                                      const Duration(milliseconds: 600),
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.only(bottom: 12),
+                                    child: HelplineCard(
+                                      number: helpline.number,
+                                      name: helpline.name,
+                                      icon: helpline.icon,
+                                      color: colorPair[0],
+                                      textColor: colorPair[1],
+                                      onTap: () {
+                                        context.read<HelplineBloc>().add(
+                                              CallHelpline(helpline.number),
+                                            );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          childCount: state.helplines.length,
+                        ),
+                      );
+                    }
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: secondaryColor,
+                              strokeWidth: 3,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading helplines...',
+                              style: TextStyle(
+                                color: secondaryColor.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          );
+        },
+      ),
+
+      // 🚨 Floating Emergency Button
+  //     floatingActionButton: ElasticIn(
+  //       duration: const Duration(milliseconds: 800),
+  //       child: SizedBox(
+  //         width: isLargeScreen ? 180 : 140,
+  //         height: isLargeScreen ? 65 : 55,
+  //         child: Container(
+  //           decoration: BoxDecoration(
+  //             gradient: const LinearGradient(
+  //               colors: [tertiaryColor, Color(0xFFFF7043)],
+  //               begin: Alignment.topLeft,
+  //               end: Alignment.bottomRight,
+  //             ),
+  //             borderRadius: BorderRadius.circular(40),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: tertiaryColor.withOpacity(0.4),
+  //                 blurRadius: 15,
+  //                 offset: const Offset(0, 6),
+  //               ),
+  //             ],
+  //           ),
+  //           child: Material(
+  //             color: Colors.transparent,
+  //             child: InkWell(
+  //               borderRadius: BorderRadius.circular(40),
+  //               onTap: () {
+  //                 context
+  //                     .read<HelplineBloc>()
+  //                     .add(const CallHelpline('112'));
+  //               },
+  //               child: Row(
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: [
+  //                   const Icon(Icons.emergency_rounded,
+  //                       color: Colors.white, size: 24),
+  //                   const SizedBox(width: 8),
+  //                   Text(
+  //                     'EMERGENCY',
+  //                     style: TextStyle(
+  //                       color: Colors.white,
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: isLargeScreen ? 14 : 12,
+  //                       letterSpacing: 0.5,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //     floatingActionButtonLocation:
+  //         FloatingActionButtonLocation.centerFloat,
+  //   );
+  // }
+    );
+  }
+}

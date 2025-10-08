@@ -102,7 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           context.push(AppRoutes.fake);
        
-        } else {
+        } 
+        if(screenIndex ==4){
+          context.push(AppRoutes.helpline);
+        }
+        else {
 
         // if (screenIndex == 3) {
         //   // Support
