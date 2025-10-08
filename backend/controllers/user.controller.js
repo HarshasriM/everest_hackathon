@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import EmergencyContact from "../models/emergencyContact.model.js";
+import mongoose from "mongoose";
 import twilio from "twilio";
 import dotenv from "dotenv";
 dotenv.config();
@@ -39,6 +39,8 @@ export const getUser = async (req, res) => {
 
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+
 
 export const addEmergencyContact = async (req, res) => {
   try {
@@ -161,4 +163,20 @@ export const deleteEmergencyContact = async (req, res) => {
   }
 };
 
+export const getEmergencyContacts = async (req, res) => {
+  try {
+    const { userId } = req.params; 
+    const user = await User.findById(userId).select("emergencyContacts");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    } 
+    res.status(200).json({
+      success: true,
+      data: user.emergencyContacts,
+    });
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 

@@ -80,6 +80,24 @@ response : {
 }
 
 
+
+https://everest-hackathon.onrender.com/api/users/get-emergency-contacts/userId
+
+request:{}
+response:{
+    "success": true,
+    "data": [
+        {
+            "user": "68e62b776adc8ea103f8f221",
+            "name": "Subramanyam",
+            "phoneNumber": "+919347206960",
+            "_id": "68e6371bfd2a6032366715ba"
+        }
+    ]
+}
+
+
+
 https://everest-hackathon.onrender.com/api/users/add-emergency-contact
 
 request:
