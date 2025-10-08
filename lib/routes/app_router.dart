@@ -1,4 +1,10 @@
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
+import 'package:everest_hackathon/features/helpline/bloc/helpline_bloc.dart';
+// import 'package:everest_hackathon/features/fake_call/bloc/fake_call_bloc.dart';
+// import 'package:everest_hackathon/features/fake_call/presentations/fake_call_input_screen.dart';
+// import 'package:everest_hackathon/features/fake_call/presentations/fake_call_screen.dart';
+// import 'package:everest_hackathon/features/fake_call/presentations/incoming_call_screen.dart';
+import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -59,12 +65,61 @@ class AppRouter {
           child: const ProfileSetupScreen(),
         ),
       ),
+
+      //fake call
+//        GoRoute(
+//         path: AppRoutes.fake,
+//         builder: (context, state) => BlocProvider.value(
+//           value: FakeCallBloc(),
+//           child:  FakeCallScreen(),
+//         ),
+//       ),
+//       GoRoute(
+//   path: AppRoutes.incoming,
+//   builder: (context, state) {
+//     final bloc = state.extra as FakeCallBloc;
+//     return BlocProvider.value(
+//       value: bloc,
+//       child: const IncomingCallScreen(),
+//     );
+//   },
+// ),
+//helpline 
+// GoRoute(
+//         path: AppRoutes.helpline,
+//         builder: (context, state) => BlocProvider.value(
+//           value: FakeCallBloc(),
+//           child:  HelplineScreen(),
+//         ),
+//       ),
+  //helpline 
+// GoRoute(
+//         path: AppRoutes.helpline,
+//         builder: (context, state) => BlocProvider.value(
+//           // value: FakeCallBloc()
+//           child:  HelplineScreen(),
+//         ),
+//       ),
+      GoRoute(
+        path: AppRoutes.helpline,
+        builder: (context, state) => HelplineScreen(),
+
+      ),
+
+      
+        // Nested routes
+
       // Nested routes
+
       GoRoute(
         path: AppRoutes.helpSupport,
         builder: (context, state) =>
             const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
       ),
+      // GoRoute(
+      //   path: AppRoutes.fakecallInput,
+      //   builder:(context,state) => FakeCallInputScreen()
+      // ),
       GoRoute(
         path: AppRoutes.sos,
         builder: (context, state) => const SosScreen(),

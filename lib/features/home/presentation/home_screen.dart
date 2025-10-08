@@ -93,6 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
         //   // Profile
         //   context.push(AppRoutes.profile);
         // } else {
+         if(screenIndex ==4){
+          context.push(AppRoutes.helpline);
+        }
         setState(() => _selectedIndex = screenIndex);
         // }
       },
