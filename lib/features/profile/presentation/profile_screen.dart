@@ -44,7 +44,7 @@ class ProfileScreen extends StatelessWidget {
             builder: (context, state) {
               final user = state.maybeWhen(
                 authenticated: (user, _) => user,
-                profileIncomplete: (user) => user,
+                // profileIncomplete: (user) => user,
                 orElse: () => null,
               );
               
@@ -128,25 +128,11 @@ class ProfileScreen extends StatelessWidget {
                             context,
                             icon: Icons.language,
                             title: 'Language',
-                            value: _getLanguageName(user.settings.languageCode),
                             showArrow: true,
+                            value: 'English',
                           ),
                           _buildDivider(),
-                          _buildInfoRow(
-                            context,
-                            icon: Icons.notifications_outlined,
-                            title: 'Notifications',
-                            value: user.settings.notificationsEnabled ? 'On' : 'Off',
-                            showArrow: true,
-                          ),
-                          _buildDivider(),
-                          _buildInfoRow(
-                            context,
-                            icon: Icons.shield_outlined,
-                            title: 'Biometric Lock',
-                            value: user.settings.biometricLock ? 'On' : 'Off',
-                            showArrow: true,
-                          ),
+                  
                         ],
                       ),
                     ),
@@ -226,9 +212,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
   
-  String _getLanguageName(String code) {
-    return AppConstants.languageNames[code] ?? 'English';
-  }
   
   Widget _buildInfoRow(
     BuildContext context, {

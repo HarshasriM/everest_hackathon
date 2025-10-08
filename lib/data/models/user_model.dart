@@ -6,39 +6,29 @@ class UserModel {
   final String phoneNumber;
   final String name;
   final String? email;
-  final String? profileImageUrl;
-  final DateTime? dateOfBirth;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
-  final UserSettingsModel settings;
 
   const UserModel({
     required this.id,
     required this.phoneNumber,
     required this.name,
     this.email,
-    this.profileImageUrl,
-    this.dateOfBirth,
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,
     this.lastLoginAt,
-    required this.settings,
   });
 
+  /// Creates a UserModel from JSON data
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Handle the API response format
     return UserModel(
       id: json['_id'] as String? ?? json['id'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
       name: json['name'] as String? ?? '',
       email: json['email'] as String?,
-      profileImageUrl: json['profileImageUrl'] as String?,
-      dateOfBirth: json['dateOfBirth'] != null 
-          ? DateTime.parse(json['dateOfBirth'] as String)
-          : null,
       isProfileComplete: json['isProfileComplete'] as bool? ?? false,
       isVerified: json['isVerified'] as bool? ?? false,
       createdAt: json['createdAt'] != null
@@ -47,152 +37,58 @@ class UserModel {
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.parse(json['lastLoginAt'] as String)
           : null,
-      settings: json['settings'] != null
-          ? UserSettingsModel.fromJson(json['settings'] as Map<String, dynamic>)
-          : UserSettingsModel.defaults(),
     );
   }
 
+  /// Converts UserModel to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'phoneNumber': phoneNumber,
       'name': name,
       'email': email,
-      'profileImageUrl': profileImageUrl,
-      'dateOfBirth': dateOfBirth?.toIso8601String(),
       'isProfileComplete': isProfileComplete,
       'isVerified': isVerified,
       'createdAt': createdAt.toIso8601String(),
       'lastLoginAt': lastLoginAt?.toIso8601String(),
-      'settings': settings.toJson(),
     };
   }
 
-  // Convert to entity
+  /// Converts UserModel to UserEntity
   UserEntity toEntity() {
     return UserEntity(
       id: id,
       phoneNumber: phoneNumber,
       name: name,
       email: email,
-      profileImageUrl: profileImageUrl,
-      dateOfBirth: dateOfBirth,
       isProfileComplete: isProfileComplete,
       isVerified: isVerified,
       createdAt: createdAt,
       lastLoginAt: lastLoginAt,
-      settings: settings.toEntity(),
     );
   }
 
-  // Create from entity
+  /// Creates a UserModel from UserEntity
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,
       phoneNumber: entity.phoneNumber,
       name: entity.name,
       email: entity.email,
-      profileImageUrl: entity.profileImageUrl,
-      dateOfBirth: entity.dateOfBirth,
       isProfileComplete: entity.isProfileComplete,
       isVerified: entity.isVerified,
       createdAt: entity.createdAt,
       lastLoginAt: entity.lastLoginAt,
-      settings: UserSettingsModel.fromEntity(entity.settings),
-    );
-  }
-}
-
-/// User settings data model
-class UserSettingsModel {
-  final String languageCode;
-  final bool sosButtonEnabled;
-  final bool shakeToSos;
-  final bool voiceActivation;
-  final bool autoSendLocation;
-  final bool discreteMode;
-  final int sosCountdown;
-  final bool biometricLock;
-  final bool notificationsEnabled;
-  final String emergencyMessage;
-
-  const UserSettingsModel({
-    required this.languageCode,
-    required this.sosButtonEnabled,
-    required this.shakeToSos,
-    required this.voiceActivation,
-    required this.autoSendLocation,
-    required this.discreteMode,
-    required this.sosCountdown,
-    required this.biometricLock,
-    required this.notificationsEnabled,
-    required this.emergencyMessage,
-  });
-
-  factory UserSettingsModel.fromJson(Map<String, dynamic> json) {
-    return UserSettingsModel(
-      languageCode: json['languageCode'] as String? ?? 'en',
-      sosButtonEnabled: json['sosButtonEnabled'] as bool? ?? true,
-      shakeToSos: json['shakeToSos'] as bool? ?? false,
-      voiceActivation: json['voiceActivation'] as bool? ?? false,
-      autoSendLocation: json['autoSendLocation'] as bool? ?? true,
-      discreteMode: json['discreteMode'] as bool? ?? false,
-      sosCountdown: json['sosCountdown'] as int? ?? 5,
-      biometricLock: json['biometricLock'] as bool? ?? false,
-      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      emergencyMessage: json['emergencyMessage'] as String? ?? 'I am in an emergency situation and need help!',
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'languageCode': languageCode,
-      'sosButtonEnabled': sosButtonEnabled,
-      'shakeToSos': shakeToSos,
-      'voiceActivation': voiceActivation,
-      'autoSendLocation': autoSendLocation,
-      'discreteMode': discreteMode,
-      'sosCountdown': sosCountdown,
-      'biometricLock': biometricLock,
-      'notificationsEnabled': notificationsEnabled,
-      'emergencyMessage': emergencyMessage,
-    };
-  }
-
-  // Convert to entity
-  UserSettings toEntity() {
-    return UserSettings(
-      languageCode: languageCode,
-      sosButtonEnabled: sosButtonEnabled,
-      shakeToSos: shakeToSos,
-      voiceActivation: voiceActivation,
-      autoSendLocation: autoSendLocation,
-      discreteMode: discreteMode,
-      sosCountdown: sosCountdown,
-      biometricLock: biometricLock,
-      notificationsEnabled: notificationsEnabled,
-      emergencyMessage: emergencyMessage,
+  /// Creates a default UserModel
+  factory UserModel.empty() {
+    return UserModel(
+      id: '',
+      phoneNumber: '',
+      name: '',
+      createdAt: DateTime.now(),
     );
-  }
-
-  // Create from entity
-  factory UserSettingsModel.fromEntity(UserSettings entity) {
-    return UserSettingsModel(
-      languageCode: entity.languageCode,
-      sosButtonEnabled: entity.sosButtonEnabled,
-      shakeToSos: entity.shakeToSos,
-      voiceActivation: entity.voiceActivation,
-      autoSendLocation: entity.autoSendLocation,
-      discreteMode: entity.discreteMode,
-      sosCountdown: entity.sosCountdown,
-      biometricLock: entity.biometricLock,
-      notificationsEnabled: entity.notificationsEnabled,
-      emergencyMessage: entity.emergencyMessage,
-    );
-  }
-
-  factory UserSettingsModel.defaults() {
-    return UserSettingsModel.fromEntity(UserSettings.defaults());
   }
 }

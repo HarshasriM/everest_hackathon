@@ -191,42 +191,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> updateSettings(UserSettings settings) async {
-    try {
-      Logger.info('Updating user settings');
-
-      final currentUser = await getCurrentUser();
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      final updatedUser = UserEntity(
-        id: currentUser.id,
-        phoneNumber: currentUser.phoneNumber,
-        name: currentUser.name,
-        email: currentUser.email,
-        profileImageUrl: currentUser.profileImageUrl,
-        dateOfBirth: currentUser.dateOfBirth,
-        isProfileComplete: currentUser.isProfileComplete,
-        isVerified: currentUser.isVerified,
-        createdAt: currentUser.createdAt,
-        lastLoginAt: currentUser.lastLoginAt,
-        settings: settings,
-      );
-
-      await updateProfile(updatedUser);
-
-      // Update language preference
-      await _preferencesService.saveLanguageCode(settings.languageCode);
-
-      Logger.info('Settings updated successfully');
-    } catch (e) {
-      Logger.error('Failed to update settings', error: e);
-      rethrow;
-    }
-  }
-
-  @override
   Future<void> deleteAccount() async {
     try {
       Logger.info('Deleting user account');
