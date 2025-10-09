@@ -85,14 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int navIndex, int screenIndex) {
     return InkWell(
       onTap: () {
-        // if (screenIndex == 3) {
-        //   // Support
-        //   // Navigate to chat screen using the existing route
-        //   context.push(AppRoutes.helpSupport);
-        // } else if (screenIndex == 4) {
-        //   // Profile
-        //   context.push(AppRoutes.profile);
-        // } else {
+       
          if(screenIndex ==4){
           context.push(AppRoutes.helpline);
         }
@@ -157,14 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.sos, size: 36.sp, color: Colors.white),
-                  // Text(
-                  //   'SOS',
-                  //   style: TextStyle(
-                  //     color: Colors.white,
-                  //     fontWeight: FontWeight.bold,
-                  //     fontSize: 10.sp,
-                  //   ),
-                  // ),
+                  
                 ],
               ),
             ),
