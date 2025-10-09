@@ -180,9 +180,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           isVerified: currentUser.isVerified,
           createdAt: currentUser.createdAt,
           lastLoginAt: DateTime.now(),
-          settings: currentUser.settings,
-          profileImageUrl: currentUser.profileImageUrl,
-          dateOfBirth: currentUser.dateOfBirth,
         );
 
         final savedUser = await _authRepository.updateProfile(updatedUser);
@@ -227,13 +224,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           phoneNumber: user.phoneNumber,
           name: user.name,
           email: user.email,
-          profileImageUrl: user.profileImageUrl,
-          dateOfBirth: user.dateOfBirth,
           isProfileComplete: true,
           isVerified: user.isVerified,
           createdAt: user.createdAt,
           lastLoginAt: DateTime.now(),
-          settings: user.settings,
         );
 
         final savedUser = await _authRepository.updateProfile(updatedUser);

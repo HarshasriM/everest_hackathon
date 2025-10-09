@@ -4,26 +4,20 @@ class UserEntity {
   final String phoneNumber;
   final String name;
   final String? email;
-  final String? profileImageUrl;
-  final DateTime? dateOfBirth;
   final bool isProfileComplete;
   final bool isVerified;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
-  final UserSettings settings;
 
   const UserEntity({
     required this.id,
     required this.phoneNumber,
     required this.name,
     this.email,
-    this.profileImageUrl,
-    this.dateOfBirth,
     this.isProfileComplete = false,
     this.isVerified = false,
     required this.createdAt,
     this.lastLoginAt,
-    required this.settings,
   });
 
   // Check if profile has the minimum required information
@@ -36,7 +30,6 @@ class UserEntity {
       phoneNumber: '',
       name: '',
       createdAt: DateTime.now(),
-      settings: UserSettings.defaults(),
     );
   }
 }

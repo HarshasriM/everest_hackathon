@@ -24,9 +24,6 @@ abstract class AuthRepository {
   /// Update user profile
   Future<UserEntity> updateProfile(UserEntity user);
   
-  /// Update user settings
-  Future<void> updateSettings(UserSettings settings);
-  
   /// Delete user account
   Future<void> deleteAccount();
 }
