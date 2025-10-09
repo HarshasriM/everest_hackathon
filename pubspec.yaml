@@ -57,6 +57,7 @@ dependencies:
   dartz: ^0.10.1
   connectivity_plus: ^6.1.0
   json_annotation: ^4.9.0
+  share_plus: ^10.1.2
 
 
 dev_dependencies:
