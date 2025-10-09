@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -48,131 +49,86 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   Widget _buildContactsContent() {
     return Scaffold(
-        backgroundColor: Colors.grey[50],
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Header Section
-              Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  gradient: AppColorScheme.primaryGradient,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(24.r),
-                    bottomRight: Radius.circular(24.r),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Icon(
-                            Icons.contacts,
-                            color: Colors.white,
-                            size: 24.sp,
+      appBar: CustomAppBar(),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            BlocBuilder<ContactsBloc, ContactsState>(
+              bloc: _contactsBloc,
+              builder: (context, state) {
+                final hasContacts = state is ContactsLoaded && state.contacts.isNotEmpty;
+                if (hasContacts) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (query) {
+                        _contactsBloc.add(SearchContactsEvent(query));
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search contacts...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14.sp,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.grey[400],
+                          size: 20.sp,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
+                            color: Colors.grey[200]!,
+                            width: 1,
                           ),
                         ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'SOS Contacts',
-                                style: TextStyle(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                'Manage your emergency contacts',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20.h),
-                    // Search Bar
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (query) {
-                          _contactsBloc.add(SearchContactsEvent(query));
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search contacts...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14.sp,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.grey[400],
-                            size: 20.sp,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 12.h,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
+                            color: AppColorScheme.primaryColor,
+                            width: 1,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20.h),
-
-              // Contacts List
-              Expanded(child: _buildContactsList()),
-
-              Padding(
-                padding: EdgeInsets.all(20.w),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showAddContactBottomSheet(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Emergency Contact'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColorScheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      elevation: 2,
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            SizedBox(height: 20.h),
+            // Contacts List
+            Expanded(child: _buildContactsList()),
+            Padding(
+              padding: EdgeInsets.all(20.w),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _showAddContactBottomSheet,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Emergency Contact'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColorScheme.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
+                    elevation: 2,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-
+      ),
     );
   }
 
