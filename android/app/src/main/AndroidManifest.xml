@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Contacts permission -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:label="everest_hackathon"
         android:name="${applicationName}"

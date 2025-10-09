@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/color_scheme.dart';
-
+import '../presentation/phone_contacts_screen.dart';
 
 class AddContactBottomSheet extends StatefulWidget {
   final Function(Contact) onContactAdded;
@@ -24,7 +24,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   String _selectedRelationship = 'Family';
   bool _isPrimary = false;
   bool _isLoading = false;
@@ -90,18 +90,83 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     ),
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   // Title
                   Text(
-                    widget.contact == null ? 'Add Emergency Contact' : 'Edit Contact',
+                    widget.contact == null
+                        ? 'Add Emergency Contact'
+                        : 'Edit Contact',
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 24.h),
-                  
+                  SizedBox(height: 16.h),
+
+                  // Phone Contacts Button (only show when adding new contact)
+                  if (widget.contact == null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _openPhoneContacts,
+                        icon: Icon(
+                          Icons.contacts,
+                          size: 18.sp,
+                          color: AppColorScheme.primaryColor,
+                        ),
+                        label: Text(
+                          'Select from Phone Contacts',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: AppColorScheme.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          side: BorderSide(
+                            color: AppColorScheme.primaryColor.withValues(
+                              alpha: 0.3,
+                            ),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          backgroundColor: AppColorScheme.primaryColor
+                              .withValues(alpha: 0.05),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Divider with "OR" text
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(color: Colors.grey[300], thickness: 1),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[500],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(color: Colors.grey[300], thickness: 1),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                  ] else
+                    SizedBox(height: 8.h),
+
                   // Name Field
                   TextFormField(
                     controller: _nameController,
@@ -121,7 +186,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     },
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   // Phone Field
                   TextFormField(
                     controller: _phoneController,
@@ -145,8 +210,10 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                         return 'Please enter a phone number';
                       }
                       final cleaned = _cleanPhone(value);
-                      
-                      final isValid = RegExp(r'^\+?[0-9]{10}$').hasMatch(cleaned);
+
+                      final isValid = RegExp(
+                        r'^\+?[0-9]{10}$',
+                      ).hasMatch(cleaned);
                       if (!isValid) {
                         return 'Enter a valid phone (10 digits)';
                       }
@@ -154,7 +221,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     },
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   // Relationship Dropdown
                   DropdownButtonFormField<String>(
                     value: _selectedRelationship,
@@ -178,7 +245,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     },
                   ),
                   // SizedBox(height: 16.h),
-                  
+
                   // Primary Contact Switch
                   // SwitchListTile(
                   //   title: const Text('Primary Contact'),
@@ -188,7 +255,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   //   activeColor: AppColorScheme.primaryColor,
                   // ),
                   SizedBox(height: 40.h),
-                  
+
                   // Action Buttons
                   Row(
                     children: [
@@ -223,11 +290,15 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : Text(
-                                  widget.contact == null ? 'Add Contact' : 'Update Contact',
+                                  widget.contact == null
+                                      ? 'Add Contact'
+                                      : 'Update Contact',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w600,
@@ -247,6 +318,22 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     );
   }
 
+  void _openPhoneContacts() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhoneContactsScreen(
+          onContactSelected: (name, phone) {
+            setState(() {
+              _nameController.text = name;
+              _phoneController.text = phone;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -255,7 +342,9 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     try {
       final cleanedPhone = _cleanPhone(_phoneController.text.trim());
       final contact = Contact(
-        id: widget.contact?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.contact?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         phone: cleanedPhone,
         relationship: _selectedRelationship,
@@ -265,14 +354,14 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       );
 
       widget.onContactAdded(contact);
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.contact == null 
-                  ? 'Contact added successfully!' 
+              widget.contact == null
+                  ? 'Contact added successfully!'
                   : 'Contact updated successfully!',
             ),
             backgroundColor: Colors.green,

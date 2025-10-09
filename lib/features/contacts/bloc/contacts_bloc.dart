@@ -4,8 +4,9 @@ import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
 import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
 import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contacts;
 
-
+import '../services/phone_contacts_service.dart';
 
 part 'contacts_event.dart';
 part 'contacts_state.dart';
@@ -14,6 +15,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   final GetContactsUseCase _getContactsUseCase;
   final AddContactUseCase _addContactUseCase;
   final ContactsRepository _repository;
+  final PhoneContactsService _phoneContactsService;
 
   StreamSubscription<List<Contact>>? _contactsSubscription;
 
@@ -21,9 +23,12 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     required GetContactsUseCase getContactsUseCase,
     required AddContactUseCase addContactUseCase,
     required ContactsRepository repository,
+    PhoneContactsService? phoneContactsService,
   }) : _getContactsUseCase = getContactsUseCase,
        _addContactUseCase = addContactUseCase,
        _repository = repository,
+       _phoneContactsService =
+           phoneContactsService ?? PhoneContactsService.instance,
        super(const ContactsInitial()) {
     on<LoadContactsEvent>(_onLoadContacts);
     on<AddContactEvent>(_onAddContact);
@@ -31,6 +36,9 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     on<DeleteContactEvent>(_onDeleteContact);
     on<SearchContactsEvent>(_onSearchContacts);
     on<WatchContactsEvent>(_onWatchContacts);
+    on<LoadPhoneContactsEvent>(_onLoadPhoneContacts);
+    on<SearchPhoneContactsEvent>(_onSearchPhoneContacts);
+    on<AddContactFromPhoneEvent>(_onAddContactFromPhone);
   }
 
   Future<void> _onLoadContacts(
@@ -113,6 +121,57 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       (contacts) => emit(ContactsLoaded(contacts)),
       onError: (error) => emit(ContactsError(error.toString())),
     );
+  }
+
+  Future<void> _onLoadPhoneContacts(
+    LoadPhoneContactsEvent event,
+    Emitter<ContactsState> emit,
+  ) async {
+    emit(const PhoneContactsLoading());
+    try {
+      final phoneContacts = await _phoneContactsService.getPhoneContacts();
+      emit(PhoneContactsLoaded(phoneContacts));
+    } catch (e) {
+      emit(PhoneContactsError(e.toString()));
+    }
+  }
+
+  Future<void> _onSearchPhoneContacts(
+    SearchPhoneContactsEvent event,
+    Emitter<ContactsState> emit,
+  ) async {
+    emit(const PhoneContactsLoading());
+    try {
+      final phoneContacts = await _phoneContactsService.searchPhoneContacts(
+        event.query,
+      );
+      emit(PhoneContactsLoaded(phoneContacts));
+    } catch (e) {
+      emit(PhoneContactsError(e.toString()));
+    }
+  }
+
+  Future<void> _onAddContactFromPhone(
+    AddContactFromPhoneEvent event,
+    Emitter<ContactsState> emit,
+  ) async {
+    try {
+      final contact = Contact(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: event.name,
+        phone: event.phone,
+        relationship: event.relationship,
+        isPrimary: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await _addContactUseCase(contact);
+      // Reload contacts to show the new one
+      add(const LoadContactsEvent());
+    } catch (e) {
+      emit(ContactsError('Failed to add contact: ${e.toString()}'));
+    }
   }
 
   @override
