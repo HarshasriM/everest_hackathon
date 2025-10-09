@@ -16,6 +16,7 @@ class HelplineBloc extends Bloc<HelplineEvent, HelplineState> {
   }
 
 void _onLoadHelplines(LoadHelplines event, Emitter<HelplineState> emit) {
+  print("Loaded helplines: $helplineList");
   emit(HelplineLoaded(helplineList));
 }
 

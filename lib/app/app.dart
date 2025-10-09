@@ -25,9 +25,8 @@ class SHEApp extends StatelessWidget {
             BlocProvider(
               create: (_) => sl<AuthBloc>(),
             ),
-            BlocProvider(create: (context)=> HelplineBloc()..add(LoadHelplines()),
-          child: const HelplineScreen(),
-          ),
+            
+          
           ],
           child: MaterialApp.router(
             title: 'SHE - Safety Help Emergency',

@@ -1,6 +1,7 @@
 import 'package:everest_hackathon/features/contacts/presentation/contacts_screen.dart';
 import 'package:everest_hackathon/features/track/presentation/track_screen.dart';
 import 'package:everest_hackathon/routes/app_routes.dart';
+import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -86,9 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () {
        
-         if(screenIndex ==4){
-          context.push(AppRoutes.helpline);
-        }
         setState(() => _selectedIndex = screenIndex);
         // }
       },
@@ -178,6 +176,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHelplineContent() {
-    return const Center(child: Text('Help line Content'));
+    return const  HelplineScreen();
   }
 }

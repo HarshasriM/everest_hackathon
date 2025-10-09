@@ -1,7 +1,6 @@
 import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:animate_do/animate_do.dart';
 import './bloc/helpline_bloc.dart';
 import './bloc/helpline_event.dart';
 import './bloc/helpline_state.dart';
@@ -21,39 +20,42 @@ class HelplineScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isLargeScreen = size.width > 600;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: CustomAppBar(),
-      body: BlocConsumer<HelplineBloc, HelplineState>(
-        listener: (context, state) {
-          if (state is HelplineError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
+    return BlocProvider(
+      create: (_) => HelplineBloc()..add(LoadHelplines()), 
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        appBar: CustomAppBar(),
+        body: BlocConsumer<HelplineBloc, HelplineState>(
+          listener: (context, state) {
+            if (state is HelplineError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(state.message)),
+                    ],
+                  ),
+                  backgroundColor: tertiaryColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is HelplineLoaded) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Column(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(state.message)),
-                  ],
-                ),
-                backgroundColor: tertiaryColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is HelplineLoaded) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                children: [
-                  ...List.generate(
-                    state.helplines.length,
-                    (index) {
+                    ...List.generate(state.helplines.length, (index) {
                       final helpline = state.helplines[index];
                       final colors = [
                         [const Color(0xFFFFF0F6), primaryColor],
@@ -66,54 +68,50 @@ class HelplineScreen extends StatelessWidget {
                       return Center(
                         child: SizedBox(
                           width: isLargeScreen ? 600 : size.width * 0.9,
-                          child: FadeInUp(
-                            delay: Duration(milliseconds: 100 * index),
-                            duration: const Duration(milliseconds: 600),
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: HelplineCard(
-                                number: helpline.number,
-                                name: helpline.name,
-                                icon: helpline.icon,
-                                color: colorPair[0],
-                                textColor: colorPair[1],
-                                onTap: () {
-                                  context.read<HelplineBloc>().add(
-                                        CallHelpline(helpline.number),
-                                      );
-                                },
-                              ),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: HelplineCard(
+                              number: helpline.number,
+                              name: helpline.name,
+                              icon: helpline.icon,
+                              color: colorPair[0],
+                              textColor: colorPair[1],
+                              onTap: () {
+                                context.read<HelplineBloc>().add(
+                                  CallHelpline(helpline.number),
+                                );
+                              },
                             ),
                           ),
                         ),
                       );
-                    },
+                    }),
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              );
+            }
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    color: secondaryColor,
+                    strokeWidth: 3,
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading helplines...',
+                    style: TextStyle(
+                      color: secondaryColor.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             );
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(
-                  color: secondaryColor,
-                  strokeWidth: 3,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Loading helplines...',
-                  style: TextStyle(
-                    color: secondaryColor.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
