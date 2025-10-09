@@ -11,4 +11,9 @@ class AppRoutes {
   static const String emergencyContacts = '/emergency-contacts';
   static const String safetyTips = '/safety-tips';
   static const String helpSupport = '/help-support';
+  static const String fake = '/fake-call';
+  static const String incoming='/incoming';
+  static const String fakecallInput="fake/input";
+  static const String helpline="/helpline";
+
 }
