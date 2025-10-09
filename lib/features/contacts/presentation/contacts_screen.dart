@@ -23,6 +23,7 @@ class ContactsScreen extends StatefulWidget {
 class _ContactsScreenState extends State<ContactsScreen> {
   final TextEditingController _searchController = TextEditingController();
   late ContactsBloc _contactsBloc;
+  bool _hasContacts = false;
 
   @override
   void initState() {
@@ -55,46 +56,64 @@ class _ContactsScreenState extends State<ContactsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-                   Padding(
-                     padding: const EdgeInsets.all(12.0),
-                     child: TextField(
-                      controller: _searchController,
-                      onChanged: (query) {
-                        _contactsBloc.add(SearchContactsEvent(query));
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search contacts...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14.sp,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey[400],
-                          size: 20.sp,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 12.h,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
-                            color: Colors.grey[200]!,
-                            width: 1,
+            // Show search bar only when there is at least one contact
+            BlocBuilder<ContactsBloc, ContactsState>(
+              bloc: _contactsBloc,
+              builder: (context, state) {
+                // Update flag when contacts are loaded (even if currently filtered/empty due to search)
+                // We check if we're NOT actively searching, OR if contacts exist
+                if (state is ContactsLoaded) {
+                  // If search is empty and we have contacts, set flag
+                  if (_searchController.text.isEmpty && state.contacts.isNotEmpty) {
+                    _hasContacts = true;
+                  }
+                  // If search is active but we previously had contacts, keep flag true
+                  // (don't reset _hasContacts to false)
+                }
+                return _hasContacts
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0,horizontal: 20.0),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (query) {
+                            _contactsBloc.add(SearchContactsEvent(query));
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search contacts...',
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14.sp,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.grey[400],
+                              size: 20.sp,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(
+                                color: Colors.grey[200]!,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(
+                                color: AppColorScheme.primaryColor,
+                                width: 1,
+                              ),
+                            ),
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
-                            color: AppColorScheme.primaryColor,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                                       ),
-                   ),
+                      )
+                    : const SizedBox.shrink();
+              },
+            ),
 
             SizedBox(height: 20.h),
             // Contacts List
@@ -136,7 +155,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ContactsLoaded) {
           if (state.contacts.isEmpty) {
-            return _buildEmptyState();
+            // If user is searching and no match found, show specialized message
+            final searching = _searchController.text.isNotEmpty;
+            return _buildEmptyState(searching: searching);
           }
           return ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -188,7 +209,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool searching = false}) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -207,9 +228,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
               color: AppColorScheme.primaryColor,
             ),
           ),
-          SizedBox(height: 40.h),
+          SizedBox(height: 35.h),
           Text(
-            'No Emergency Contacts',
+            searching ? 'No emergency contact with this name' : 'No Emergency Contacts',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -217,15 +238,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ),
           ),
           SizedBox(height: 8.h),
-          Text(
-            'Add trusted contacts who will receive\nSOS alerts in emergency situations',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.grey[600],
-              height: 1.4,
+          if (!searching)
+            Text(
+              'Add trusted contacts who will receive\nSOS alerts in emergency situations',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
           SizedBox(height: 24.h),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:everest_hackathon/domain/entities/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/color_scheme.dart';
 
@@ -125,6 +126,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    maxLength: 10,
+                    inputFormatters: [
+                      // Allow only digits
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       hintText: 'Enter phone number',
@@ -132,10 +138,17 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       prefixIcon: const Icon(Icons.phone),
+                      counterText: '', // Hide the counter text
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a phone number';
+                      }
+                      final cleaned = _cleanPhone(value);
+                      
+                      final isValid = RegExp(r'^\+?[0-9]{10}$').hasMatch(cleaned);
+                      if (!isValid) {
+                        return 'Enter a valid phone (10 digits)';
                       }
                       return null;
                     },
@@ -240,10 +253,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
+      final cleanedPhone = _cleanPhone(_phoneController.text.trim());
       final contact = Contact(
         id: widget.contact?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: cleanedPhone,
         relationship: _selectedRelationship,
         isPrimary: _isPrimary,
         createdAt: widget.contact?.createdAt ?? DateTime.now(),
@@ -279,5 +293,19 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  // Remove spaces, dashes and parentheses, keep a single leading '+' if present
+  String _cleanPhone(String input) {
+    String s = input.trim();
+    // Remove spaces, dashes, parentheses
+    s = s.replaceAll(RegExp(r'[\s\-()]+'), '');
+    // If multiple '+', keep only leading one; otherwise remove all '+' then re-add if first char was '+'
+    if (s.startsWith('+')) {
+      s = '+' + s.substring(1).replaceAll('+', '');
+    } else {
+      s = s.replaceAll('+', '');
+    }
+    return s;
   }
 }
