@@ -1,3 +1,8 @@
+import 'package:everest_hackathon/data/repositories_impl/contacts_repository_impl.dart';
+import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
+import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
+import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
+
 import '../../core/network/api_client.dart';
 import '../../core/services/app_preferences_service.dart';
 import '../../core/services/location_service.dart';
@@ -9,11 +14,8 @@ import '../../domain/usecases/auth/send_otp_usecase.dart';
 import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
 import '../../features/track/bloc/track_bloc.dart';
-import '../../features/contacts/presentation/bloc/contacts_bloc.dart';
-import '../../features/contacts/domain/repositories/contacts_repository.dart';
-import '../../features/contacts/data/repositories/contacts_repository_impl.dart';
-import '../../features/contacts/domain/usecases/get_contacts_usecase.dart';
-import '../../features/contacts/domain/usecases/add_contact_usecase.dart';
+import '../../features/contacts/bloc/contacts_bloc.dart';
+
 import 'di_container.dart';
 
 /// Setup dependency injection

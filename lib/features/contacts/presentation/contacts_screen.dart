@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/domain/entities/contact.dart';
 import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/color_scheme.dart';
 import '../../../core/dependency_injection/di_container.dart';
 
-import '../domain/entities/contact.dart';
-import 'bloc/contacts_bloc.dart';
+
+import '../bloc/contacts_bloc.dart';
 import '../widgets/add_contact_bottom_sheet.dart';
 import '../widgets/contact_card.dart';
 
@@ -54,14 +55,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            BlocBuilder<ContactsBloc, ContactsState>(
-              bloc: _contactsBloc,
-              builder: (context, state) {
-                final hasContacts = state is ContactsLoaded && state.contacts.isNotEmpty;
-                if (hasContacts) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: TextField(
+                   Padding(
+                     padding: const EdgeInsets.all(12.0),
+                     child: TextField(
                       controller: _searchController,
                       onChanged: (query) {
                         _contactsBloc.add(SearchContactsEvent(query));
@@ -97,12 +93,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+                                       ),
+                   ),
+
             SizedBox(height: 20.h),
             // Contacts List
             Expanded(child: _buildContactsList()),
@@ -201,7 +194,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 40.h),
+          SizedBox(height: 120.h),
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
@@ -214,7 +207,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               color: AppColorScheme.primaryColor,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 40.h),
           Text(
             'No Emergency Contacts',
             style: TextStyle(

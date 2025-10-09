@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'package:everest_hackathon/domain/entities/contact.dart';
+import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
+import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
+import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/contact.dart';
-import '../../domain/usecases/add_contact_usecase.dart';
-import '../../domain/usecases/get_contacts_usecase.dart';
-import '../../domain/repositories/contacts_repository.dart';
+
 
 part 'contacts_event.dart';
 part 'contacts_state.dart';
