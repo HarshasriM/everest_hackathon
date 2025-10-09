@@ -1,5 +1,8 @@
 import User from "../models/user.model.js";
-
+import mongoose from "mongoose";
+import twilio from "twilio";
+import dotenv from "dotenv";
+dotenv.config();
 // Complete or update profile
 export const updateProfile = async (req, res) => {
   try {
@@ -30,3 +33,8 @@ export const getUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// add emergency contact and send Twilio message
+
+
+

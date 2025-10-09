@@ -77,42 +77,6 @@ class Validators {
     return null;
   }
 
-  // Emergency contact name validation
-  static String? validateContactName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Contact name is required';
-    }
-    
-    if (value.length < 2) {
-      return 'Name must be at least 2 characters';
-    }
-    
-    return null;
-  }
-
-  // Relationship validation
-  static String? validateRelationship(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please select a relationship';
-    }
-    
-    final validRelationships = [
-      'Parent',
-      'Spouse',
-      'Sibling',
-      'Friend',
-      'Relative',
-      'Guardian',
-      'Other'
-    ];
-    
-    if (!validRelationships.contains(value)) {
-      return 'Please select a valid relationship';
-    }
-    
-    return null;
-  }
-
   // Address validation
   static String? validateAddress(String? value) {
     if (value == null || value.isEmpty) {

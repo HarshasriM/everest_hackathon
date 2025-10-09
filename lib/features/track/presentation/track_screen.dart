@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -104,6 +105,9 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomAppBar(
+        
+      ),
       body: BlocConsumer<TrackBloc, TrackState>(
         listener: (context, state) {
           // Update markers when location changes

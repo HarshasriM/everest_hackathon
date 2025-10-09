@@ -3,15 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/utils/constants.dart';
 import '../../../core/utils/validators.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/emergency_contact_card.dart';
-import '../widgets/add_contact_dialog.dart';
 
 /// Profile setup screen for new users
 class ProfileSetupScreen extends StatefulWidget {
@@ -25,14 +21,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _addressController = TextEditingController();
-  String? _selectedBloodGroup;
-  List<EmergencyContactEntity> _emergencyContacts = [];
   bool _isLoading = false;
-
-  final List<String> _bloodGroups = [
-    'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
-  ];
 
   @override
   void initState() {
@@ -46,16 +35,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       profileIncomplete: (user) {
         _nameController.text = user.name;
         _emailController.text = user.email ?? '';
-        _addressController.text = user.address ?? '';
-        _selectedBloodGroup = user.bloodGroup;
-        _emergencyContacts = user.emergencyContacts;
       },
       authenticated: (user, _) {
         _nameController.text = user.name;
         _emailController.text = user.email ?? '';
-        _addressController.text = user.address ?? '';
-        _selectedBloodGroup = user.bloodGroup;
-        _emergencyContacts = user.emergencyContacts;
       },
       orElse: () {},
     );
@@ -65,7 +48,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -78,32 +60,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           email: _emailController.text.trim().isEmpty 
               ? null 
               : _emailController.text.trim(),
-          address: _addressController.text.trim().isEmpty 
-              ? null 
-              : _addressController.text.trim(),
-          bloodGroup: _selectedBloodGroup,
         ),
       );
     }
-  }
-
-  void _handleAddContact() async {
-    final contact = await showDialog<EmergencyContactEntity>(
-      context: context,
-      builder: (context) => const AddContactDialog(),
-    );
-    
-    if (contact != null) {
-      context.read<AuthBloc>().add(
-        AuthEvent.addEmergencyContact(contact: contact),
-      );
-    }
-  }
-
-  void _handleRemoveContact(String contactId) {
-    context.read<AuthBloc>().add(
-      AuthEvent.removeEmergencyContact(contactId: contactId),
-    );
   }
 
   void _handleCompleteSetup() {
@@ -118,51 +77,44 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       return;
     }
     
-    // Show a warning if no emergency contacts are added, but allow to proceed
-    if (_emergencyContacts.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('No Emergency Contacts'),
-          content: const Text(
-            'You haven\'t added any emergency contacts. While optional, they are recommended for your safety. Do you want to continue anyway?'
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Add Contacts'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.push(AppRoutes.home);
-                _saveAndComplete();
-              },
-              child: const Text('Continue Anyway'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    
     _saveAndComplete();
   }
   
   void _saveAndComplete() {
-    
     // Save profile first
     _handleSaveProfile();
     
     // Then complete setup
     context.read<AuthBloc>().add(const AuthEvent.completeProfileSetup());
+    context.go(AppRoutes.home);
+  }
+
+  void _handleSkip() {
+    context.go(AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile Setup'),
+        title: const Text('Complete Your Profile'),
         automaticallyImplyLeading: false,
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _handleSkip,
+            child: Text(
+              'Skip',
+              style: TextStyle(
+                color: _isLoading 
+                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.3)
+                    : Theme.of(context).colorScheme.primary,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -181,7 +133,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             profileIncomplete: (user) {
               setState(() {
                 _isLoading = false;
-                _emergencyContacts = user.emergencyContacts;
               });
             },
             error: (message, phoneNumber) {
@@ -201,199 +152,91 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         builder: (context, state) {
           return SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Progress Indicator
-                    LinearProgressIndicator(
-                      value: _calculateProgress(),
-                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
+                    // Welcome Icon
+                    Center(
+                      child: Container(
+                        width: 80.w,
+                        height: 80.h,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 40.sp,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
+                    
                     SizedBox(height: 24.h),
                     
                     // Title
                     Text(
-                      'Complete Your Profile',
+                      'Welcome!',
+                      textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Help us personalize your safety experience',
+                      'Let\'s get to know you better',
+                      textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     
-                    SizedBox(height: 32.h),
-                    
-                    // Personal Information Section
-                    Text(
-                      'Personal Information',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 48.h),
                     
                     // Name Field (Required)
                     TextFormField(
                       controller: _nameController,
                       enabled: !_isLoading,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Full Name *',
                         hintText: 'Enter your full name',
-                        prefixIcon: Icon(Icons.person_outline),
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                       ),
                       validator: Validators.validateName,
                       textCapitalization: TextCapitalization.words,
                     ),
                     
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 20.h),
                     
                     // Email Field (Optional)
                     TextFormField(
                       controller: _emailController,
                       enabled: !_isLoading,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Email (Optional)',
                         hintText: 'Enter your email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                       ),
                       validator: Validators.validateEmail,
                     ),
                     
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 48.h),
                     
-                    // Blood Group Dropdown (Optional)
-                    DropdownButtonFormField<String>(
-                      value: _selectedBloodGroup,
-                      decoration: const InputDecoration(
-                        labelText: 'Blood Group (Optional)',
-                        prefixIcon: Icon(Icons.bloodtype_outlined),
-                      ),
-                      items: _bloodGroups.map((group) {
-                        return DropdownMenuItem(
-                          value: group,
-                          child: Text(group),
-                        );
-                      }).toList(),
-                      onChanged: _isLoading 
-                          ? null 
-                          : (value) => setState(() => _selectedBloodGroup = value),
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    // Address Field (Optional)
-                    TextFormField(
-                      controller: _addressController,
-                      enabled: !_isLoading,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Address (Optional)',
-                        hintText: 'Enter your address',
-                        prefixIcon: Icon(Icons.location_on_outlined),
-                        alignLabelWithHint: true,
-                      ),
-                    ),
-                    
-                    SizedBox(height: 32.h),
-                    
-                    // Emergency Contacts Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Emergency Contacts',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: _isLoading ? null : _handleAddContact,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add'),
-                        ),
-                      ],
-                    ),
-                    
-                    Text(
-                      'Add emergency contacts (optional, but recommended)',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    // Emergency Contacts List
-                    if (_emergencyContacts.isEmpty)
-                      Container(
-                        padding: EdgeInsets.all(24.w),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.group_add_outlined,
-                              size: 48.sp,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'No emergency contacts added',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _emergencyContacts.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 12.h),
-                        itemBuilder: (context, index) {
-                          final contact = _emergencyContacts[index];
-                          return EmergencyContactCard(
-                            contact: contact,
-                            onRemove: _isLoading 
-                                ? null 
-                                : () => _handleRemoveContact(contact.id),
-                          );
-                        },
-                      ),
-                    
-                    SizedBox(height: 32.h),
-                    
-                    // Action Buttons
+                    // Complete Setup Button
                     PrimaryButton(
                       text: 'Complete Setup',
                       onPressed: _isLoading ? null : _handleCompleteSetup,
                       isLoading: _isLoading,
-                    ),
-                    
-                    SizedBox(height: 12.h),
-                    
-                    TextButton(
-                      onPressed: _isLoading ? null : () => context.go(AppRoutes.home),
-                      child: const Text('skip'),
                     ),
                     
                     SizedBox(height: 20.h),
@@ -405,49 +248,5 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         },
       ),
     );
-  }
-  
-  double _calculateProgress() {
-    double progress = 0.0;
-    
-    // Name (required - 70%)
-    if (_nameController.text.trim().isNotEmpty) {
-      progress += 0.7;
-    }
-    
-    // Optional fields (30%)
-    double optionalProgress = 0.0;
-    int optionalFieldCount = 0;
-    
-    // Email
-    if (_emailController.text.trim().isNotEmpty) {
-      optionalProgress += 1;
-      optionalFieldCount++;
-    }
-    
-    // Blood Group
-    if (_selectedBloodGroup != null) {
-      optionalProgress += 1;
-      optionalFieldCount++;
-    }
-    
-    // Address
-    if (_addressController.text.trim().isNotEmpty) {
-      optionalProgress += 1;
-      optionalFieldCount++;
-    }
-    
-    // Emergency Contacts
-    if (_emergencyContacts.isNotEmpty) {
-      optionalProgress += 1;
-      optionalFieldCount++;
-    }
-    
-    // Calculate the average progress for optional fields
-    if (optionalFieldCount > 0) {
-      progress += 0.3 * (optionalProgress / optionalFieldCount);
-    }
-    
-    return progress;
   }
 }

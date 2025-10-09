@@ -31,13 +31,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         sendOtp: (phoneNumber) => _onSendOtp(phoneNumber, emit),
         resendOtp: () => _onResendOtp(emit),
         verifyOtp: (phoneNumber, otp) => _onVerifyOtp(phoneNumber, otp, emit),
-        updateProfile: (name, email, address, bloodGroup) =>
-            _onUpdateProfile(name, email, address, bloodGroup, emit),
-        addEmergencyContact: (contact) => _onAddEmergencyContact(contact, emit),
-        updateEmergencyContact: (contact) =>
-            _onUpdateEmergencyContact(contact, emit),
-        removeEmergencyContact: (contactId) =>
-            _onRemoveEmergencyContact(contactId, emit),
+        updateProfile: (name, email) => 
+            _onUpdateProfile(name, email, emit),
         completeProfileSetup: () => _onCompleteProfileSetup(emit),
         logout: () => _onLogout(emit),
         deleteAccount: () => _onDeleteAccount(emit),
@@ -118,31 +113,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(const AuthState.verifyingOtp());
-
-      Logger.bloc(
-        'AuthBloc',
-        'VerifyOtp',
-        data: {'phone': phoneNumber, 'otp': '***${otp.substring(3)}'},
-      );
-
-      final authEntity = await _verifyOtpUseCase(
-        VerifyOtpParams(phoneNumber: phoneNumber, otp: otp),
-      );
-
-      // Fetch user profile
-      final user = await _authRepository.getCurrentUser();
-
-      if (user != null) {
-        // Check if profile is complete based on user data
-        if (!user.hasRequiredInfo) {
-          emit(AuthState.profileIncomplete(user: user));
+      
+      Logger.bloc('AuthBloc', 'VerifyOtp', data: {
+        'phone': phoneNumber,
+        'otp': '***${otp.substring(3)}',
+      });
+      
+      final authEntity = await _verifyOtpUseCase(VerifyOtpParams(
+        phoneNumber: '+91$phoneNumber',
+        otp: otp,
+      ));
+      
+      // Check if profile is complete
+      if (!authEntity.isProfileComplete) {
+        // Profile needs to be completed
+        emit(AuthState.profileIncomplete(
+          user: authEntity.user ?? UserEntity.empty(),
+        ));
+      } else {
+        // Profile is complete, user is authenticated
+        final user = authEntity.user ?? await _authRepository.getCurrentUser();
+        if (user != null) {
+          emit(AuthState.authenticated(
+            user: user,
+            isNewUser: false,
+          ));
         } else {
-          emit(
-            AuthState.authenticated(
-              user: user,
-              isNewUser: !authEntity.isProfileComplete,
-            ),
-          );
+          emit(AuthState.profileIncomplete(user: UserEntity.empty()));
         }
       } else {
         // Create new user if not exists
@@ -162,8 +159,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onUpdateProfile(
     String name,
     String? email,
-    String? address,
-    String? bloodGroup,
     Emitter<AuthState> emit,
   ) async {
     try {
@@ -184,16 +179,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           phoneNumber: currentUser.phoneNumber,
           name: name,
           email: email,
-          address: address,
-          bloodGroup: bloodGroup,
-          emergencyContacts: currentUser.emergencyContacts,
           isProfileComplete: true, // Only name is required
           isVerified: currentUser.isVerified,
           createdAt: currentUser.createdAt,
           lastLoginAt: DateTime.now(),
-          settings: currentUser.settings,
-          profileImageUrl: currentUser.profileImageUrl,
-          dateOfBirth: currentUser.dateOfBirth,
         );
 
         final savedUser = await _authRepository.updateProfile(updatedUser);
@@ -211,106 +200,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     }
   }
-
-  Future<void> _onAddEmergencyContact(
-    EmergencyContactEntity contact,
+  
+  Future<void> _onCompleteProfileSetup(
     Emitter<AuthState> emit,
   ) async {
-    try {
-      final hasUser = state.maybeWhen(
-        profileIncomplete: (_) => true,
-        authenticated: (_, _) => true,
-        orElse: () => false,
-      );
-
-      if (hasUser) {
-        Logger.bloc(
-          'AuthBloc',
-          'AddEmergencyContact',
-          data: {'contact': contact.name},
-        );
-
-        await _authRepository.addEmergencyContact(contact);
-
-        // Refresh user
-        final user = await _authRepository.getCurrentUser();
-        if (user != null) {
-          if (user.hasRequiredInfo) {
-            emit(AuthState.authenticated(user: user, isNewUser: false));
-          } else {
-            emit(AuthState.profileIncomplete(user: user));
-          }
-        }
-      }
-    } catch (e) {
-      Logger.error('Error adding emergency contact', error: e);
-      emit(
-        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
-      );
-    }
-  }
-
-  Future<void> _onUpdateEmergencyContact(
-    EmergencyContactEntity contact,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      Logger.bloc(
-        'AuthBloc',
-        'UpdateEmergencyContact',
-        data: {'contact': contact.name},
-      );
-
-      await _authRepository.updateEmergencyContact(contact);
-
-      // Refresh user
-      final user = await _authRepository.getCurrentUser();
-      if (user != null) {
-        if (user.hasRequiredInfo) {
-          emit(AuthState.authenticated(user: user, isNewUser: false));
-        } else {
-          emit(AuthState.profileIncomplete(user: user));
-        }
-      }
-    } catch (e) {
-      Logger.error('Error updating emergency contact', error: e);
-      emit(
-        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
-      );
-    }
-  }
-
-  Future<void> _onRemoveEmergencyContact(
-    String contactId,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      Logger.bloc(
-        'AuthBloc',
-        'RemoveEmergencyContact',
-        data: {'contactId': contactId},
-      );
-
-      await _authRepository.removeEmergencyContact(contactId);
-
-      // Refresh user
-      final user = await _authRepository.getCurrentUser();
-      if (user != null) {
-        if (user.hasRequiredInfo) {
-          emit(AuthState.authenticated(user: user, isNewUser: false));
-        } else {
-          emit(AuthState.profileIncomplete(user: user));
-        }
-      }
-    } catch (e) {
-      Logger.error('Error removing emergency contact', error: e);
-      emit(
-        AuthState.error(message: e.toString().replaceAll('Exception: ', '')),
-      );
-    }
-  }
-
-  Future<void> _onCompleteProfileSetup(Emitter<AuthState> emit) async {
     try {
       final user = state.maybeWhen(
         profileIncomplete: (user) => user,
@@ -334,16 +227,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           phoneNumber: user.phoneNumber,
           name: user.name,
           email: user.email,
-          profileImageUrl: user.profileImageUrl,
-          dateOfBirth: user.dateOfBirth,
-          bloodGroup: user.bloodGroup,
-          address: user.address,
-          emergencyContacts: user.emergencyContacts,
           isProfileComplete: true,
           isVerified: user.isVerified,
           createdAt: user.createdAt,
           lastLoginAt: DateTime.now(),
-          settings: user.settings,
         );
 
         final savedUser = await _authRepository.updateProfile(updatedUser);

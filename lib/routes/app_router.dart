@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/core/services/app_preferences_service.dart';
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -128,7 +129,6 @@ class AppRouter {
   );
 }
 
-/// Splash screen widget
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -136,90 +136,204 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  bool _isCheckingAuth = true;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
+    _animationController.forward();
     _checkAuthStatus();
   }
 
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+  
   Future<void> _checkAuthStatus() async {
-    // Add the auth bloc and check status
-    final authBloc = sl<AuthBloc>();
-    authBloc.add(const AuthEvent.checkAuthStatus());
+    try {
 
-    // Wait for auth check to complete
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-
-    // Navigate based on auth state
-    final state = authBloc.state;
-    state.when(
-      initial: () => context.go(AppRoutes.login),
-      unauthenticated: () => context.go(AppRoutes.login),
-      otpSending: () {},
-      otpSent: (_, __) {},
-      verifyingOtp: () {},
-      authenticated: (_, __) => context.go(AppRoutes.home),
-      profileIncomplete: (_) => context.go(AppRoutes.profileSetup),
-      error: (_, __) => context.go(AppRoutes.login),
-      loading: () {},
-    );
+      // Get the auth bloc
+      final authBloc = sl<AuthBloc>();
+      
+      // First check if we have stored credentials
+      final preferencesService = sl<AppPreferencesService>();
+      final hasStoredAuth = await preferencesService.validateStoredAuth();
+      
+      if (hasStoredAuth) {
+        
+        
+        // If we have stored auth, navigate to home immediately
+        // This ensures we don't get stuck at the splash screen
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          context.go(AppRoutes.home);
+          return; // Exit early to avoid waiting for auth check
+        }
+      }
+      
+      // Trigger auth status check
+      authBloc.add(const AuthEvent.checkAuthStatus());
+  
+      // Wait for the auth check to complete with a minimum splash duration
+      await Future.wait([
+        Future.delayed(const Duration(milliseconds: 1000)),
+        _waitForAuthState(authBloc),
+      ]);
+  
+      if (!mounted) return;
+  
+      // Navigate based on auth state
+      final state = authBloc.state;
+      state.when(
+        initial: () => _navigateToLogin(),
+        unauthenticated: () => _navigateToLogin(),
+        otpSending: () => _navigateToLogin(),
+        otpSent: (_, __) => _navigateToLogin(),
+        verifyingOtp: () => _navigateToLogin(),
+        authenticated: (user, __) {
+       
+          // Navigate immediately to avoid getting stuck
+          context.go(AppRoutes.home);
+        },
+        profileIncomplete: (user) {
+      
+          // Navigate immediately to avoid getting stuck
+          context.go(AppRoutes.profileSetup);
+        },
+        error: (message, __) {
+         
+          _navigateToLogin();
+        },
+        loading: () {
+          // If still loading after waiting, go to login as fallback
+          _navigateToLogin();
+        },
+      );
+    } catch (e) {
+      // Handle any unexpected errors
+      if (mounted) {
+       
+        await Future.delayed(const Duration(seconds: 1));
+        _navigateToLogin();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckingAuth = false;
+        });
+      }
+    }
+  }
+  
+  Future<void> _waitForAuthState(AuthBloc authBloc) async {
+    // Wait for auth state to resolve from initial/loading
+    int attempts = 0;
+    while (attempts < 10) { // Max 1 second (10 * 100ms) - shorter timeout
+      final state = authBloc.state;
+      if (!state.maybeWhen(
+        initial: () => true,
+        loading: () => true,
+        orElse: () => false,
+      )) {
+        break;
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
+  }
+  
+  void _navigateToLogin() {
+    if (mounted) {
+  
+      // Navigate immediately without delay
+      context.go(AppRoutes.login);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo with animation
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                width: _isCheckingAuth ? 120 : 140,
+                height: _isCheckingAuth ? 120 : 140,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.shield_outlined,
+                  size: _isCheckingAuth ? 80 : 90,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
-              child: Icon(
-                Icons.shield_outlined,
-                size: 80,
-                color: Theme.of(context).colorScheme.onPrimary,
+              const SizedBox(height: 24),
+              
+              // App Name
+              Text(
+                'SHE',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // App Name
-            Text(
-              'SHE',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+              
+              const SizedBox(height: 8),
+              
+              // Tagline
+              Text(
+                'Safety Help Emergency',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Tagline
-            Text(
-              'Safety Help Emergency',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              
+              const SizedBox(height: 48),
+              
+              // Loading indicator with status
+              Column(
+                children: [
+                  if (_isCheckingAuth)
+                    const CircularProgressIndicator()
+                
+                ],
               ),
-            ),
-
-            const SizedBox(height: 48),
-
-            // Loading indicator
-            const CircularProgressIndicator(),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
 
 /// Error screen widget
 class ErrorScreen extends StatelessWidget {
