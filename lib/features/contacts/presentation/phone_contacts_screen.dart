@@ -9,10 +9,7 @@ import '../services/phone_contacts_service.dart';
 class PhoneContactsScreen extends StatefulWidget {
   final Function(String name, String phone) onContactSelected;
 
-  const PhoneContactsScreen({
-    super.key,
-    required this.onContactSelected,
-  });
+  const PhoneContactsScreen({super.key, required this.onContactSelected});
 
   @override
   State<PhoneContactsScreen> createState() => _PhoneContactsScreenState();
@@ -21,7 +18,7 @@ class PhoneContactsScreen extends StatefulWidget {
 class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final PhoneContactsService _contactsService = PhoneContactsService.instance;
-  
+
   List<flutter_contacts.Contact> _allContacts = [];
   List<flutter_contacts.Contact> _filteredContacts = [];
   bool _isLoading = true;
@@ -48,23 +45,25 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
 
     try {
       final permissionStatus = await _contactsService.checkPermissionStatus();
-      
+
       if (permissionStatus != ContactsPermissionStatus.granted) {
         if (permissionStatus == ContactsPermissionStatus.permanentlyDenied) {
           setState(() {
             _hasPermission = false;
             _isLoading = false;
-            _errorMessage = 'Contacts permission permanently denied. Please enable it in app settings.';
+            _errorMessage =
+                'Contacts permission permanently denied. Please enable it in app settings.';
           });
           return;
         }
-        
+
         final granted = await _contactsService.requestContactsPermission();
         if (!granted) {
           setState(() {
             _hasPermission = false;
             _isLoading = false;
-            _errorMessage = 'Contacts permission is required to access your phone contacts.';
+            _errorMessage =
+                'Contacts permission is required to access your phone contacts.';
           });
           return;
         }
@@ -86,19 +85,63 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
     }
   }
 
+  static String getContactDisplayName(flutter_contacts.Contact contact) {
+    if (contact.displayName.isNotEmpty) {
+      return contact.displayName;
+    }
+
+    // Try to construct name from first and last name
+    final firstName = contact.name.first;
+    final lastName = contact.name.last;
+
+    if (firstName.isNotEmpty && lastName.isNotEmpty) {
+      return '$firstName $lastName';
+    } else if (firstName.isNotEmpty) {
+      return firstName;
+    } else if (lastName.isNotEmpty) {
+      return lastName;
+    }
+
+    // If no name available, use phone number
+    if (contact.phones.isNotEmpty) {
+      return contact.phones.first.number;
+    }
+
+    return 'Unknown Contact';
+  }
+
   void _filterContacts(String query) {
     setState(() {
       if (query.isEmpty) {
         _filteredContacts = _allContacts;
       } else {
         final lowercaseQuery = query.toLowerCase();
+
         _filteredContacts = _allContacts.where((contact) {
-          final nameMatch = contact.displayName.toLowerCase().contains(lowercaseQuery);
-          final phoneMatch = contact.phones.any((phone) => 
-            phone.number.replaceAll(RegExp(r'[^\d]'), '').contains(
-              query.replaceAll(RegExp(r'[^\d]'), '')
-            )
-          );
+          // Search in display name and other name fields
+          final displayName = contact.displayName.toLowerCase();
+          final firstName = contact.name.first.toLowerCase();
+          final lastName = contact.name.last.toLowerCase();
+          final middleName = contact.name.middle.toLowerCase();
+          final fullDisplayName = getContactDisplayName(contact).toLowerCase();
+
+          final nameMatch =
+              displayName.contains(lowercaseQuery) ||
+              firstName.contains(lowercaseQuery) ||
+              lastName.contains(lowercaseQuery) ||
+              middleName.contains(lowercaseQuery) ||
+              fullDisplayName.contains(lowercaseQuery);
+
+          // Only search phone numbers if the query looks like a number
+          final isNumericQuery = RegExp(r'^\d+$').hasMatch(query.trim());
+          final phoneMatch =
+              isNumericQuery &&
+              contact.phones.any(
+                (phone) => phone.number
+                    .replaceAll(RegExp(r'[^\d]'), '')
+                    .contains(query.replaceAll(RegExp(r'[^\d]'), '')),
+              );
+
           return nameMatch || phoneMatch;
         }).toList();
       }
@@ -166,11 +209,9 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               ),
             ),
           ],
-          
+
           // Content
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -183,15 +224,14 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColorScheme.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColorScheme.primaryColor,
+              ),
             ),
             SizedBox(height: 16.h),
             Text(
               'Loading contacts...',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -216,11 +256,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.contacts_outlined,
-              size: 64.sp,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.contacts_outlined, size: 64.sp, color: Colors.grey[400]),
             SizedBox(height: 16.h),
             Text(
               'Cannot Access Contacts',
@@ -258,8 +294,8 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
                 ),
               ),
               child: Text(
-                _errorMessage?.contains('permanently denied') == true 
-                    ? 'Open Settings' 
+                _errorMessage?.contains('permanently denied') == true
+                    ? 'Open Settings'
                     : 'Try Again',
               ),
             ),
@@ -276,11 +312,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64.sp,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64.sp, color: Colors.grey[400]),
             SizedBox(height: 16.h),
             Text(
               'No Contacts Found',
@@ -295,10 +327,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               _searchController.text.isNotEmpty
                   ? 'No contacts match your search'
                   : 'No contacts with phone numbers found',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -314,12 +343,15 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
       itemBuilder: (context, index) {
         final contact = _filteredContacts[index];
         final primaryPhone = _contactsService.getPrimaryPhoneNumber(contact);
-        
+
         return _ContactListTile(
           contact: contact,
           primaryPhone: primaryPhone,
           onTap: () {
-            widget.onContactSelected(contact.displayName, primaryPhone);
+            final displayName = _PhoneContactsScreenState.getContactDisplayName(
+              contact,
+            );
+            widget.onContactSelected(displayName, primaryPhone);
             Navigator.pop(context);
           },
         );
@@ -344,9 +376,7 @@ class _ContactListTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.only(bottom: 8.h),
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: ListTile(
         onTap: onTap,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -354,9 +384,9 @@ class _ContactListTile extends StatelessWidget {
           radius: 24.r,
           backgroundColor: AppColorScheme.primaryColor.withValues(alpha: 0.1),
           child: Text(
-            contact.displayName.isNotEmpty 
-                ? contact.displayName[0].toUpperCase()
-                : '?',
+            _PhoneContactsScreenState.getContactDisplayName(
+              contact,
+            )[0].toUpperCase(),
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -365,7 +395,7 @@ class _ContactListTile extends StatelessWidget {
           ),
         ),
         title: Text(
-          contact.displayName,
+          _PhoneContactsScreenState.getContactDisplayName(contact),
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w500,
@@ -374,10 +404,7 @@ class _ContactListTile extends StatelessWidget {
         ),
         subtitle: Text(
           primaryPhone.isNotEmpty ? primaryPhone : 'No phone number',
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
         ),
         trailing: Icon(
           Icons.add_circle_outline,
