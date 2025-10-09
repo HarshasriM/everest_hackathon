@@ -141,9 +141,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           emit(AuthState.profileIncomplete(user: UserEntity.empty()));
         }
-      } else {
-        // Create new user if not exists
-        emit(AuthState.profileIncomplete(user: UserEntity.empty()));
       }
     } catch (e) {
       Logger.error('Error verifying OTP', error: e);

@@ -134,53 +134,6 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
                 mapToolbarEnabled: false,
               ),
 
-              // Top gradient overlay
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 120.h,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.6),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // App Bar
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 10.h,
-                left: 16.w,
-                right: 16.w,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Track Location',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            offset: const Offset(0, 1),
-                            blurRadius: 3,
-                            color: Colors.black.withOpacity(0.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Center location button
               Positioned(
                 right: 16.w,
