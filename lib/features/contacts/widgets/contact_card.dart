@@ -1,8 +1,9 @@
+import 'package:everest_hackathon/domain/entities/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/color_scheme.dart';
-import '../domain/entities/contact.dart';
+
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
