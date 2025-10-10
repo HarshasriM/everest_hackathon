@@ -1,6 +1,7 @@
 import 'package:everest_hackathon/features/contacts/presentation/contacts_screen.dart';
 import 'package:everest_hackathon/features/track/presentation/track_screen.dart';
 import 'package:everest_hackathon/routes/app_routes.dart';
+import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -85,14 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int navIndex, int screenIndex) {
     return InkWell(
       onTap: () {
-        // if (screenIndex == 3) {
-        //   // Support
-        //   // Navigate to chat screen using the existing route
-        //   context.push(AppRoutes.helpSupport);
-        // } else if (screenIndex == 4) {
-        //   // Profile
-        //   context.push(AppRoutes.profile);
-        // } else {
+       
         setState(() => _selectedIndex = screenIndex);
         // }
       },
@@ -154,14 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.sos, size: 36.sp, color: Colors.white),
-                  // Text(
-                  //   'SOS',
-                  //   style: TextStyle(
-                  //     color: Colors.white,
-                  //     fontWeight: FontWeight.bold,
-                  //     fontSize: 10.sp,
-                  //   ),
-                  // ),
+                  
                 ],
               ),
             ),
@@ -189,6 +176,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHelplineContent() {
-    return const Center(child: Text('Help line Content'));
+    return const  HelplineScreen();
   }
 }
