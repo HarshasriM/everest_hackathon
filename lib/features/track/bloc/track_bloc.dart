@@ -52,12 +52,6 @@ class TrackBloc extends Bloc<TrackEvent, TrackState> {
       );
     });
 
-    // Set up location update callback for live sharing
-    _locationSharingService.setLocationUpdateCallback((lat, lng, address) {
-      // This callback is triggered when live location sharing needs an update
-      // We'll get the current location and update the sharing service
-      _getCurrentLocationForSharing();
-    });
   }
 
   /// Initialize location services
@@ -634,30 +628,7 @@ class TrackBloc extends Bloc<TrackEvent, TrackState> {
     );
   }
 
-  /// Get current location for live sharing updates
-  Future<void> _getCurrentLocationForSharing() async {
-    try {
-      Position? position = await _locationService.getCurrentPosition();
-      if (position != null) {
-        // Get address for the new location
-        String address = await _locationService.getAddressFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-
-        // Update the location sharing service with new location
-        await _locationSharingService.updateCurrentLocation(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          address: address,
-        );
-      }
-    } catch (e) {
-      // If we can't get current location, we'll continue with the last known location
-      print('Failed to get current location for sharing: $e');
-    }
-  }
-
+  
   @override
   Future<void> close() async {
     await _positionSubscription?.cancel();
