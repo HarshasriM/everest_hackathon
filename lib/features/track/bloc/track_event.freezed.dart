@@ -55,7 +55,7 @@ extension TrackEventPatterns on TrackEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initialize value)?  initialize,TResult Function( _RequestPermission value)?  requestPermission,TResult Function( _GetCurrentLocation value)?  getCurrentLocation,TResult Function( _StartLocationUpdates value)?  startLocationUpdates,TResult Function( _StopLocationUpdates value)?  stopLocationUpdates,TResult Function( _UpdateLocation value)?  updateLocation,TResult Function( _FetchAddress value)?  fetchAddress,TResult Function( _CenterOnCurrentLocation value)?  centerOnCurrentLocation,TResult Function( _LocationError value)?  locationError,TResult Function( _Retry value)?  retry,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initialize value)?  initialize,TResult Function( _RequestPermission value)?  requestPermission,TResult Function( _GetCurrentLocation value)?  getCurrentLocation,TResult Function( _StartLocationUpdates value)?  startLocationUpdates,TResult Function( _StopLocationUpdates value)?  stopLocationUpdates,TResult Function( _UpdateLocation value)?  updateLocation,TResult Function( _FetchAddress value)?  fetchAddress,TResult Function( _CenterOnCurrentLocation value)?  centerOnCurrentLocation,TResult Function( _LocationError value)?  locationError,TResult Function( _Retry value)?  retry,TResult Function( _StartLocationSharing value)?  startLocationSharing,TResult Function( _StopLocationSharing value)?  stopLocationSharing,TResult Function( _UpdateLocationSharingStatus value)?  updateLocationSharingStatus,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
@@ -68,7 +68,10 @@ return updateLocation(_that);case _FetchAddress() when fetchAddress != null:
 return fetchAddress(_that);case _CenterOnCurrentLocation() when centerOnCurrentLocation != null:
 return centerOnCurrentLocation(_that);case _LocationError() when locationError != null:
 return locationError(_that);case _Retry() when retry != null:
-return retry(_that);case _:
+return retry(_that);case _StartLocationSharing() when startLocationSharing != null:
+return startLocationSharing(_that);case _StopLocationSharing() when stopLocationSharing != null:
+return stopLocationSharing(_that);case _UpdateLocationSharingStatus() when updateLocationSharingStatus != null:
+return updateLocationSharingStatus(_that);case _:
   return orElse();
 
 }
@@ -86,7 +89,7 @@ return retry(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initialize value)  initialize,required TResult Function( _RequestPermission value)  requestPermission,required TResult Function( _GetCurrentLocation value)  getCurrentLocation,required TResult Function( _StartLocationUpdates value)  startLocationUpdates,required TResult Function( _StopLocationUpdates value)  stopLocationUpdates,required TResult Function( _UpdateLocation value)  updateLocation,required TResult Function( _FetchAddress value)  fetchAddress,required TResult Function( _CenterOnCurrentLocation value)  centerOnCurrentLocation,required TResult Function( _LocationError value)  locationError,required TResult Function( _Retry value)  retry,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initialize value)  initialize,required TResult Function( _RequestPermission value)  requestPermission,required TResult Function( _GetCurrentLocation value)  getCurrentLocation,required TResult Function( _StartLocationUpdates value)  startLocationUpdates,required TResult Function( _StopLocationUpdates value)  stopLocationUpdates,required TResult Function( _UpdateLocation value)  updateLocation,required TResult Function( _FetchAddress value)  fetchAddress,required TResult Function( _CenterOnCurrentLocation value)  centerOnCurrentLocation,required TResult Function( _LocationError value)  locationError,required TResult Function( _Retry value)  retry,required TResult Function( _StartLocationSharing value)  startLocationSharing,required TResult Function( _StopLocationSharing value)  stopLocationSharing,required TResult Function( _UpdateLocationSharingStatus value)  updateLocationSharingStatus,}){
 final _that = this;
 switch (_that) {
 case _Initialize():
@@ -99,7 +102,10 @@ return updateLocation(_that);case _FetchAddress():
 return fetchAddress(_that);case _CenterOnCurrentLocation():
 return centerOnCurrentLocation(_that);case _LocationError():
 return locationError(_that);case _Retry():
-return retry(_that);case _:
+return retry(_that);case _StartLocationSharing():
+return startLocationSharing(_that);case _StopLocationSharing():
+return stopLocationSharing(_that);case _UpdateLocationSharingStatus():
+return updateLocationSharingStatus(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -116,7 +122,7 @@ return retry(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initialize value)?  initialize,TResult? Function( _RequestPermission value)?  requestPermission,TResult? Function( _GetCurrentLocation value)?  getCurrentLocation,TResult? Function( _StartLocationUpdates value)?  startLocationUpdates,TResult? Function( _StopLocationUpdates value)?  stopLocationUpdates,TResult? Function( _UpdateLocation value)?  updateLocation,TResult? Function( _FetchAddress value)?  fetchAddress,TResult? Function( _CenterOnCurrentLocation value)?  centerOnCurrentLocation,TResult? Function( _LocationError value)?  locationError,TResult? Function( _Retry value)?  retry,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initialize value)?  initialize,TResult? Function( _RequestPermission value)?  requestPermission,TResult? Function( _GetCurrentLocation value)?  getCurrentLocation,TResult? Function( _StartLocationUpdates value)?  startLocationUpdates,TResult? Function( _StopLocationUpdates value)?  stopLocationUpdates,TResult? Function( _UpdateLocation value)?  updateLocation,TResult? Function( _FetchAddress value)?  fetchAddress,TResult? Function( _CenterOnCurrentLocation value)?  centerOnCurrentLocation,TResult? Function( _LocationError value)?  locationError,TResult? Function( _Retry value)?  retry,TResult? Function( _StartLocationSharing value)?  startLocationSharing,TResult? Function( _StopLocationSharing value)?  stopLocationSharing,TResult? Function( _UpdateLocationSharingStatus value)?  updateLocationSharingStatus,}){
 final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
@@ -129,7 +135,10 @@ return updateLocation(_that);case _FetchAddress() when fetchAddress != null:
 return fetchAddress(_that);case _CenterOnCurrentLocation() when centerOnCurrentLocation != null:
 return centerOnCurrentLocation(_that);case _LocationError() when locationError != null:
 return locationError(_that);case _Retry() when retry != null:
-return retry(_that);case _:
+return retry(_that);case _StartLocationSharing() when startLocationSharing != null:
+return startLocationSharing(_that);case _StopLocationSharing() when stopLocationSharing != null:
+return stopLocationSharing(_that);case _UpdateLocationSharingStatus() when updateLocationSharingStatus != null:
+return updateLocationSharingStatus(_that);case _:
   return null;
 
 }
@@ -146,7 +155,7 @@ return retry(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialize,TResult Function()?  requestPermission,TResult Function()?  getCurrentLocation,TResult Function()?  startLocationUpdates,TResult Function()?  stopLocationUpdates,TResult Function( double latitude,  double longitude,  double accuracy)?  updateLocation,TResult Function( double latitude,  double longitude)?  fetchAddress,TResult Function()?  centerOnCurrentLocation,TResult Function( String message)?  locationError,TResult Function()?  retry,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialize,TResult Function()?  requestPermission,TResult Function()?  getCurrentLocation,TResult Function()?  startLocationUpdates,TResult Function()?  stopLocationUpdates,TResult Function( double latitude,  double longitude,  double accuracy)?  updateLocation,TResult Function( double latitude,  double longitude)?  fetchAddress,TResult Function()?  centerOnCurrentLocation,TResult Function( String message)?  locationError,TResult Function()?  retry,TResult Function( Duration duration)?  startLocationSharing,TResult Function()?  stopLocationSharing,TResult Function( bool isSharing,  Duration? remainingTime)?  updateLocationSharingStatus,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
 return initialize();case _RequestPermission() when requestPermission != null:
@@ -158,7 +167,10 @@ return updateLocation(_that.latitude,_that.longitude,_that.accuracy);case _Fetch
 return fetchAddress(_that.latitude,_that.longitude);case _CenterOnCurrentLocation() when centerOnCurrentLocation != null:
 return centerOnCurrentLocation();case _LocationError() when locationError != null:
 return locationError(_that.message);case _Retry() when retry != null:
-return retry();case _:
+return retry();case _StartLocationSharing() when startLocationSharing != null:
+return startLocationSharing(_that.duration);case _StopLocationSharing() when stopLocationSharing != null:
+return stopLocationSharing();case _UpdateLocationSharingStatus() when updateLocationSharingStatus != null:
+return updateLocationSharingStatus(_that.isSharing,_that.remainingTime);case _:
   return orElse();
 
 }
@@ -176,7 +188,7 @@ return retry();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialize,required TResult Function()  requestPermission,required TResult Function()  getCurrentLocation,required TResult Function()  startLocationUpdates,required TResult Function()  stopLocationUpdates,required TResult Function( double latitude,  double longitude,  double accuracy)  updateLocation,required TResult Function( double latitude,  double longitude)  fetchAddress,required TResult Function()  centerOnCurrentLocation,required TResult Function( String message)  locationError,required TResult Function()  retry,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialize,required TResult Function()  requestPermission,required TResult Function()  getCurrentLocation,required TResult Function()  startLocationUpdates,required TResult Function()  stopLocationUpdates,required TResult Function( double latitude,  double longitude,  double accuracy)  updateLocation,required TResult Function( double latitude,  double longitude)  fetchAddress,required TResult Function()  centerOnCurrentLocation,required TResult Function( String message)  locationError,required TResult Function()  retry,required TResult Function( Duration duration)  startLocationSharing,required TResult Function()  stopLocationSharing,required TResult Function( bool isSharing,  Duration? remainingTime)  updateLocationSharingStatus,}) {final _that = this;
 switch (_that) {
 case _Initialize():
 return initialize();case _RequestPermission():
@@ -188,7 +200,10 @@ return updateLocation(_that.latitude,_that.longitude,_that.accuracy);case _Fetch
 return fetchAddress(_that.latitude,_that.longitude);case _CenterOnCurrentLocation():
 return centerOnCurrentLocation();case _LocationError():
 return locationError(_that.message);case _Retry():
-return retry();case _:
+return retry();case _StartLocationSharing():
+return startLocationSharing(_that.duration);case _StopLocationSharing():
+return stopLocationSharing();case _UpdateLocationSharingStatus():
+return updateLocationSharingStatus(_that.isSharing,_that.remainingTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,7 +220,7 @@ return retry();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialize,TResult? Function()?  requestPermission,TResult? Function()?  getCurrentLocation,TResult? Function()?  startLocationUpdates,TResult? Function()?  stopLocationUpdates,TResult? Function( double latitude,  double longitude,  double accuracy)?  updateLocation,TResult? Function( double latitude,  double longitude)?  fetchAddress,TResult? Function()?  centerOnCurrentLocation,TResult? Function( String message)?  locationError,TResult? Function()?  retry,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialize,TResult? Function()?  requestPermission,TResult? Function()?  getCurrentLocation,TResult? Function()?  startLocationUpdates,TResult? Function()?  stopLocationUpdates,TResult? Function( double latitude,  double longitude,  double accuracy)?  updateLocation,TResult? Function( double latitude,  double longitude)?  fetchAddress,TResult? Function()?  centerOnCurrentLocation,TResult? Function( String message)?  locationError,TResult? Function()?  retry,TResult? Function( Duration duration)?  startLocationSharing,TResult? Function()?  stopLocationSharing,TResult? Function( bool isSharing,  Duration? remainingTime)?  updateLocationSharingStatus,}) {final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
 return initialize();case _RequestPermission() when requestPermission != null:
@@ -217,7 +232,10 @@ return updateLocation(_that.latitude,_that.longitude,_that.accuracy);case _Fetch
 return fetchAddress(_that.latitude,_that.longitude);case _CenterOnCurrentLocation() when centerOnCurrentLocation != null:
 return centerOnCurrentLocation();case _LocationError() when locationError != null:
 return locationError(_that.message);case _Retry() when retry != null:
-return retry();case _:
+return retry();case _StartLocationSharing() when startLocationSharing != null:
+return startLocationSharing(_that.duration);case _StopLocationSharing() when stopLocationSharing != null:
+return stopLocationSharing();case _UpdateLocationSharingStatus() when updateLocationSharingStatus != null:
+return updateLocationSharingStatus(_that.isSharing,_that.remainingTime);case _:
   return null;
 
 }
@@ -652,5 +670,171 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _StartLocationSharing implements TrackEvent {
+  const _StartLocationSharing({required this.duration});
+  
+
+ final  Duration duration;
+
+/// Create a copy of TrackEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StartLocationSharingCopyWith<_StartLocationSharing> get copyWith => __$StartLocationSharingCopyWithImpl<_StartLocationSharing>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StartLocationSharing&&(identical(other.duration, duration) || other.duration == duration));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,duration);
+
+@override
+String toString() {
+  return 'TrackEvent.startLocationSharing(duration: $duration)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StartLocationSharingCopyWith<$Res> implements $TrackEventCopyWith<$Res> {
+  factory _$StartLocationSharingCopyWith(_StartLocationSharing value, $Res Function(_StartLocationSharing) _then) = __$StartLocationSharingCopyWithImpl;
+@useResult
+$Res call({
+ Duration duration
+});
+
+
+
+
+}
+/// @nodoc
+class __$StartLocationSharingCopyWithImpl<$Res>
+    implements _$StartLocationSharingCopyWith<$Res> {
+  __$StartLocationSharingCopyWithImpl(this._self, this._then);
+
+  final _StartLocationSharing _self;
+  final $Res Function(_StartLocationSharing) _then;
+
+/// Create a copy of TrackEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? duration = null,}) {
+  return _then(_StartLocationSharing(
+duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
+as Duration,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _StopLocationSharing implements TrackEvent {
+  const _StopLocationSharing();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StopLocationSharing);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'TrackEvent.stopLocationSharing()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _UpdateLocationSharingStatus implements TrackEvent {
+  const _UpdateLocationSharingStatus({required this.isSharing, this.remainingTime});
+  
+
+ final  bool isSharing;
+ final  Duration? remainingTime;
+
+/// Create a copy of TrackEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UpdateLocationSharingStatusCopyWith<_UpdateLocationSharingStatus> get copyWith => __$UpdateLocationSharingStatusCopyWithImpl<_UpdateLocationSharingStatus>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateLocationSharingStatus&&(identical(other.isSharing, isSharing) || other.isSharing == isSharing)&&(identical(other.remainingTime, remainingTime) || other.remainingTime == remainingTime));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,isSharing,remainingTime);
+
+@override
+String toString() {
+  return 'TrackEvent.updateLocationSharingStatus(isSharing: $isSharing, remainingTime: $remainingTime)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UpdateLocationSharingStatusCopyWith<$Res> implements $TrackEventCopyWith<$Res> {
+  factory _$UpdateLocationSharingStatusCopyWith(_UpdateLocationSharingStatus value, $Res Function(_UpdateLocationSharingStatus) _then) = __$UpdateLocationSharingStatusCopyWithImpl;
+@useResult
+$Res call({
+ bool isSharing, Duration? remainingTime
+});
+
+
+
+
+}
+/// @nodoc
+class __$UpdateLocationSharingStatusCopyWithImpl<$Res>
+    implements _$UpdateLocationSharingStatusCopyWith<$Res> {
+  __$UpdateLocationSharingStatusCopyWithImpl(this._self, this._then);
+
+  final _UpdateLocationSharingStatus _self;
+  final $Res Function(_UpdateLocationSharingStatus) _then;
+
+/// Create a copy of TrackEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? isSharing = null,Object? remainingTime = freezed,}) {
+  return _then(_UpdateLocationSharingStatus(
+isSharing: null == isSharing ? _self.isSharing : isSharing // ignore: cast_nullable_to_non_nullable
+as bool,remainingTime: freezed == remainingTime ? _self.remainingTime : remainingTime // ignore: cast_nullable_to_non_nullable
+as Duration?,
+  ));
+}
+
+
+}
 
 // dart format on

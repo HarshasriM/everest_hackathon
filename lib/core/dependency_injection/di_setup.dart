@@ -1,6 +1,7 @@
 import '../../core/network/api_client.dart';
 import '../../core/services/app_preferences_service.dart';
 import '../../core/services/location_service.dart';
+import '../../core/services/location_sharing_service.dart';
 import '../../data/datasources/remote/auth_remote_source.dart';
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -45,6 +46,11 @@ Future<void> _registerCore() async {
 
   // Location Service
   sl.registerLazySingleton<LocationService>(() => LocationService());
+
+  // Location Sharing Service
+  sl.registerLazySingleton<LocationSharingService>(
+    () => LocationSharingService(),
+  );
 }
 
 /// Register data sources
@@ -95,7 +101,9 @@ void _registerBlocs() {
   );
 
   // Track BLoC
-  sl.registerFactory<TrackBloc>(() => TrackBloc(locationService: sl()));
+  sl.registerFactory<TrackBloc>(
+    () => TrackBloc(locationService: sl(), locationSharingService: sl()),
+  );
 
   // Contacts BLoC
   sl.registerFactory<ContactsBloc>(
