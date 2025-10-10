@@ -14,7 +14,14 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/send_otp_usecase.dart';
 import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
-import '../../features/track/bloc/track_bloc.dart';
+
+import '../../features/contacts/presentation/bloc/contacts_bloc.dart';
+import '../../features/contacts/domain/repositories/contacts_repository.dart';
+import '../../features/contacts/data/repositories/contacts_repository_impl.dart';
+import '../../features/contacts/domain/usecases/get_contacts_usecase.dart';
+import '../../features/contacts/domain/usecases/add_contact_usecase.dart';
+import '../../features/fake_call/bloc/fake_call_bloc.dart';
+
 import '../../features/contacts/bloc/contacts_bloc.dart';
 
 import 'di_container.dart';
@@ -121,4 +128,7 @@ void _registerBlocs() {
       repository: sl(),
     ),
   );
+
+  // FakeCall BLoC
+  sl.registerFactory<FakeCallBloc>(() => FakeCallBloc());
 }
