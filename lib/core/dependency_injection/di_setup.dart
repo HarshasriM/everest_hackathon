@@ -13,6 +13,7 @@ import '../../features/contacts/domain/repositories/contacts_repository.dart';
 import '../../features/contacts/data/repositories/contacts_repository_impl.dart';
 import '../../features/contacts/domain/usecases/get_contacts_usecase.dart';
 import '../../features/contacts/domain/usecases/add_contact_usecase.dart';
+import '../../features/fake_call/bloc/fake_call_bloc.dart';
 import 'di_container.dart';
 
 /// Setup dependency injection
@@ -105,4 +106,7 @@ void _registerBlocs() {
       repository: sl(),
     ),
   );
+
+  // FakeCall BLoC
+  sl.registerFactory<FakeCallBloc>(() => FakeCallBloc());
 }
