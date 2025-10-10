@@ -6,23 +6,21 @@ class OtpSendResponseModel {
   final String message;
   final String sid;
 
-  const OtpSendResponseModel({
-    required this.message,
-    required this.sid,
-  });
+  const OtpSendResponseModel({required this.message, required this.sid});
 
   factory OtpSendResponseModel.fromJson(Map<String, dynamic> json) {
-    return OtpSendResponseModel(
-      message: json['message'] as String,
-      sid: json['sid'] as String,
-    );
+    try {
+      return OtpSendResponseModel(
+        message: json['message']?.toString() ?? 'OTP sent successfully',
+        sid: json['sid']?.toString() ?? '',
+      );
+    } catch (e) {
+      throw Exception('Failed to parse OTP response: $e. JSON: $json');
+    }
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      'sid': sid,
-    };
+    return {'message': message, 'sid': sid};
   }
 }
 
@@ -41,12 +39,21 @@ class AuthModel {
   });
 
   factory AuthModel.fromJson(Map<String, dynamic> json) {
-    return AuthModel(
-      message: json['message'] as String,
-      userId: json['userId'] as String,
-      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
-      isProfileComplete: json['isProfileComplete'] as bool? ?? false,
-    );
+    try {
+      return AuthModel(
+        message: json['message']?.toString() ?? 'Authentication successful',
+        userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
+        user: json['user'] != null
+            ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
+            : null,
+        isProfileComplete:
+            json['isProfileComplete'] as bool? ??
+            json['profileComplete'] as bool? ??
+            false,
+      );
+    } catch (e) {
+      throw Exception('Failed to parse auth response: $e. JSON: $json');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -82,14 +89,10 @@ class AuthModel {
 class OtpRequestModel {
   final String phoneNumber;
 
-  const OtpRequestModel({
-    required this.phoneNumber,
-  });
+  const OtpRequestModel({required this.phoneNumber});
 
   Map<String, dynamic> toJson() {
-    return {
-      'phoneNumber': phoneNumber,
-    };
+    return {'phoneNumber': phoneNumber};
   }
 }
 
@@ -104,9 +107,6 @@ class OtpVerificationRequestModel {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'phoneNumber': phoneNumber,
-      'otp': otp,
-    };
+    return {'phoneNumber': phoneNumber, 'otp': otp};
   }
 }
