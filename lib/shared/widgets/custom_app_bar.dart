@@ -7,13 +7,8 @@ import 'package:go_router/go_router.dart';
 /// Custom AppBar for SHE - Woman Safety Application
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
-  final VoidCallback? onLanguageTap;
-  final String? selectedLanguage;
-
   const CustomAppBar({
     super.key,
-    this.onLanguageTap,
-    this.selectedLanguage = 'EN',
   });
 
   @override
@@ -60,12 +55,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
               ),
-              // Language Switcher
-              _LanguageSwitcher(
-                selectedLanguage: selectedLanguage!,
-                onTap: onLanguageTap,
-              ),
-              const SizedBox(width: 16),
               // AI Assistant Icon
               _AppBarIconButton(
                 icon: Icons.smart_toy_outlined,
@@ -113,62 +102,6 @@ class _AppBarIconButton extends StatelessWidget {
               icon,
               size: 26,
               color: AppColorScheme.primaryColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Language Switcher
-class _LanguageSwitcher extends StatelessWidget {
-  final String selectedLanguage;
-  final VoidCallback? onTap;
-
-  const _LanguageSwitcher({
-    required this.selectedLanguage,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Change Language',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            print('Language switcher tapped - Current: $selectedLanguage');
-            onTap?.call();
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColorScheme.primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.language_rounded,
-                  color: AppColorScheme.primaryColor,
-                  size: 18,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  selectedLanguage,
-                  style: const TextStyle(
-                    color: AppColorScheme.primaryColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
             ),
           ),
         ),

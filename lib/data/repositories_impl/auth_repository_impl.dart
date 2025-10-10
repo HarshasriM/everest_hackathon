@@ -43,9 +43,17 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       Logger.info('Verifying OTP for ${verification.phoneNumber}');
 
+      // Ensure phone number has country code (same format as send OTP)
+      String phoneNumber = verification.phoneNumber;
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+91$phoneNumber';
+      }
+
+      Logger.debug('Formatted phone number for verification: $phoneNumber');
+
       // Create verification request model
       final request = OtpVerificationRequestModel(
-        phoneNumber: verification.phoneNumber,
+        phoneNumber: phoneNumber,
         otp: verification.otp,
       );
 
@@ -130,7 +138,9 @@ class AuthRepositoryImpl implements AuthRepository {
       if (userId == null) {
         throw Exception('No user ID found');
       }
-      
+
+      final user = await getCurrentUser();
+      Logger.info('Token refresh successful');
       return AuthEntity(
         userId: userId,
         isProfileComplete: _cachedUser != null,

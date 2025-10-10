@@ -50,6 +50,11 @@
 	<string>This app needs location access to show your current location on the map for safety tracking.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs location access to show your current location on the map for safety tracking.</string>
+
+	<!-- Contacts permission -->
+	<key>NSContactsUsageDescription</key>
+	<string>This app needs access to your contacts to help you quickly add emergency contacts for safety alerts.</string>
+
 	<!-- Google Maps API Key -->
 	<key>GMSApiKey</key>
 	<string>AIzaSyDHKi-_91nMkut0lUChVR9kRUEXQVWxZbI</string>

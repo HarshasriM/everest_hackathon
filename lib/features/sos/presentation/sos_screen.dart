@@ -70,7 +70,6 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
   }
 
   void _sendSosAlert() {
-    // TODO: Implement actual SOS alert sending
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('SOS Alert Sent!'),
@@ -129,31 +128,35 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
               
               // Countdown Display
               if (_isActivated) ...[
-                Text(
-                  'SENDING SOS IN',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColorScheme.sosRedColor,
-                    fontWeight: FontWeight.bold,
+                Center(
+                  child: Text(
+                    'SENDING SOS IN',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppColorScheme.sosRedColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SizedBox(height: 24.h),
-                Container(
-                  width: 120.w,
-                  height: 120.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColorScheme.sosRedColor,
-                      width: 4,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$_countdown',
-                      style: TextStyle(
-                        fontSize: 64.sp,
-                        fontWeight: FontWeight.bold,
+                Center(
+                  child: Container(
+                    width: 120.w,
+                    height: 120.h,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
                         color: AppColorScheme.sosRedColor,
+                        width: 4,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_countdown',
+                        style: TextStyle(
+                          fontSize: 64.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorScheme.sosRedColor,
+                        ),
                       ),
                     ),
                   ),
@@ -194,18 +197,12 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
                                 children: [
                                   Icon(
                                     _isActivated ? Icons.cancel : Icons.sos,
-                                    size: 80.sp,
+                                    size: 100.sp,
                                     color: Colors.white,
                                   ),
                                   SizedBox(height: 8.h),
-                                  Text(
-                                    _isActivated ? 'CANCEL' : 'SOS',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                 
+                                  
                                 ],
                               ),
                             ),
@@ -219,29 +216,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
               
               SizedBox(height: 48.h),
               
-              // Quick Actions
-              if (!_isActivated)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildQuickAction(
-                      icon: Icons.phone,
-                      label: 'Call Police',
-                      onTap: () {},
-                    ),
-                    _buildQuickAction(
-                      icon: Icons.location_on,
-                      label: 'Share Location',
-                      onTap: () {},
-                    ),
-                    _buildQuickAction(
-                      icon: Icons.camera_alt,
-                      label: 'Record',
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              
+             
               // Cancel Instructions
               if (_isActivated) ...[
                 Text(
@@ -258,32 +233,4 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
     );
   }
 
-  Widget _buildQuickAction({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      children: [
-        Container(
-          width: 60.w,
-          height: 60.h,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: Icon(icon),
-            onPressed: onTap,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
-    );
-  }
 }

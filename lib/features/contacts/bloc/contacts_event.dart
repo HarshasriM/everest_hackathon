@@ -31,3 +31,24 @@ class SearchContactsEvent extends ContactsEvent {
 class WatchContactsEvent extends ContactsEvent {
   const WatchContactsEvent();
 }
+
+class LoadPhoneContactsEvent extends ContactsEvent {
+  const LoadPhoneContactsEvent();
+}
+
+class SearchPhoneContactsEvent extends ContactsEvent {
+  final String query;
+  const SearchPhoneContactsEvent(this.query);
+}
+
+class AddContactFromPhoneEvent extends ContactsEvent {
+  final String name;
+  final String phone;
+  final String relationship;
+
+  const AddContactFromPhoneEvent({
+    required this.name,
+    required this.phone,
+    required this.relationship,
+  });
+}
