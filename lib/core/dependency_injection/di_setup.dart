@@ -5,6 +5,7 @@ import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/services/app_preferences_service.dart';
+import '../../core/services/contact_storage_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/location_sharing_service.dart';
 import '../../data/datasources/remote/auth_remote_source.dart';
@@ -45,6 +46,11 @@ Future<void> _registerCore() async {
   final appPreferences = AppPreferencesService();
   await appPreferences.init();
   sl.registerLazySingleton<AppPreferencesService>(() => appPreferences);
+
+  // Contact Storage Service
+  final contactStorage = ContactStorageService();
+  await contactStorage.init();
+  sl.registerLazySingleton<ContactStorageService>(() => contactStorage);
 
   // Location Service
   sl.registerLazySingleton<LocationService>(() => LocationService());
