@@ -48,6 +48,8 @@ class TrackState with _$TrackState {
     required DateTime timestamp,
     @Default(true) bool isLocationEnabled,
     @Default(false) bool isListeningToUpdates,
+    @Default(false) bool isLocationSharing,
+    Duration? locationSharingRemainingTime,
   }) = _LocationLoaded;
 
   /// Location updating state (when getting new location)
@@ -60,6 +62,8 @@ class TrackState with _$TrackState {
     @Default(true) bool isLocationEnabled,
     @Default(true) bool isListeningToUpdates,
     @Default('Updating location...') String updateMessage,
+    @Default(false) bool isLocationSharing,
+    Duration? locationSharingRemainingTime,
   }) = _LocationUpdating;
 
   /// Address loading state
@@ -71,6 +75,8 @@ class TrackState with _$TrackState {
     @Default(true) bool isLocationEnabled,
     @Default(false) bool isListeningToUpdates,
     @Default('Getting address...') String message,
+    @Default(false) bool isLocationSharing,
+    Duration? locationSharingRemainingTime,
   }) = _AddressLoading;
 
   /// Error state
@@ -90,80 +96,283 @@ class TrackState with _$TrackState {
 extension TrackStateExtension on TrackState {
   /// Check if state has location data
   bool get hasLocation => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) =>
-        true,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => true,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            true,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        true,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => true,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => true,
     orElse: () => false,
   );
 
   /// Get current latitude if available
   double? get latitude => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) => lat,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => lat,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            lat,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        lat,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => lat,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => lat,
     orElse: () => null,
   );
 
   /// Get current longitude if available
   double? get longitude => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) => lng,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => lng,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            lng,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        lng,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => lng,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => lng,
     orElse: () => null,
   );
 
   /// Get current accuracy if available
   double? get accuracy => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) => acc,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => acc,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            acc,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        acc,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => acc,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => acc,
     orElse: () => null,
   );
 
   /// Get current address if available
   String? get address => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) =>
-        addr,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => addr,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            addr,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => addr,
     orElse: () => null,
   );
 
   /// Check if location is enabled
   bool get isLocationEnabled => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) =>
-        enabled,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => enabled,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            enabled,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        enabled,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => enabled,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => enabled,
     orElse: () => false,
   );
 
   /// Check if listening to location updates
   bool get isListeningToUpdates => maybeWhen(
-    locationLoaded: (lat, lng, acc, addr, timestamp, enabled, listening) =>
-        listening,
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => listening,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            listening,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        listening,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => listening,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => listening,
     orElse: () => false,
   );
 
@@ -172,10 +381,30 @@ extension TrackStateExtension on TrackState {
     loading: (message) => true,
     checkingPermission: () => true,
     locationUpdating:
-        (lat, lng, acc, addr, timestamp, enabled, listening, updateMessage) =>
-            true,
-    addressLoading: (lat, lng, acc, timestamp, enabled, listening, message) =>
-        true,
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => true,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => true,
     orElse: () => false,
   );
 
@@ -186,5 +415,89 @@ extension TrackStateExtension on TrackState {
     locationServiceDisabled: (message) => true,
     noLocation: (message) => true,
     orElse: () => false,
+  );
+
+  /// Check if location is being shared
+  bool get isLocationSharing => maybeWhen(
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => sharing,
+    locationUpdating:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => sharing,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => sharing,
+    orElse: () => false,
+  );
+
+  /// Get location sharing remaining time
+  Duration? get locationSharingRemainingTime => maybeWhen(
+    locationLoaded:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          sharing,
+          remainingTime,
+        ) => remainingTime,
+    locationUpdating:
+        (
+          lat,
+          lng,
+          acc,
+          addr,
+          timestamp,
+          enabled,
+          listening,
+          updateMessage,
+          sharing,
+          remainingTime,
+        ) => remainingTime,
+    addressLoading:
+        (
+          lat,
+          lng,
+          acc,
+          timestamp,
+          enabled,
+          listening,
+          message,
+          sharing,
+          remainingTime,
+        ) => remainingTime,
+    orElse: () => null,
   );
 }

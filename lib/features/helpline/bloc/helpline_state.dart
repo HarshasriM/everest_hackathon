@@ -14,6 +14,11 @@ class HelplineInitial extends HelplineState {
   List<Object> get props => [];
 }
 
+class HelplineLoading extends HelplineState {
+  @override
+  List<Object> get props => [];
+}
+
 class HelplineLoaded extends HelplineState {
   final List<Helpline> helplines;
 

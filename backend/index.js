@@ -5,6 +5,8 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import emergencyRoutes from "./routes/emergency.routes.js";
+import sosRoutes from "./routes/sos.router.js";
+
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/users", emergencyRoutes);
+app.use("/api/sos", sosRoutes);
 
 // Test route
 app.get("/", (req, res) => {

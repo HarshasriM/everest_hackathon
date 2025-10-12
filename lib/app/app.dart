@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:everest_hackathon/features/helpline/bloc/helpline_bloc.dart';
-import 'package:everest_hackathon/features/helpline/bloc/helpline_event.dart';
-import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../core/dependency_injection/di_container.dart';
 import '../core/theme/app_theme.dart';

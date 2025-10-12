@@ -6,35 +6,37 @@ import 'package:go_router/go_router.dart';
 
 /// Custom AppBar for SHE - Woman Safety Application
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-
-  final VoidCallback? onLanguageTap;
-  final String? selectedLanguage;
-
   const CustomAppBar({
     super.key,
-    this.onLanguageTap,
-    this.selectedLanguage = 'EN',
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Colors.white.withOpacity(0.95),
+          ],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColorScheme.primaryColor.withOpacity(0.08),
+            blurRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: Row(
             children: [
-              // Profile Icon
+              // Profile Button with Avatar Style
               _AppBarIconButton(
                 icon: Icons.person,
                 onTap: () {
@@ -42,38 +44,53 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   context.push(AppRoutes.profile);
                 },
                 tooltip: 'Profile',
-              ),
-              const SizedBox(width: 20),
-              // App Title
-              Expanded(
-                child: ShaderMask(
-                  shaderCallback: (bounds) =>
-                      AppColorScheme.primaryGradient.createShader(bounds),
-                  child: const Text(
-                    'SHE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ),
-              ),
-              // Language Switcher
-              _LanguageSwitcher(
-                selectedLanguage: selectedLanguage!,
-                onTap: onLanguageTap,
+                isAvatar: true,
               ),
               const SizedBox(width: 16),
-              // AI Assistant Icon
+              
+              // App Title with Enhanced Styling
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) =>
+                          AppColorScheme.primaryGradient.createShader(bounds),
+                      child: const Text(
+                        'SHE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Stay Safe, Stay Strong',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // AI Assistant with Badge
               _AppBarIconButton(
-                icon: Icons.smart_toy_outlined,
+                icon: Icons.support_agent,
                 onTap: () {
                   HapticFeedback.lightImpact();
                   context.push(AppRoutes.helpSupport);
                 },
                 tooltip: 'AI Assistant',
+                showBadge: true,
               ),
             ],
           ),
@@ -83,93 +100,127 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 8);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 20);
 }
 
-/// Simple Icon Button for AppBar
-class _AppBarIconButton extends StatelessWidget {
+/// Enhanced Icon Button for AppBar
+class _AppBarIconButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final String tooltip;
+  final bool isAvatar;
+  final bool showBadge;
 
   const _AppBarIconButton({
     required this.icon,
     this.onTap,
     required this.tooltip,
+    this.isAvatar = false,
+    this.showBadge = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            child: Icon(
-              icon,
-              size: 26,
-              color: AppColorScheme.primaryColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  State<_AppBarIconButton> createState() => _AppBarIconButtonState();
 }
 
-/// Language Switcher
-class _LanguageSwitcher extends StatelessWidget {
-  final String selectedLanguage;
-  final VoidCallback? onTap;
+class _AppBarIconButtonState extends State<_AppBarIconButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
 
-  const _LanguageSwitcher({
-    required this.selectedLanguage,
-    this.onTap,
-  });
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Change Language',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            print('Language switcher tapped - Current: $selectedLanguage');
-            onTap?.call();
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColorScheme.primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.language_rounded,
-                  color: AppColorScheme.primaryColor,
-                  size: 18,
+      message: widget.tooltip,
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) => _controller.reverse(),
+        onTapCancel: () => _controller.reverse(),
+        onTap: widget.onTap,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: widget.isAvatar
+                      ? AppColorScheme.primaryGradient
+                      : LinearGradient(
+                          colors: [
+                            AppColorScheme.primaryColor.withOpacity(0.1),
+                            AppColorScheme.primaryColor.withOpacity(0.05),
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: widget.isAvatar
+                        ? Colors.transparent
+                        : AppColorScheme.primaryColor.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColorScheme.primaryColor.withOpacity(0.15),
+                      blurRadius: 2,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  selectedLanguage,
-                  style: const TextStyle(
-                    color: AppColorScheme.primaryColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                child: Icon(
+                  widget.icon,
+                  size: 24,
+                  color: widget.isAvatar
+                      ? Colors.white
+                      : AppColorScheme.primaryColor,
+                ),
+              ),
+              // Online/Active Badge
+              if (widget.showBadge)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF00E676), Color(0xFF00C853)],
+                      ),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF00E676).withOpacity(0.5),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

@@ -1,11 +1,10 @@
+import 'package:everest_hackathon/core/services/app_preferences_service.dart';
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
-import 'package:everest_hackathon/features/helpline/bloc/helpline_bloc.dart';
 import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../core/dependency_injection/di_container.dart';
-import '../core/services/app_preferences_service.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
@@ -44,11 +43,9 @@ class AppRouter {
       
 
       GoRoute(
-        path: '${AppRoutes.otpVerification}',
+        path: AppRoutes.otpVerification,
         builder: (context, state) {
-          // Get phone number from query parameters or extra
-          final phoneNumber = state.uri.queryParameters['phone'] ?? 
-                             (state.extra as String? ?? '');
+          final phoneNumber = state.extra as String? ?? '';
           return BlocProvider.value(
             value: sl<AuthBloc>(),
             child: OtpVerificationScreen(phoneNumber: phoneNumber),
@@ -146,7 +143,6 @@ class AppRouter {
   );
 }
 
-/// Splash screen widget
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -351,6 +347,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
+
 
 /// Error screen widget
 class ErrorScreen extends StatelessWidget {

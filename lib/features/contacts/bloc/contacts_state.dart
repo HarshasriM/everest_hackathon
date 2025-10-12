@@ -21,3 +21,17 @@ class ContactsError extends ContactsState {
   final String message;
   const ContactsError(this.message);
 }
+
+class PhoneContactsLoading extends ContactsState {
+  const PhoneContactsLoading();
+}
+
+class PhoneContactsLoaded extends ContactsState {
+  final List<flutter_contacts.Contact> phoneContacts;
+  const PhoneContactsLoaded(this.phoneContacts);
+}
+
+class PhoneContactsError extends ContactsState {
+  final String message;
+  const PhoneContactsError(this.message);
+}

@@ -146,7 +146,7 @@ return noLocation(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( String message)?  loading,TResult Function()?  checkingPermission,TResult Function( LocationPermissionStatus permissionStatus,  String message)?  permissionDenied,TResult Function( String message)?  locationServiceDisabled,TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates)?  locationLoaded,TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage)?  locationUpdating,TResult Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message)?  addressLoading,TResult Function( String message,  String? details,  bool canRetry)?  error,TResult Function( String message)?  noLocation,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( String message)?  loading,TResult Function()?  checkingPermission,TResult Function( LocationPermissionStatus permissionStatus,  String message)?  permissionDenied,TResult Function( String message)?  locationServiceDisabled,TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  locationLoaded,TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  locationUpdating,TResult Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  addressLoading,TResult Function( String message,  String? details,  bool canRetry)?  error,TResult Function( String message)?  noLocation,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -154,9 +154,9 @@ return loading(_that.message);case _CheckingPermission() when checkingPermission
 return checkingPermission();case _PermissionDenied() when permissionDenied != null:
 return permissionDenied(_that.permissionStatus,_that.message);case _LocationServiceDisabled() when locationServiceDisabled != null:
 return locationServiceDisabled(_that.message);case _LocationLoaded() when locationLoaded != null:
-return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates);case _LocationUpdating() when locationUpdating != null:
-return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage);case _AddressLoading() when addressLoading != null:
-return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message);case _Error() when error != null:
+return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.isLocationSharing,_that.locationSharingRemainingTime);case _LocationUpdating() when locationUpdating != null:
+return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage,_that.isLocationSharing,_that.locationSharingRemainingTime);case _AddressLoading() when addressLoading != null:
+return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message,_that.isLocationSharing,_that.locationSharingRemainingTime);case _Error() when error != null:
 return error(_that.message,_that.details,_that.canRetry);case _NoLocation() when noLocation != null:
 return noLocation(_that.message);case _:
   return orElse();
@@ -176,7 +176,7 @@ return noLocation(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( String message)  loading,required TResult Function()  checkingPermission,required TResult Function( LocationPermissionStatus permissionStatus,  String message)  permissionDenied,required TResult Function( String message)  locationServiceDisabled,required TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates)  locationLoaded,required TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage)  locationUpdating,required TResult Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message)  addressLoading,required TResult Function( String message,  String? details,  bool canRetry)  error,required TResult Function( String message)  noLocation,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( String message)  loading,required TResult Function()  checkingPermission,required TResult Function( LocationPermissionStatus permissionStatus,  String message)  permissionDenied,required TResult Function( String message)  locationServiceDisabled,required TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  bool isLocationSharing,  Duration? locationSharingRemainingTime)  locationLoaded,required TResult Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage,  bool isLocationSharing,  Duration? locationSharingRemainingTime)  locationUpdating,required TResult Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message,  bool isLocationSharing,  Duration? locationSharingRemainingTime)  addressLoading,required TResult Function( String message,  String? details,  bool canRetry)  error,required TResult Function( String message)  noLocation,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -184,9 +184,9 @@ return loading(_that.message);case _CheckingPermission():
 return checkingPermission();case _PermissionDenied():
 return permissionDenied(_that.permissionStatus,_that.message);case _LocationServiceDisabled():
 return locationServiceDisabled(_that.message);case _LocationLoaded():
-return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates);case _LocationUpdating():
-return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage);case _AddressLoading():
-return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message);case _Error():
+return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.isLocationSharing,_that.locationSharingRemainingTime);case _LocationUpdating():
+return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage,_that.isLocationSharing,_that.locationSharingRemainingTime);case _AddressLoading():
+return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message,_that.isLocationSharing,_that.locationSharingRemainingTime);case _Error():
 return error(_that.message,_that.details,_that.canRetry);case _NoLocation():
 return noLocation(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -205,7 +205,7 @@ return noLocation(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( String message)?  loading,TResult? Function()?  checkingPermission,TResult? Function( LocationPermissionStatus permissionStatus,  String message)?  permissionDenied,TResult? Function( String message)?  locationServiceDisabled,TResult? Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates)?  locationLoaded,TResult? Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage)?  locationUpdating,TResult? Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message)?  addressLoading,TResult? Function( String message,  String? details,  bool canRetry)?  error,TResult? Function( String message)?  noLocation,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( String message)?  loading,TResult? Function()?  checkingPermission,TResult? Function( LocationPermissionStatus permissionStatus,  String message)?  permissionDenied,TResult? Function( String message)?  locationServiceDisabled,TResult? Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  locationLoaded,TResult? Function( double latitude,  double longitude,  double accuracy,  String address,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String updateMessage,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  locationUpdating,TResult? Function( double latitude,  double longitude,  double accuracy,  DateTime timestamp,  bool isLocationEnabled,  bool isListeningToUpdates,  String message,  bool isLocationSharing,  Duration? locationSharingRemainingTime)?  addressLoading,TResult? Function( String message,  String? details,  bool canRetry)?  error,TResult? Function( String message)?  noLocation,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -213,9 +213,9 @@ return loading(_that.message);case _CheckingPermission() when checkingPermission
 return checkingPermission();case _PermissionDenied() when permissionDenied != null:
 return permissionDenied(_that.permissionStatus,_that.message);case _LocationServiceDisabled() when locationServiceDisabled != null:
 return locationServiceDisabled(_that.message);case _LocationLoaded() when locationLoaded != null:
-return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates);case _LocationUpdating() when locationUpdating != null:
-return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage);case _AddressLoading() when addressLoading != null:
-return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message);case _Error() when error != null:
+return locationLoaded(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.isLocationSharing,_that.locationSharingRemainingTime);case _LocationUpdating() when locationUpdating != null:
+return locationUpdating(_that.latitude,_that.longitude,_that.accuracy,_that.address,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.updateMessage,_that.isLocationSharing,_that.locationSharingRemainingTime);case _AddressLoading() when addressLoading != null:
+return addressLoading(_that.latitude,_that.longitude,_that.accuracy,_that.timestamp,_that.isLocationEnabled,_that.isListeningToUpdates,_that.message,_that.isLocationSharing,_that.locationSharingRemainingTime);case _Error() when error != null:
 return error(_that.message,_that.details,_that.canRetry);case _NoLocation() when noLocation != null:
 return noLocation(_that.message);case _:
   return null;
@@ -493,7 +493,7 @@ as String,
 
 
 class _LocationLoaded implements TrackState {
-  const _LocationLoaded({required this.latitude, required this.longitude, required this.accuracy, required this.address, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = false});
+  const _LocationLoaded({required this.latitude, required this.longitude, required this.accuracy, required this.address, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = false, this.isLocationSharing = false, this.locationSharingRemainingTime});
   
 
  final  double latitude;
@@ -503,6 +503,8 @@ class _LocationLoaded implements TrackState {
  final  DateTime timestamp;
 @JsonKey() final  bool isLocationEnabled;
 @JsonKey() final  bool isListeningToUpdates;
+@JsonKey() final  bool isLocationSharing;
+ final  Duration? locationSharingRemainingTime;
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
@@ -514,16 +516,16 @@ _$LocationLoadedCopyWith<_LocationLoaded> get copyWith => __$LocationLoadedCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationLoaded&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.address, address) || other.address == address)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationLoaded&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.address, address) || other.address == address)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates)&&(identical(other.isLocationSharing, isLocationSharing) || other.isLocationSharing == isLocationSharing)&&(identical(other.locationSharingRemainingTime, locationSharingRemainingTime) || other.locationSharingRemainingTime == locationSharingRemainingTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,address,timestamp,isLocationEnabled,isListeningToUpdates);
+int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,address,timestamp,isLocationEnabled,isListeningToUpdates,isLocationSharing,locationSharingRemainingTime);
 
 @override
 String toString() {
-  return 'TrackState.locationLoaded(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, address: $address, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates)';
+  return 'TrackState.locationLoaded(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, address: $address, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates, isLocationSharing: $isLocationSharing, locationSharingRemainingTime: $locationSharingRemainingTime)';
 }
 
 
@@ -534,7 +536,7 @@ abstract mixin class _$LocationLoadedCopyWith<$Res> implements $TrackStateCopyWi
   factory _$LocationLoadedCopyWith(_LocationLoaded value, $Res Function(_LocationLoaded) _then) = __$LocationLoadedCopyWithImpl;
 @useResult
 $Res call({
- double latitude, double longitude, double accuracy, String address, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates
+ double latitude, double longitude, double accuracy, String address, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates, bool isLocationSharing, Duration? locationSharingRemainingTime
 });
 
 
@@ -551,7 +553,7 @@ class __$LocationLoadedCopyWithImpl<$Res>
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? address = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? address = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,Object? isLocationSharing = null,Object? locationSharingRemainingTime = freezed,}) {
   return _then(_LocationLoaded(
 latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
@@ -560,7 +562,9 @@ as double,address: null == address ? _self.address : address // ignore: cast_nul
 as String,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
 as DateTime,isLocationEnabled: null == isLocationEnabled ? _self.isLocationEnabled : isLocationEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isListeningToUpdates: null == isListeningToUpdates ? _self.isListeningToUpdates : isListeningToUpdates // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,isLocationSharing: null == isLocationSharing ? _self.isLocationSharing : isLocationSharing // ignore: cast_nullable_to_non_nullable
+as bool,locationSharingRemainingTime: freezed == locationSharingRemainingTime ? _self.locationSharingRemainingTime : locationSharingRemainingTime // ignore: cast_nullable_to_non_nullable
+as Duration?,
   ));
 }
 
@@ -571,7 +575,7 @@ as bool,
 
 
 class _LocationUpdating implements TrackState {
-  const _LocationUpdating({required this.latitude, required this.longitude, required this.accuracy, required this.address, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = true, this.updateMessage = 'Updating location...'});
+  const _LocationUpdating({required this.latitude, required this.longitude, required this.accuracy, required this.address, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = true, this.updateMessage = 'Updating location...', this.isLocationSharing = false, this.locationSharingRemainingTime});
   
 
  final  double latitude;
@@ -582,6 +586,8 @@ class _LocationUpdating implements TrackState {
 @JsonKey() final  bool isLocationEnabled;
 @JsonKey() final  bool isListeningToUpdates;
 @JsonKey() final  String updateMessage;
+@JsonKey() final  bool isLocationSharing;
+ final  Duration? locationSharingRemainingTime;
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
@@ -593,16 +599,16 @@ _$LocationUpdatingCopyWith<_LocationUpdating> get copyWith => __$LocationUpdatin
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationUpdating&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.address, address) || other.address == address)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates)&&(identical(other.updateMessage, updateMessage) || other.updateMessage == updateMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationUpdating&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.address, address) || other.address == address)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates)&&(identical(other.updateMessage, updateMessage) || other.updateMessage == updateMessage)&&(identical(other.isLocationSharing, isLocationSharing) || other.isLocationSharing == isLocationSharing)&&(identical(other.locationSharingRemainingTime, locationSharingRemainingTime) || other.locationSharingRemainingTime == locationSharingRemainingTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,address,timestamp,isLocationEnabled,isListeningToUpdates,updateMessage);
+int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,address,timestamp,isLocationEnabled,isListeningToUpdates,updateMessage,isLocationSharing,locationSharingRemainingTime);
 
 @override
 String toString() {
-  return 'TrackState.locationUpdating(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, address: $address, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates, updateMessage: $updateMessage)';
+  return 'TrackState.locationUpdating(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, address: $address, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates, updateMessage: $updateMessage, isLocationSharing: $isLocationSharing, locationSharingRemainingTime: $locationSharingRemainingTime)';
 }
 
 
@@ -613,7 +619,7 @@ abstract mixin class _$LocationUpdatingCopyWith<$Res> implements $TrackStateCopy
   factory _$LocationUpdatingCopyWith(_LocationUpdating value, $Res Function(_LocationUpdating) _then) = __$LocationUpdatingCopyWithImpl;
 @useResult
 $Res call({
- double latitude, double longitude, double accuracy, String address, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates, String updateMessage
+ double latitude, double longitude, double accuracy, String address, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates, String updateMessage, bool isLocationSharing, Duration? locationSharingRemainingTime
 });
 
 
@@ -630,7 +636,7 @@ class __$LocationUpdatingCopyWithImpl<$Res>
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? address = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,Object? updateMessage = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? address = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,Object? updateMessage = null,Object? isLocationSharing = null,Object? locationSharingRemainingTime = freezed,}) {
   return _then(_LocationUpdating(
 latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
@@ -640,7 +646,9 @@ as String,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: 
 as DateTime,isLocationEnabled: null == isLocationEnabled ? _self.isLocationEnabled : isLocationEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isListeningToUpdates: null == isListeningToUpdates ? _self.isListeningToUpdates : isListeningToUpdates // ignore: cast_nullable_to_non_nullable
 as bool,updateMessage: null == updateMessage ? _self.updateMessage : updateMessage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isLocationSharing: null == isLocationSharing ? _self.isLocationSharing : isLocationSharing // ignore: cast_nullable_to_non_nullable
+as bool,locationSharingRemainingTime: freezed == locationSharingRemainingTime ? _self.locationSharingRemainingTime : locationSharingRemainingTime // ignore: cast_nullable_to_non_nullable
+as Duration?,
   ));
 }
 
@@ -651,7 +659,7 @@ as String,
 
 
 class _AddressLoading implements TrackState {
-  const _AddressLoading({required this.latitude, required this.longitude, required this.accuracy, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = false, this.message = 'Getting address...'});
+  const _AddressLoading({required this.latitude, required this.longitude, required this.accuracy, required this.timestamp, this.isLocationEnabled = true, this.isListeningToUpdates = false, this.message = 'Getting address...', this.isLocationSharing = false, this.locationSharingRemainingTime});
   
 
  final  double latitude;
@@ -661,6 +669,8 @@ class _AddressLoading implements TrackState {
 @JsonKey() final  bool isLocationEnabled;
 @JsonKey() final  bool isListeningToUpdates;
 @JsonKey() final  String message;
+@JsonKey() final  bool isLocationSharing;
+ final  Duration? locationSharingRemainingTime;
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
@@ -672,16 +682,16 @@ _$AddressLoadingCopyWith<_AddressLoading> get copyWith => __$AddressLoadingCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AddressLoading&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AddressLoading&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.accuracy, accuracy) || other.accuracy == accuracy)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.isLocationEnabled, isLocationEnabled) || other.isLocationEnabled == isLocationEnabled)&&(identical(other.isListeningToUpdates, isListeningToUpdates) || other.isListeningToUpdates == isListeningToUpdates)&&(identical(other.message, message) || other.message == message)&&(identical(other.isLocationSharing, isLocationSharing) || other.isLocationSharing == isLocationSharing)&&(identical(other.locationSharingRemainingTime, locationSharingRemainingTime) || other.locationSharingRemainingTime == locationSharingRemainingTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,timestamp,isLocationEnabled,isListeningToUpdates,message);
+int get hashCode => Object.hash(runtimeType,latitude,longitude,accuracy,timestamp,isLocationEnabled,isListeningToUpdates,message,isLocationSharing,locationSharingRemainingTime);
 
 @override
 String toString() {
-  return 'TrackState.addressLoading(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates, message: $message)';
+  return 'TrackState.addressLoading(latitude: $latitude, longitude: $longitude, accuracy: $accuracy, timestamp: $timestamp, isLocationEnabled: $isLocationEnabled, isListeningToUpdates: $isListeningToUpdates, message: $message, isLocationSharing: $isLocationSharing, locationSharingRemainingTime: $locationSharingRemainingTime)';
 }
 
 
@@ -692,7 +702,7 @@ abstract mixin class _$AddressLoadingCopyWith<$Res> implements $TrackStateCopyWi
   factory _$AddressLoadingCopyWith(_AddressLoading value, $Res Function(_AddressLoading) _then) = __$AddressLoadingCopyWithImpl;
 @useResult
 $Res call({
- double latitude, double longitude, double accuracy, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates, String message
+ double latitude, double longitude, double accuracy, DateTime timestamp, bool isLocationEnabled, bool isListeningToUpdates, String message, bool isLocationSharing, Duration? locationSharingRemainingTime
 });
 
 
@@ -709,7 +719,7 @@ class __$AddressLoadingCopyWithImpl<$Res>
 
 /// Create a copy of TrackState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,Object? message = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? accuracy = null,Object? timestamp = null,Object? isLocationEnabled = null,Object? isListeningToUpdates = null,Object? message = null,Object? isLocationSharing = null,Object? locationSharingRemainingTime = freezed,}) {
   return _then(_AddressLoading(
 latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
@@ -718,7 +728,9 @@ as double,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: 
 as DateTime,isLocationEnabled: null == isLocationEnabled ? _self.isLocationEnabled : isLocationEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isListeningToUpdates: null == isListeningToUpdates ? _self.isListeningToUpdates : isListeningToUpdates // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isLocationSharing: null == isLocationSharing ? _self.isLocationSharing : isLocationSharing // ignore: cast_nullable_to_non_nullable
+as bool,locationSharingRemainingTime: freezed == locationSharingRemainingTime ? _self.locationSharingRemainingTime : locationSharingRemainingTime // ignore: cast_nullable_to_non_nullable
+as Duration?,
   ));
 }
 

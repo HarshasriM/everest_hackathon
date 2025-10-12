@@ -1,8 +1,8 @@
+import 'package:everest_hackathon/domain/entities/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/color_scheme.dart';
-import '../domain/entities/contact.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -22,19 +22,14 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Card(
+      // add a small top margin so the elevation shadow is visible above the card
+      margin: EdgeInsets.only(top: 6.h, bottom: 12.h),
+      color: Colors.white,
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      // ensure the card's shadow isn't clipped
+      clipBehavior: Clip.none,
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
@@ -51,7 +46,9 @@ class ContactCard extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
+                      contact.name.isNotEmpty
+                          ? contact.name[0].toUpperCase()
+                          : '?',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20.sp,
@@ -61,7 +58,7 @@ class ContactCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 12.w),
-                
+
                 // Contact Info
                 Expanded(
                   child: Column(
@@ -101,7 +98,7 @@ class ContactCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Action Menu
                 PopupMenuButton<String>(
                   onSelected: (value) {
@@ -136,16 +133,13 @@ class ContactCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  child: Icon(
-                    Icons.more_vert,
-                    color: Colors.grey[400],
-                  ),
+                  child: Icon(Icons.more_vert, color: Colors.grey[400]),
                 ),
               ],
             ),
-            
+
             SizedBox(height: 12.h),
-            
+
             // Action Buttons
             Row(
               children: [
@@ -192,11 +186,7 @@ class ContactCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 16.sp,
-              color: color,
-            ),
+            Icon(icon, size: 16.sp, color: color),
             SizedBox(width: 4.w),
             Text(
               label,

@@ -57,6 +57,70 @@ class Contact {
   }
 
   bool get isValid => name.trim().isNotEmpty && phone.trim().isNotEmpty;
+
+  // JSON serialization methods for persistence
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'phone': phone,
+      'relationship': relationship,
+      'isPrimary': isPrimary,
+      'canReceiveSOS': canReceiveSOS,
+      'email': email,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
+
+  factory Contact.fromJson(Map<String, dynamic> json) {
+    return Contact(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      phone: json['phone'] as String,
+      relationship: json['relationship'] as String,
+      isPrimary: json['isPrimary'] as bool? ?? false,
+      canReceiveSOS: json['canReceiveSOS'] as bool? ?? true,
+      email: json['email'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Contact &&
+        other.id == id &&
+        other.name == name &&
+        other.phone == phone &&
+        other.relationship == relationship &&
+        other.isPrimary == isPrimary &&
+        other.canReceiveSOS == canReceiveSOS &&
+        other.email == email;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      id,
+      name,
+      phone,
+      relationship,
+      isPrimary,
+      canReceiveSOS,
+      email,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Contact(id: $id, name: $name, phone: $phone, relationship: $relationship)';
+  }
 }
 
 enum ContactRelationship {
