@@ -20,10 +20,8 @@ class ProfileScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFFFB1C8), 
-                  Color(0xFFFFB1C8).withAlpha(128), 
-                  //  AppColorScheme.secondaryColor,
-                  // light yellow (top)
+
+                 AppColorScheme.primaryColor.withAlpha(64),
                   Colors.white, // soft medium yellow
                 // deeper yellow (bottom)
                 ],

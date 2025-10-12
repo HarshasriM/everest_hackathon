@@ -126,13 +126,6 @@ class _HelplineCardState extends State<HelplineCard>
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: widget.textColor.withOpacity(0.1),
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Icon(
                         widget.icon,

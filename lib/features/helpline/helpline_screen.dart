@@ -1,3 +1,4 @@
+import 'package:everest_hackathon/core/theme/color_scheme.dart';
 import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +10,6 @@ import './helpline_card.dart';
 class HelplineScreen extends StatelessWidget {
   const HelplineScreen({super.key});
 
-  static const Color primaryColor = Color(0xFFE91E63);
   static const Color secondaryColor = Color(0xFF9C27B0);
   static const Color tertiaryColor = Color(0xFFFF5722);
   static const Color backgroundColor = Color(0xFFFAFAFC);
@@ -26,10 +26,7 @@ class HelplineScreen extends StatelessWidget {
       create: (_) => HelplineBloc()..add(LoadHelplines()),
       child: Scaffold(
         backgroundColor: backgroundColor,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: CustomAppBar(),
-        ),
+        appBar: CustomAppBar(),
         body: BlocConsumer<HelplineBloc, HelplineState>(
           listener: (context, state) {
             if (state is HelplineError) {
@@ -88,33 +85,8 @@ class HelplineScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      primaryColor,
-                                      secondaryColor,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primaryColor.withOpacity(0.1),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.headset_mic_rounded,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
+                            
+                              
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,10 +94,9 @@ class HelplineScreen extends StatelessWidget {
                                     const Text(
                                       'Emergency Support',
                                       style: TextStyle(
-                                        fontSize: 24,
+                                        fontSize: 26,
                                         fontWeight: FontWeight.w700,
                                         color: textPrimaryColor,
-                                        letterSpacing: -0.5,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -150,10 +121,10 @@ class HelplineScreen extends StatelessWidget {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.08),
+                              color: AppColorScheme.primaryColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: primaryColor.withOpacity(0.15),
+                                color: AppColorScheme.primaryColor.withValues(alpha: 0.15),
                                 width: 1,
                               ),
                             ),
@@ -161,7 +132,7 @@ class HelplineScreen extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.info_outline_rounded,
-                                  color: primaryColor,
+                                  color: AppColorScheme.primaryColor,
                                   size: 17,
                                 ),
                                 const SizedBox(width: 12),
@@ -170,7 +141,7 @@ class HelplineScreen extends StatelessWidget {
                                     'Tap any helpline to call instantly',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: primaryColor.withOpacity(0.9),
+                                      color: AppColorScheme.primaryColor.withValues(alpha: 0.9),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -194,10 +165,10 @@ class HelplineScreen extends StatelessWidget {
                         (context, index) {
                           final helpline = state.helplines[index];
                           final colors = [
-                            [const Color(0xFFFFF1F3), primaryColor],
-                            [const Color(0xFFF3E8FF), secondaryColor],
-                            [const Color(0xFFFFF4ED), tertiaryColor],
-                            [const Color(0xFFECFDF5), const Color(0xFF059669)],
+                            [const Color(0xFFE0F2F1), AppColorScheme.primaryColor.withAlpha(180)],   // soft mint + deep teal
+                            [const Color(0xFFD0F0F0), AppColorScheme.secondaryColor.withAlpha(180)], // light teal + teal-green
+                            [const Color(0xFFE0F7FA), const Color(0xFF4D6A6D).withAlpha(200)],       // sky aqua + bright cyan
+                            [const Color(0xFFE3F2FD), const Color(0xFF0277BD).withAlpha(180)],       // light blue + ocean blue
                           ];
                           final colorPair = colors[index % colors.length];
 
