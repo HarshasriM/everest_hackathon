@@ -137,7 +137,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               // Center location button
               Positioned(
                 right: 16.w,
-                bottom: 200.h,
+                bottom: 150.h,
                 child: FloatingActionButton(
                   onPressed: _centerOnCurrentLocation,
                   backgroundColor: Theme.of(context).primaryColor,
