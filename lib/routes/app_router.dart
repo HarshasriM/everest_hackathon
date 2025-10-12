@@ -1,6 +1,5 @@
 import 'package:everest_hackathon/core/services/app_preferences_service.dart';
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
-import 'package:everest_hackathon/features/helpline/bloc/helpline_bloc.dart';
 import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
