@@ -40,6 +40,8 @@ class AppRouter {
           child: const LoginScreen(),
         ),
       ),
+     
+      
 
       GoRoute(
         path: '${AppRoutes.otpVerification}',

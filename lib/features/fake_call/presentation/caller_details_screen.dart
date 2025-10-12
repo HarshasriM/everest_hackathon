@@ -373,9 +373,9 @@ class _CallerDetailsScreenState extends State<CallerDetailsScreen> {
           borderRadius: BorderRadius.circular(25.r),
           boxShadow: [
             BoxShadow(
-              color: AppColorScheme.primaryColor.withOpacity(0.3),
+              color: AppColorScheme.primaryColor.withOpacity(0.1),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
