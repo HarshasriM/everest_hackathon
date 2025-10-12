@@ -102,9 +102,9 @@ class HelplineScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: primaryColor.withOpacity(0.3),
+                                      color: primaryColor.withOpacity(0.1),
                                       blurRadius: 12,
-                                      offset: const Offset(0, 4),
+                                      offset: const Offset(0, 3),
                                     ),
                                   ],
                                 ),
