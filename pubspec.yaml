@@ -61,7 +61,6 @@ dependencies:
   animate_do: ^3.3.4
   image_picker: ^1.1.2
   audioplayers: ^6.1.0
-
   share_plus: ^10.1.2
   speech_to_text: ^7.3.0
 

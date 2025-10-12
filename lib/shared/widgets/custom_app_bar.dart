@@ -6,10 +6,7 @@ import 'package:go_router/go_router.dart';
 
 /// Custom AppBar for SHE - Woman Safety Application
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-
-  const CustomAppBar({
-    super.key,
-  });
+  const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
         ),
       ),
       child: SafeArea(
@@ -31,7 +25,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               // Profile Icon
               _AppBarIconButton(
-                icon: Icons.person,
+                icon: CircleAvatar(
+                  radius: 20, // adjust size as needed
+                  child: Icon(
+                    Icons.person, // icon color
+                  ),
+                ),
                 onTap: () {
                   HapticFeedback.lightImpact();
                   context.push(AppRoutes.profile);
@@ -57,7 +56,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               // AI Assistant Icon
               _AppBarIconButton(
-                icon: Icons.smart_toy_outlined,
+                icon: Icon(
+                  Icons.smart_toy_outlined,
+                  size: 24,
+                  color: Colors.black,
+                ),
+                // icon: Icons.smart_toy_outlined,
                 onTap: () {
                   HapticFeedback.lightImpact();
                   context.push(AppRoutes.helpSupport);
@@ -77,7 +81,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Simple Icon Button for AppBar
 class _AppBarIconButton extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final VoidCallback? onTap;
   final String tooltip;
 
@@ -96,14 +100,7 @@ class _AppBarIconButton extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            child: Icon(
-              icon,
-              size: 26,
-              color: AppColorScheme.primaryColor,
-            ),
-          ),
+          child: Container(padding: const EdgeInsets.all(4), child: icon),
         ),
       ),
     );
