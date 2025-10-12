@@ -147,4 +147,29 @@ response:{
     "message": "Emergency contact deleted successfully"
 }
 
+https://everest-hackathon.onrender.com/api/sos/send-sos-alert
+
+{
+  "username": "Harsha",
+  "location": "https://maps.google.com/?q=17.3850,78.4867",
+  "phoneNumbers": ["+919347206960", "+919182028713"]
+}
+
+
+response:{
+    "success": true,
+    "message": "SOS alerts processed",
+    "results": [
+        {
+            "number": "+919347206960",
+            "status": "sent",
+            "sid": "SM85253b72191a0245e65436a9d97dc8a9"
+        },
+        {
+            "number": "+919182028713",
+            "status": "sent",
+            "sid": "SM674be6570449a48b2ecee889c27b65dd"
+        }
+    ]
+}
 
