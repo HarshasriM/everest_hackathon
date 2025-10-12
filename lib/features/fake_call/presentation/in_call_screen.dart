@@ -40,7 +40,7 @@ class InCallScreen extends StatelessWidget {
           );
         },
         child: Scaffold(
-          backgroundColor: Colors.grey[100],
+          backgroundColor: Colors.white,
           body: BlocBuilder<FakeCallBloc, FakeCallState>(
             builder: (context, state) {
               // Extract name and number from state
@@ -61,7 +61,8 @@ class InCallScreen extends StatelessWidget {
               
               return SafeArea(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
+                  padding: EdgeInsets.symmetric(horizontal: 
+                  0.w, vertical: 0.h),
                   child: Column(
                     children: [
                       SizedBox(height: 20.h),
@@ -142,13 +143,33 @@ class InCallScreen extends StatelessWidget {
 
                       const Spacer(),
 
-                      // Call control buttons
-                      _buildCallControls(context),
-                      SizedBox(height: 50.h),
+                      // Call control buttons container
+                      Container(
 
-                      // End call button
-                      _buildEndCallButton(context),
-                      SizedBox(height: 30.h),
+                        // margin: EdgeInsets.symmetric(horizontal: 10.w),
+                        padding: EdgeInsets.symmetric(vertical: 35.h, horizontal: 20.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F6),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _buildCallControls(context),
+                            SizedBox(height: 30.h),
+                            // End call button
+                            _buildEndCallButton(context),
+                          ],
+                        ),
+                      ),
+                      // SizedBox(height: 30.h),
+                      
                     ],
                   ),
                 ),
@@ -252,9 +273,9 @@ class InCallScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(32.r),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD32F2F).withOpacity(0.3),
+                color: const Color(0xFFD32F2F).withOpacity(0.1),
                 blurRadius: 12,
-                offset: const Offset(0, 4),
+                offset: const Offset(0, 2),
               ),
             ],
           ),

@@ -215,7 +215,7 @@ class IncomingCallScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4CAF50).withOpacity(0.4),
+                      color: const Color(0xFF4CAF50).withOpacity(0.1),
                       blurRadius: 16,
                       spreadRadius: 2,
                     ),
