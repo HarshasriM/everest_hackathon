@@ -3,6 +3,7 @@ import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
 import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import '../core/dependency_injection/di_container.dart';
 import '../features/auth/bloc/auth_bloc.dart';
@@ -74,7 +75,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.helpSupport,
         builder: (context, state) =>
-            const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
+            ChatScreen(apiKey: dotenv.env['GEMINI_API_KEY'] ?? ''),
       ),
       
       GoRoute(

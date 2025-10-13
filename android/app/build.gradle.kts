@@ -28,6 +28,30 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Add support for dart-define variables with fallback to .env
+        val dartDefines = project.property("dart-defines")?.toString()?.split(",") ?: emptyList()
+        val dartDefineMap = dartDefines.associate { define ->
+            val parts = define.split("=")
+            parts[0] to (if (parts.size > 1) parts[1] else "")
+        }
+        
+        // Try to get from dart-define first, then fallback to reading .env file
+        var googleMapsApiKey = dartDefineMap["GOOGLE_MAPS_API_KEY"] ?: ""
+        
+        if (googleMapsApiKey.isEmpty()) {
+            // Read from .env file as fallback
+            val envFile = file("../../.env")
+            if (envFile.exists()) {
+                envFile.readLines().forEach { line ->
+                    if (line.startsWith("GOOGLE_MAPS_API_KEY=")) {
+                        googleMapsApiKey = line.substringAfter("=").trim()
+                    }
+                }
+            }
+        }
+        
+        manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
     }
 
     buildTypes {
