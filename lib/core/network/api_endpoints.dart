@@ -25,8 +25,6 @@ class ApiEndpoints {
   static const String getNearbyHospitals = '/location/nearby/hospitals';
   static const String getNearbyHelpCenters = '/location/nearby/help-centers';
 
-
-
   // Helplines
   static const String getHelplines = '/helplines';
   static const String getHelplinesByCategory = '/helplines/{category}';
