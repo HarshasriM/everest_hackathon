@@ -1,8 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/material.dart';
-import 'package:everest_hackathon/features/helpline/helpline_model.dart';
 
 // Add these imports for your event and state files
 import 'package:everest_hackathon/features/helpline/bloc/helpline_event.dart';

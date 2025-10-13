@@ -1,4 +1,5 @@
 import 'package:everest_hackathon/core/services/gemini_service.dart';
+import 'package:everest_hackathon/core/theme/color_scheme.dart';
 import 'package:everest_hackathon/features/chat/presentation/widgets/animate_wave_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -185,18 +186,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         child: Container(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Colors.pinkAccent, Colors.purpleAccent],
+              colors: [AppColorScheme.primaryColor, AppColorScheme.secondaryColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pinkAccent.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            shape: BoxShape.circle
           ),
           child: const Center(
             child: Icon(
@@ -270,7 +264,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       child: Align(
         alignment: Alignment.centerLeft,
         child: SpinKitThreeBounce(
-          color: Colors.pinkAccent,
+          color: AppColorScheme.primaryColor,
           size: 20.0,
         ),
       ),
@@ -282,9 +276,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        padding:  EdgeInsets.symmetric(vertical: 12, horizontal: 14),
         decoration: BoxDecoration(
-          color: isUser ? Colors.pinkAccent : Colors.grey.shade300,
+          color: isUser ? AppColorScheme.primaryColor : Colors.grey.shade300,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -346,7 +340,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: const BoxDecoration(
-                  color: Colors.pinkAccent,
+                  color: AppColorScheme.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -371,7 +365,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         children: List.generate(40, (index) {
           return AnimatedWaveBar(
             delay: index * 50,
-            color: Colors.pinkAccent.withOpacity(0.8),
+            color: AppColorScheme.primaryColor,
           );
         }),
       ),
@@ -450,7 +444,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Widget _buildSendButton() {
     return CircleAvatar(
       radius: 24,
-      backgroundColor: Colors.pinkAccent,
+      backgroundColor: AppColorScheme.primaryColor,
       child: IconButton(
         icon: const Icon(Icons.send, color: Colors.white),
         onPressed: _isTyping ? null : _sendMessage,

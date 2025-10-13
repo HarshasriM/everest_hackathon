@@ -162,7 +162,7 @@ class TrackBloc extends Bloc<TrackEvent, TrackState> {
           longitude: position.longitude,
           accuracy: position.accuracy,
           address: 'Getting address...',
-          timestamp: position.timestamp ?? DateTime.now(),
+          timestamp: position.timestamp,
           isLocationEnabled: true,
           isListeningToUpdates: false,
           isLocationSharing: false,

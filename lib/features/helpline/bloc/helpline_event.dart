@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:everest_hackathon/features/helpline/helpline_model.dart';
-// part of 'helpline_bloc.dart';
 
 abstract class HelplineEvent extends Equatable {
   const HelplineEvent();

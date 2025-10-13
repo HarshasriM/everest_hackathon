@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:everest_hackathon/features/helpline/helpline_model.dart';
 // part of 'helpline_bloc.dart';
 abstract class HelplineState extends Equatable {
