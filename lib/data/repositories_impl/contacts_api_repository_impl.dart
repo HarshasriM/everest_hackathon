@@ -52,6 +52,11 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
     }
   }
 
+  /// Get cached contacts without making API call
+  List<Contact> getCachedContacts() {
+    return List.from(_contacts);
+  }
+
   @override
   Future<Contact> addContact(Contact contact) async {
     try {
@@ -66,6 +71,8 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
       );
 
       final newContact = apiContact.toEntity();
+      
+      // Add to local cache immediately for instant UI update
       _contacts.add(newContact);
       _notifyListeners();
 

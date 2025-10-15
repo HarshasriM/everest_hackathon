@@ -53,16 +53,25 @@ class EmergencyContactsApiService {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final apiResponse = EmergencyContactsResponse.fromJson(response.data);
+        Logger.debug('API Response for getEmergencyContacts: ${response.data}');
         
-        if (apiResponse.success) {
-          Logger.info('Successfully fetched ${apiResponse.data.length} emergency contacts');
-          return apiResponse.data;
-        } else {
-          throw Exception(apiResponse.message ?? 'Failed to fetch emergency contacts');
+        try {
+          final apiResponse = EmergencyContactsResponse.fromJson(response.data);
+          
+          if (apiResponse.success) {
+            Logger.info('Successfully fetched ${apiResponse.data.length} emergency contacts');
+            return apiResponse.data;
+          } else {
+            throw Exception(apiResponse.message ?? 'Failed to fetch emergency contacts');
+          }
+        } catch (parseError) {
+          Logger.error('Failed to parse API response', error: parseError);
+          Logger.debug('Raw response data: ${response.data}');
+          throw Exception('Invalid response format from server');
         }
       } else {
-        throw Exception('Invalid response from server');
+        Logger.error('Invalid response status: ${response.statusCode}');
+        throw Exception('Invalid response from server (Status: ${response.statusCode})');
       }
     });
   }
