@@ -3,12 +3,12 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/error/exceptions.dart';
 import '../../models/sos_request_model.dart';
-import '../../models/emergency_contact_model.dart';
+import "package:everest_hackathon/data/models/emergency_contact_api_model.dart";
 
 /// SOS Remote Data Source
 abstract class SosRemoteSource {
   Future<SosResponseModel> sendSosAlert(SosRequestModel request);
-  Future<EmergencyContactsResponseModel> getEmergencyContacts(String userId);
+  Future<EmergencyContactsResponse> getEmergencyContacts(String userId);
 }
 
 /// Implementation of SOS Remote Data Source
@@ -62,14 +62,14 @@ class SosRemoteSourceImpl implements SosRemoteSource {
   }
 
   @override
-  Future<EmergencyContactsResponseModel> getEmergencyContacts(String userId) async {
+  Future<EmergencyContactsResponse> getEmergencyContacts(String userId) async {
     try {
       final response = await _apiClient.get(
         ApiEndpoints.getEmergencyContacts(userId),
       );
 
       if (response.statusCode == 200) {
-        return EmergencyContactsResponseModel.fromJson(response.data);
+        return EmergencyContactsResponse.fromJson(response.data);
       } else {
         throw ServerException(
           message: response.data['message'] ?? 'Failed to get emergency contacts',

@@ -11,7 +11,7 @@ class ApiEndpoints {
   static String updateProfile(String userId) => '/api/users/$userId';
   static const String deleteAccount = '/api/users/delete';
   static const String uploadProfileImage = '/api/users/profile-image';
-  static String getEmergencyContacts(String userId) => '/api/users/get-emergency-contacts/$userId';
+  // static String getEmergencyContacts(String userId) => '/api/users/get-emergency-contacts/$userId';
 
   // SOS
   static const String sendSosAlert = '/api/sos/send-sos-alert';
@@ -25,6 +25,12 @@ class ApiEndpoints {
   static const String getNearbyPoliceStations = '/location/nearby/police';
   static const String getNearbyHospitals = '/location/nearby/hospitals';
   static const String getNearbyHelpCenters = '/location/nearby/help-centers';
+
+  // Emergency Contacts
+  static String getEmergencyContacts(String userId) => '/api/users/get-emergency-contacts/$userId';
+  static const String addEmergencyContact = '/api/users/add-emergency-contact';
+  static String updateEmergencyContact(String userId, String contactId) => '/api/users/update/$userId/$contactId';
+  static String deleteEmergencyContact(String userId, String contactId) => '/api/users/delete/$userId/$contactId';
 
   // Helplines
   static const String getHelplines = '/helplines';

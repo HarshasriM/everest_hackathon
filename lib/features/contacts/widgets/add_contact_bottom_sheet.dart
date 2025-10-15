@@ -42,7 +42,12 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     super.initState();
     if (widget.contact != null) {
       _nameController.text = widget.contact!.name;
-      _phoneController.text = widget.contact!.phone;
+      // Remove +91 prefix for display in the text field
+      String displayPhone = widget.contact!.phone;
+      if (displayPhone.startsWith('+91')) {
+        displayPhone = displayPhone.substring(3);
+      }
+      _phoneController.text = displayPhone;
       _selectedRelationship = widget.contact!.relationship;
       _isPrimary = widget.contact!.isPrimary;
     }
@@ -198,25 +203,41 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     ],
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
-                      hintText: 'Enter phone number',
+                      hintText: 'Enter 10-digit mobile number',
+                      helperText: 'Number will be saved with +91 prefix',
+                      helperStyle: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey[600],
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       prefixIcon: const Icon(Icons.phone),
+                      prefixText: '+91 ',
+                      prefixStyle: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
                       counterText: '', // Hide the counter text
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a phone number';
                       }
-                      final cleaned = _cleanPhone(value);
-
-                      final isValid = RegExp(
-                        r'^\+?[0-9]{10}$',
-                      ).hasMatch(cleaned);
-                      if (!isValid) {
-                        return 'Enter a valid phone (10 digits)';
+                      
+                      // Remove any non-digit characters for validation
+                      final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+                      
+                      if (digitsOnly.length != 10) {
+                        return 'Enter a valid 10-digit mobile number';
                       }
+                      
+                      // Check if it's a valid Indian mobile number (starts with 6-9)
+                      if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(digitsOnly)) {
+                        return 'Enter a valid Indian mobile number';
+                      }
+                      
                       return null;
                     },
                   ),
@@ -326,7 +347,18 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           onContactSelected: (name, phone) {
             setState(() {
               _nameController.text = name;
-              _phoneController.text = phone;
+              // Remove +91 prefix if present for display
+              String displayPhone = phone;
+              if (displayPhone.startsWith('+91')) {
+                displayPhone = displayPhone.substring(3);
+              }
+              // Also remove any other country codes or formatting
+              displayPhone = displayPhone.replaceAll(RegExp(r'[^0-9]'), '');
+              // Take only the last 10 digits if longer
+              if (displayPhone.length > 10) {
+                displayPhone = displayPhone.substring(displayPhone.length - 10);
+              }
+              _phoneController.text = displayPhone;
             });
           },
         ),
@@ -340,7 +372,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final cleanedPhone = _cleanPhone(_phoneController.text.trim());
+      final cleanedPhone = _formatPhoneWithCountryCode(_phoneController.text.trim());
       final contact = Contact(
         id:
             widget.contact?.id ??
@@ -384,17 +416,27 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     }
   }
 
-  // Remove spaces, dashes and parentheses, keep a single leading '+' if present
-  String _cleanPhone(String input) {
-    String s = input.trim();
-    // Remove spaces, dashes, parentheses
-    s = s.replaceAll(RegExp(r'[\s\-()]+'), '');
-    // If multiple '+', keep only leading one; otherwise remove all '+' then re-add if first char was '+'
-    if (s.startsWith('+')) {
-      s = '+' + s.substring(1).replaceAll('+', '');
-    } else {
-      s = s.replaceAll('+', '');
+  /// Format phone number with +91 country code for India
+  String _formatPhoneWithCountryCode(String input) {
+    // Remove all non-digit characters
+    String digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // If it's a 10-digit number, add +91 prefix
+    if (digitsOnly.length == 10) {
+      return '+91$digitsOnly';
     }
-    return s;
+    
+    // If it already has country code (13 digits starting with 91), add + if missing
+    if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
+      return '+$digitsOnly';
+    }
+    
+    // If it already has + and country code, return as is
+    if (input.startsWith('+91') && digitsOnly.length == 12) {
+      return input;
+    }
+    
+    // Default: add +91 to whatever digits we have
+    return '+91$digitsOnly';
   }
 }

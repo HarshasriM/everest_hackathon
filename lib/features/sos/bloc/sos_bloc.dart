@@ -15,7 +15,7 @@ class SosBloc extends Bloc<SosEvent, SosState> {
   final ContactStorageService _contactStorageService;
   final AppPreferencesService _preferencesService;
   Timer? _countdownTimer;
-  static const int _countdownDuration = 5; // 5 seconds countdown
+  static const int _countdownDuration = 3; // 3 seconds countdown
 
   SosBloc(
     this._sendSosAlertUseCase,
@@ -54,10 +54,10 @@ class SosBloc extends Bloc<SosEvent, SosState> {
         } else {
           timer.cancel();
           _countdownTimer = null;
-          add( SosSendAlert(
+          add(const SosSendAlert(
             username: '',
             phoneNumbers: [],
-            location: LocationEntity(latitude: 12.9, longitude: 18.9, timestamp: DateTime(2025)),
+            location: null, // Location will be fetched in _onSendAlert
           ));
         }
       },
@@ -94,27 +94,49 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     emit(const SosSending());
 
     try {
-      // Get current location
-      final location = await _locationService.getCurrentPosition();
-      
+      // Use provided location or get current location with high accuracy for emergency
       LocationEntity locationEntity;
-      if (location == null) {
-        // Use default location if GPS is not available
-        locationEntity = LocationEntity(
-          latitude: 0.0,
-          longitude: 0.0,
-          timestamp: DateTime.now(),
-        );
+      
+      if (event.location != null) {
+        // Use the provided location
+        locationEntity = event.location!;
       } else {
-        locationEntity = LocationEntity(
-          latitude: location.latitude,
-          longitude: location.longitude,
-          accuracy: location.accuracy,
-          timestamp: DateTime.now(),
-        );
+        // Get current location
+        final location = await _locationService.getCurrentPosition();
+        
+        if (location == null) {
+          // If GPS fails, emit error instead of using default coordinates
+          emit(const SosError(message: 'Unable to get your location. Please enable GPS and try again.'));
+          return;
+        } else {
+          locationEntity = LocationEntity(
+            latitude: location.latitude,
+            longitude: location.longitude,
+            accuracy: location.accuracy,
+            timestamp: DateTime.now(),
+          );
+          
+          // Get address for better location context
+          try {
+            final address = await _locationService.getAddressFromCoordinates(
+              location.latitude, 
+              location.longitude
+            );
+            locationEntity = LocationEntity(
+              latitude: location.latitude,
+              longitude: location.longitude,
+              accuracy: location.accuracy,
+              timestamp: DateTime.now(),
+              address: address,
+            );
+          } catch (e) {
+            // If address lookup fails, continue with coordinates only
+            print('Address lookup failed: $e');
+          }
+        }
       }
 
-      // Get current user ID
+      // Get current user ID and data
       final userId = await _preferencesService.getUserId();
       
       if (userId == null) {
@@ -122,8 +144,9 @@ class SosBloc extends Bloc<SosEvent, SosState> {
         return;
       }
       
-      // Use a default username or get from user profile
-      const username = "Emergency User"; // TODO: Get from user profile
+      // Get user's phone number for the SOS message
+      final userPhoneNumber = await _preferencesService.getUserPhoneNumber();
+      String username = userPhoneNumber ?? "Emergency User"; // Use phone number or fallback
 
       final result = await _sendSosAlertUseCase(
         username: username,

@@ -30,16 +30,26 @@ class _SosScreenWrapper extends StatelessWidget {
   }
 }
 
-class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMixin {
+class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late AnimationController _holdAnimationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
+  late Animation<double> _holdAnimation;
+  
+  Timer? _holdTimer;
+  bool _isHolding = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    
+    _holdAnimationController = AnimationController(
+      duration: const Duration(seconds: 3), // 3 second hold
       vsync: this,
     );
     
@@ -58,11 +68,28 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
+    
+    _holdAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _holdAnimationController,
+      curve: Curves.linear,
+    ));
+    
+    _holdAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _startCountdown();
+        _resetHold();
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _holdAnimationController.dispose();
+    _holdTimer?.cancel();
     super.dispose();
   }
 
@@ -158,14 +185,21 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
           
           return Scaffold(
             backgroundColor: isActive
-                ? AppColorScheme.sosRedColor.withOpacity(0.05)
-                : Theme.of(context).scaffoldBackgroundColor,
+                ? Colors.black
+                : Colors.white,
             appBar: AppBar(
-              title: const Text('Emergency SOS'),
+              title: Text(
+                'Emergency SOS',
+                style: TextStyle(
+                  color: isActive ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               backgroundColor: isActive
-                  ? AppColorScheme.sosRedColor
-                  : null,
-              foregroundColor: isActive ? Colors.white : null,
+                  ? Colors.red
+                  : Colors.white,
+              foregroundColor: isActive ? Colors.white : Colors.black,
+              elevation: 0,
             ),
             body: SafeArea(
               child: SingleChildScrollView(
@@ -180,19 +214,20 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Status Display
-                        _buildStatusDisplay(state),
+                        Center(child: _buildStatusDisplay(state)),
                         
                         SizedBox(height: 48.h),
                         
                         // SOS Button
-                        _buildSosButton(state),
+                        Center(child: _buildSosButton(state)),
                         
                         SizedBox(height: 48.h),
                         
                         // Instructions
-                        _buildInstructions(state),
+                        Center(child: _buildInstructions(state)),
                       ],
                     ),
                   ),
@@ -210,22 +245,24 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       return Column(
         children: [
           Icon(
-            Icons.shield_outlined,
+            Icons.warning,
             size: 80.sp,
-            color: AppColorScheme.primaryColor,
+            color: Colors.orange,
+          ),
+          SizedBox(height: 32.h),
+          Text(
+            'Emergency SOS',
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
-            'Emergency SOS',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColorScheme.primaryColor,
+            'Press and hold the SOS button for 3\nseconds to send an emergency alert to\nyour contacts',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.grey[600],
             ),
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Tap the SOS button to send emergency alerts\nto your trusted contacts',
-            style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
         ],
@@ -234,44 +271,34 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       return Column(
         children: [
           Text(
-            'SENDING SOS ALERT IN',
+            'SENDING SOS IN',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColorScheme.sosRedColor,
+              color: Colors.red,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 48.h),
           AnimatedBuilder(
             animation: _pulseAnimation,
             builder: (context, child) {
-              return Transform.scale(
-                scale: _pulseAnimation.value,
-                child: Container(
-                  width: 140.w,
-                  height: 140.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColorScheme.sosRedColor,
-                      width: 4,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColorScheme.sosRedColor.withOpacity(0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
+              return Container(
+                width: 120.w,
+                height: 120.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.red,
+                    width: 3,
                   ),
-                  child: Center(
-                    child: Text(
-                      '${state.remainingSeconds}',
-                      style: TextStyle(
-                        fontSize: 72.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColorScheme.sosRedColor,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${state.remainingSeconds}',
+                    style: TextStyle(
+                      fontSize: 48.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
                     ),
                   ),
                 ),
@@ -331,65 +358,125 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
     return const SizedBox.shrink();
   }
 
+  void _startHold() {
+    if (_isHolding) return;
+    setState(() {
+      _isHolding = true;
+    });
+    _holdAnimationController.forward();
+  }
+  
+  void _resetHold() {
+    setState(() {
+      _isHolding = false;
+    });
+    _holdAnimationController.reset();
+  }
+
   Widget _buildSosButton(SosState state) {
     final isCountingDown = state is SosCountdown;
     final isSending = state is SosSending;
     final isActive = isCountingDown || isSending;
     
     return GestureDetector(
-      onTap: isActive ? _cancelSos : _startCountdown,
+      onLongPressStart: (_) {
+        if (!isActive) {
+          _startHold();
+        }
+      },
+      onLongPressEnd: (_) {
+        if (_isHolding && !isActive) {
+          _resetHold();
+        }
+      },
+      onLongPressCancel: () {
+        if (_isHolding && !isActive) {
+          _resetHold();
+        }
+      },
+      onTap: () {
+        if (isActive) {
+          _cancelSos();
+        }
+      },
       child: AnimatedBuilder(
-        animation: _scaleAnimation,
+        animation: Listenable.merge([_scaleAnimation, _holdAnimation]),
         builder: (context, child) {
-          return Transform.scale(
-            scale: isActive ? _scaleAnimation.value : 1.0,
-            child: Container(
-              width: 220.w,
-              height: 220.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: isActive 
-                    ? AppColorScheme.emergencyGradient
-                    : AppColorScheme.primaryGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: (isActive 
-                        ? AppColorScheme.sosRedColor 
-                        : AppColorScheme.primaryColor).withOpacity(0.4),
-                    blurRadius: 30,
-                    offset: const Offset(0, 15),
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              // Hold progress indicator
+              if (_isHolding)
+                Container(
+                  width: 220.w,
+                  height: 220.h,
+                  child: CircularProgressIndicator(
+                    value: _holdAnimation.value,
+                    strokeWidth: 6,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    backgroundColor: Colors.white.withOpacity(0.3),
                   ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(110.r),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          isActive ? Icons.cancel : Icons.sos,
-                          size: 100.sp,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          isActive ? 'CANCEL' : 'SOS',
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ],
+                ),
+              // Main SOS Button
+              Container(
+                width: 200.w,
+                height: 200.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: isActive 
+                        ? [Colors.red, Colors.orange]
+                        : _isHolding
+                          ? [Colors.red.withOpacity(0.8), Colors.orange.withOpacity(0.8)]
+                          : [Colors.orange, Colors.red],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: isActive && isCountingDown
+                        ? Icon(
+                            Icons.close,
+                            size: 80.sp,
+                            color: Colors.white,
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'SOS',
+                                style: TextStyle(
+                                  fontSize: 48.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              if (!isActive && !_isHolding)
+                                Text(
+                                  'SOS',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                            ],
+                          ),
                   ),
                 ),
               ),
-            ),
+            ],
           );
         },
       ),
@@ -398,54 +485,18 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
 
   Widget _buildInstructions(SosState state) {
     if (state is SosInitial) {
-      return Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColorScheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: AppColorScheme.primaryColor.withOpacity(0.3),
-              ),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: AppColorScheme.primaryColor,
-                      size: 20.sp,
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'How it works:',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColorScheme.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-                _buildInstructionItem('1. Tap the SOS button'),
-                _buildInstructionItem('2. 5-second countdown begins'),
-                _buildInstructionItem('3. Location shared with contacts'),
-                _buildInstructionItem('4. Emergency alerts sent via SMS'),
-              ],
-            ),
-          ),
-        ],
-      );
+      return const SizedBox.shrink(); // Remove instructions for cleaner look
     } else if (state is SosCountdown) {
-      return Text(
-        'Tap CANCEL to stop the alert',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: AppColorScheme.sosRedColor,
-          fontWeight: FontWeight.w600,
+      return Padding(
+        padding: EdgeInsets.only(top: 32.h),
+        child: Text(
+          'Tap the button to cancel',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
       );
     } else if (state is SosSending) {
       return Text(

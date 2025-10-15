@@ -29,12 +29,12 @@ class SosCountdownTick extends SosEvent {
 class SosSendAlert extends SosEvent {
   final String username;
   final List<String> phoneNumbers;
-  final LocationEntity location;
+  final LocationEntity? location;
   
   const SosSendAlert({
     required this.username,
     required this.phoneNumbers,
-    required this.location,
+    this.location,
   });
   
   @override
