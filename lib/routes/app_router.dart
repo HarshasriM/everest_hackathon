@@ -80,7 +80,7 @@ class AppRouter {
       
       GoRoute(
         path: AppRoutes.sos,
-        builder: (context, state) => const SosScreen(),
+        builder: (context, state) => const SosScreenPage(),
       ),
       GoRoute(
         path: AppRoutes.profile,

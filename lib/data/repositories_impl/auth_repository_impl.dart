@@ -28,8 +28,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
       
-      // Store the session ID if needed (we can store it as part of auth token for now)
-      // In production, you might want to add a dedicated method for this
+      // Store the phone number temporarily for SOS usage even before full verification
+      await _preferencesService.saveUserData({'phoneNumber': request.fullPhoneNumber});
       
       Logger.info('OTP sent successfully: ${response.message}');
     } catch (e) {

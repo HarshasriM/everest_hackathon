@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/color_scheme.dart';
 import '../../../core/utils/constants.dart';
+import '../../../core/dependency_injection/di_container.dart' as di;
+import '../bloc/sos_bloc.dart';
+import '../bloc/sos_event.dart';
+import '../bloc/sos_state.dart';
 
 /// SOS emergency screen
 class SosScreen extends StatefulWidget {
@@ -13,224 +18,540 @@ class SosScreen extends StatefulWidget {
   State<SosScreen> createState() => _SosScreenState();
 }
 
-class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMixin {
+class _SosScreenWrapper extends StatelessWidget {
+  const _SosScreenWrapper();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => di.sl<SosBloc>(),
+      child: const SosScreen(),
+    );
+  }
+}
+
+class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late AnimationController _holdAnimationController;
   late Animation<double> _scaleAnimation;
-  Timer? _countdownTimer;
-  int _countdown = 5;
-  bool _isActivated = false;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _holdAnimation;
+  
+  Timer? _holdTimer;
+  bool _isHolding = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
-    )..repeat(reverse: true);
+    );
+    
+    _holdAnimationController = AnimationController(
+      duration: const Duration(seconds: 3), // 3 second hold
+      vsync: this,
+    );
     
     _scaleAnimation = Tween<double>(
       begin: 1.0,
+      end: 1.1,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _pulseAnimation = Tween<double>(
+      begin: 0.8,
       end: 1.2,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _countdownTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startCountdown() {
-    setState(() {
-      _isActivated = true;
-      _countdown = 5;
-    });
     
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _countdown--;
-        if (_countdown <= 0) {
-          timer.cancel();
-          _sendSosAlert();
-        }
-      });
-    });
-  }
-
-  void _cancelSos() {
-    _countdownTimer?.cancel();
-    setState(() {
-      _isActivated = false;
-      _countdown = 5;
-    });
-  }
-
-  void _sendSosAlert() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('SOS Alert Sent!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    _holdAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _holdAnimationController,
+      curve: Curves.linear,
+    ));
     
-    // Navigate back after sending
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.pop();
+    _holdAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _startCountdown();
+        _resetHold();
       }
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _isActivated 
-          ? AppColorScheme.sosRedColor.withOpacity(0.1)
-          : Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Emergency SOS'),
-        backgroundColor: _isActivated 
-            ? AppColorScheme.sosRedColor
-            : null,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Instructions
-              if (!_isActivated) ...[
-                Icon(
-                  Icons.warning_amber_rounded,
-                  size: 64.sp,
-                  color: AppColorScheme.warningColor,
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  'Emergency SOS',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'Press and hold the SOS button for 3 seconds to send an emergency alert to your contacts',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 48.h),
-              ],
-              
-              // Countdown Display
-              if (_isActivated) ...[
-                Center(
-                  child: Text(
-                    'SENDING SOS IN',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppColorScheme.sosRedColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Center(
-                  child: Container(
-                    width: 120.w,
-                    height: 120.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColorScheme.sosRedColor,
-                        width: 4,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$_countdown',
-                        style: TextStyle(
-                          fontSize: 64.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorScheme.sosRedColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 48.h),
-              ],
-              
-              // SOS Button
-              GestureDetector(
-                onLongPress: _isActivated ? null : _startCountdown,
-                child: AnimatedBuilder(
-                  animation: _scaleAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _isActivated ? _scaleAnimation.value : 1.0,
-                      child: Container(
-                        width: 200.w,
-                        height: 200.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: AppColorScheme.emergencyGradient,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColorScheme.sosRedColor.withOpacity(0.4),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(100.r),
-                            onTap: _isActivated ? _cancelSos : null,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _isActivated ? Icons.cancel : Icons.sos,
-                                    size: 100.sp,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(height: 8.h),
-                                 
-                                  
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              
-              SizedBox(height: 48.h),
-              
-             
-              // Cancel Instructions
-              if (_isActivated) ...[
-                Text(
-                  'Tap the button to cancel',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
-          ),
+  void dispose() {
+    _animationController.dispose();
+    _holdAnimationController.dispose();
+    _holdTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    context.read<SosBloc>().add(const SosStartCountdown());
+    _animationController.repeat(reverse: true);
+  }
+
+  void _cancelSos() {
+    context.read<SosBloc>().add(const SosCancelCountdown());
+    _animationController.stop();
+    _animationController.reset();
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.check_circle,
+          color: AppColorScheme.successColor,
+          size: 64.sp,
         ),
+        title: const Text('SOS Alert Sent'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
 
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.error,
+          color: AppColorScheme.sosRedColor,
+          size: 64.sp,
+        ),
+        title: const Text('Failed to Send SOS'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<SosBloc>().add(const SosReset());
+            },
+            child: const Text('Try Again'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<SosBloc, SosState>(
+      listener: (context, state) {
+        if (state is SosSuccess) {
+          _animationController.stop();
+          _animationController.reset();
+          _showSuccessDialog('Emergency alerts sent successfully to ${state.response.results.length} contacts');
+        } else if (state is SosError) {
+          _animationController.stop();
+          _animationController.reset();
+          _showErrorDialog(state.message);
+        } else if (state is SosCancelled) {
+          _animationController.stop();
+          _animationController.reset();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('SOS Alert Cancelled'),
+              backgroundColor: AppColorScheme.warningColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      child: BlocBuilder<SosBloc, SosState>(
+        builder: (context, state) {
+          final isCountingDown = state is SosCountdown;
+          final isSending = state is SosSending;
+          final isActive = isCountingDown || isSending;
+          
+          return Scaffold(
+            backgroundColor: isActive
+                ? Colors.black
+                : Colors.white,
+            appBar: AppBar(
+              title: Text(
+                'Emergency SOS',
+                style: TextStyle(
+                  color: isActive ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: isActive
+                  ? Colors.red
+                  : Colors.white,
+              foregroundColor: isActive ? Colors.white : Colors.black,
+              elevation: 0,
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height - 
+                          AppBar().preferredSize.height - 
+                          MediaQuery.of(context).padding.top - 
+                          MediaQuery.of(context).padding.bottom,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Status Display
+                        Center(child: _buildStatusDisplay(state)),
+                        
+                        SizedBox(height: 48.h),
+                        
+                        // SOS Button
+                        Center(child: _buildSosButton(state)),
+                        
+                        SizedBox(height: 48.h),
+                        
+                        // Instructions
+                        Center(child: _buildInstructions(state)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatusDisplay(SosState state) {
+    if (state is SosInitial) {
+      return Column(
+        children: [
+          Icon(
+            Icons.warning,
+            size: 80.sp,
+            color: Colors.orange,
+          ),
+          SizedBox(height: 32.h),
+          Text(
+            'Emergency SOS',
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Press and hold the SOS button for 3\nseconds to send an emergency alert to\nyour contacts',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    } else if (state is SosCountdown) {
+      return Column(
+        children: [
+          Text(
+            'SENDING SOS IN',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+          SizedBox(height: 48.h),
+          AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Container(
+                width: 120.w,
+                height: 120.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.red,
+                    width: 3,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${state.remainingSeconds}',
+                    style: TextStyle(
+                      fontSize: 48.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    } else if (state is SosSending) {
+      return Column(
+        children: [
+          SizedBox(
+            width: 60.w,
+            height: 60.h,
+            child: CircularProgressIndicator(
+              strokeWidth: 4,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColorScheme.sosRedColor,
+              ),
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Sending Emergency Alerts...',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: AppColorScheme.sosRedColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Getting your location and notifying contacts',
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    } else if (state is SosCancelled) {
+      return Column(
+        children: [
+          Icon(
+            Icons.cancel_outlined,
+            size: 80.sp,
+            color: AppColorScheme.warningColor,
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'SOS Alert Cancelled',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColorScheme.warningColor,
+            ),
+          ),
+        ],
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  void _startHold() {
+    if (_isHolding) return;
+    setState(() {
+      _isHolding = true;
+    });
+    _holdAnimationController.forward();
+  }
+  
+  void _resetHold() {
+    setState(() {
+      _isHolding = false;
+    });
+    _holdAnimationController.reset();
+  }
+
+  Widget _buildSosButton(SosState state) {
+    final isCountingDown = state is SosCountdown;
+    final isSending = state is SosSending;
+    final isActive = isCountingDown || isSending;
+    
+    return GestureDetector(
+      onLongPressStart: (_) {
+        if (!isActive) {
+          _startHold();
+        }
+      },
+      onLongPressEnd: (_) {
+        if (_isHolding && !isActive) {
+          _resetHold();
+        }
+      },
+      onLongPressCancel: () {
+        if (_isHolding && !isActive) {
+          _resetHold();
+        }
+      },
+      onTap: () {
+        if (isActive) {
+          _cancelSos();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_scaleAnimation, _holdAnimation]),
+        builder: (context, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              // Hold progress indicator
+              if (_isHolding)
+                Container(
+                  width: 220.w,
+                  height: 220.h,
+                  child: CircularProgressIndicator(
+                    value: _holdAnimation.value,
+                    strokeWidth: 6,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    backgroundColor: Colors.white.withOpacity(0.3),
+                  ),
+                ),
+              // Main SOS Button
+              Container(
+                width: 200.w,
+                height: 200.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: isActive 
+                        ? [Colors.red, Colors.orange]
+                        : _isHolding
+                          ? [Colors.red.withOpacity(0.8), Colors.orange.withOpacity(0.8)]
+                          : [Colors.orange, Colors.red],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: isActive && isCountingDown
+                        ? Icon(
+                            Icons.close,
+                            size: 80.sp,
+                            color: Colors.white,
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'SOS',
+                                style: TextStyle(
+                                  fontSize: 48.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              if (!isActive && !_isHolding)
+                                Text(
+                                  'SOS',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInstructions(SosState state) {
+    if (state is SosInitial) {
+      return const SizedBox.shrink(); // Remove instructions for cleaner look
+    } else if (state is SosCountdown) {
+      return Padding(
+        padding: EdgeInsets.only(top: 32.h),
+        child: Text(
+          'Tap the button to cancel',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    } else if (state is SosSending) {
+      return Text(
+        'Please wait while we send your emergency alerts...',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        textAlign: TextAlign.center,
+      );
+    } else if (state is SosCancelled) {
+      return Text(
+        'Emergency alert was cancelled successfully',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: AppColorScheme.warningColor,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildInstructionItem(String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 4.h),
+      child: Row(
+        children: [
+          SizedBox(width: 16.w),
+          Icon(
+            Icons.check_circle_outline,
+            size: 16.sp,
+            color: AppColorScheme.successColor,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+// Export the wrapper as the main widget
+class SosScreenPage extends StatelessWidget {
+  const SosScreenPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => di.sl<SosBloc>(),
+      child: const SosScreen(),
+    );
+  }
 }

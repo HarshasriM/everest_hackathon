@@ -198,6 +198,17 @@ class AppPreferencesService {
     }
   }
 
+  /// Get the user's phone number from stored data
+  Future<String?> getUserPhoneNumber() async {
+    try {
+      final userData = await getUserData();
+      return userData?['phoneNumber'] as String?;
+    } catch (e) {
+      Logger.error('Failed to get user phone number', error: e);
+      return null;
+    }
+  }
+
   Future<void> clearAuthData() async {
     try {
       await _ensureInitialized();
