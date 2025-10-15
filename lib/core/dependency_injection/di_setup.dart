@@ -5,6 +5,12 @@ import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 import 'package:everest_hackathon/features/contacts/bloc/contacts_bloc.dart';
 import 'package:everest_hackathon/features/track/bloc/track_bloc.dart';
 
+// SOS imports
+import '../../data/datasources/remote/sos_remote_source.dart';
+import '../../data/repositories_impl/sos_repository_impl.dart';
+import '../../domain/usecases/sos/send_sos_alert_usecase.dart';
+import '../../features/sos/bloc/sos_bloc.dart';
+
 import '../../core/network/api_client.dart';
 import '../../core/services/app_preferences_service.dart';
 import '../../core/services/contact_storage_service.dart';
@@ -67,6 +73,9 @@ Future<void> _registerCore() async {
 void _registerDataSources() {
   // Auth Remote Data Source
   sl.registerLazySingleton<AuthRemoteSource>(() => AuthRemoteSourceImpl(sl()));
+  
+  // SOS Remote Data Source
+  sl.registerLazySingleton<SosRemoteSource>(() => SosRemoteSourceImpl(sl()));
 }
 
 /// Register repositories
@@ -79,13 +88,8 @@ void _registerRepositories() {
   // Contacts Repository
   sl.registerLazySingleton<ContactsRepository>(() => ContactsRepositoryImpl());
 
-  //  Add SOS Repository when implemented
-  // sl.registerLazySingleton<SosRepository>(
-  //   () => SosRepositoryImpl(
-  //     remoteSource: sl(),
-  //     localSource: sl(),
-  //   ),
-  // );
+  // SOS Repository
+  sl.registerLazySingleton<SosRepositoryImpl>(() => SosRepositoryImpl(sl()));
 }
 
 /// Register use cases
@@ -97,6 +101,9 @@ void _registerUseCases() {
   // Contacts Use Cases
   sl.registerLazySingleton<GetContactsUseCase>(() => GetContactsUseCase(sl()));
   sl.registerLazySingleton<AddContactUseCase>(() => AddContactUseCase(sl()));
+  
+  // SOS Use Cases
+  sl.registerLazySingleton<SendSosAlertUseCase>(() => SendSosAlertUseCase(sl()));
 }
 
 /// Register BLoCs
@@ -126,4 +133,7 @@ void _registerBlocs() {
 
   // FakeCall BLoC
   sl.registerFactory<FakeCallBloc>(() => FakeCallBloc());
+  
+  // SOS BLoC
+  sl.registerFactory<SosBloc>(() => SosBloc(sl(), sl(), sl(), sl()));
 }
