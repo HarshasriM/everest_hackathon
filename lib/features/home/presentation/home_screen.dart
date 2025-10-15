@@ -35,17 +35,35 @@ class _HomeScreenState extends State<HomeScreen> {
     _NavItem(icon: Icons.headset_mic, label: 'Helpline'),
   ];
 
+  // Create persistent screen instances to avoid recreation
+  late final Widget _trackScreen;
+  late final Widget _contactsScreen;
+  late final Widget _sosScreen;
+  late final Widget _fakeCallScreen;
+  late final Widget _helplineScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize screens once to prevent recreation
+    _trackScreen = const TrackScreen();
+    _contactsScreen = const ContactsScreen();
+    _sosScreen = const Center(child: Text('SOS Content'));
+    _fakeCallScreen = const FakeCallScreen();
+    _helplineScreen = const HelplineScreen();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildTrackContent(),
-          _buildFriendsContent(),
-          _buildSosContent(),
-          _buildFakeCallContent(),
-          _buildHelplineContent(),
+          _trackScreen,
+          _contactsScreen,
+          _sosScreen,
+          _fakeCallScreen,
+          _helplineScreen,
         ],
       ),
       bottomNavigationBar: _buildCustomBottomNavBar(),
@@ -87,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int navIndex, int screenIndex) {
     return InkWell(
       onTap: () {
-       
         setState(() => _selectedIndex = screenIndex);
         // }
       },
@@ -147,36 +164,12 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(30.r),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.sos, size: 36.sp, color: Colors.white),
-                  
-                ],
+                children: [Icon(Icons.sos, size: 36.sp, color: Colors.white)],
               ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  // Track content with Google Maps
-  Widget _buildTrackContent() {
-    return const TrackScreen();
-  }
-
-  Widget _buildFriendsContent() {
-    return const ContactsScreen();
-  }
-
-  Widget _buildSosContent() {
-    return const Center(child: Text('SOS Content'));
-  }
-
-  Widget _buildFakeCallContent() {
-    return const FakeCallScreen();
-  }
-
-  Widget _buildHelplineContent() {
-    return const  HelplineScreen();
   }
 }
