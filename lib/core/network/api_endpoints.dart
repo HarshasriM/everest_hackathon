@@ -25,6 +25,12 @@ class ApiEndpoints {
   static const String getNearbyHospitals = '/location/nearby/hospitals';
   static const String getNearbyHelpCenters = '/location/nearby/help-centers';
 
+  // Emergency Contacts
+  static String getEmergencyContacts(String userId) => '/api/users/get-emergency-contacts/$userId';
+  static const String addEmergencyContact = '/api/users/add-emergency-contact';
+  static String updateEmergencyContact(String userId, String contactId) => '/api/users/update/$userId/$contactId';
+  static String deleteEmergencyContact(String userId, String contactId) => '/api/users/delete/$userId/$contactId';
+
   // Helplines
   static const String getHelplines = '/helplines';
   static const String getHelplinesByCategory = '/helplines/{category}';

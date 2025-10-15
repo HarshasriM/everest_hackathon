@@ -1,4 +1,4 @@
-import 'package:everest_hackathon/data/repositories_impl/contacts_repository_impl.dart';
+import 'package:everest_hackathon/data/repositories_impl/contacts_api_repository_impl.dart';
 import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
 import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
 import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
@@ -11,6 +11,7 @@ import '../../core/services/contact_storage_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/location_sharing_service.dart';
 import '../../data/datasources/remote/auth_remote_source.dart';
+import '../../data/datasources/remote/emergency_contacts_api_service.dart';
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/send_otp_usecase.dart';
@@ -67,6 +68,11 @@ Future<void> _registerCore() async {
 void _registerDataSources() {
   // Auth Remote Data Source
   sl.registerLazySingleton<AuthRemoteSource>(() => AuthRemoteSourceImpl(sl()));
+  
+  // Emergency Contacts API Service
+  sl.registerLazySingleton<EmergencyContactsApiService>(
+    () => EmergencyContactsApiService(apiClient: sl()),
+  );
 }
 
 /// Register repositories
@@ -77,7 +83,12 @@ void _registerRepositories() {
   );
 
   // Contacts Repository
-  sl.registerLazySingleton<ContactsRepository>(() => ContactsRepositoryImpl());
+  sl.registerLazySingleton<ContactsRepository>(
+    () => ContactsApiRepositoryImpl(
+      apiService: sl(),
+      preferencesService: sl(),
+    ),
+  );
 
   //  Add SOS Repository when implemented
   // sl.registerLazySingleton<SosRepository>(
