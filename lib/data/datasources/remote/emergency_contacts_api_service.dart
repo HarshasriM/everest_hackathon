@@ -9,7 +9,7 @@ class EmergencyContactsApiService {
   final ApiClient _apiClient;
 
   EmergencyContactsApiService({required ApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   /// Retry mechanism for API calls
   Future<T> _retryApiCall<T>(
@@ -26,17 +26,19 @@ class EmergencyContactsApiService {
         if (attempts >= maxRetries) {
           rethrow;
         }
-        
+
         // Only retry on network errors, not on client errors (4xx)
         if (e is DioException) {
-          if (e.response?.statusCode != null && 
-              e.response!.statusCode! >= 400 && 
+          if (e.response?.statusCode != null &&
+              e.response!.statusCode! >= 400 &&
               e.response!.statusCode! < 500) {
             rethrow; // Don't retry client errors
           }
         }
-        
-        Logger.warning('API call failed, retrying... Attempt $attempts/$maxRetries');
+
+        Logger.warning(
+          'API call failed, retrying... Attempt $attempts/$maxRetries',
+        );
         await Future.delayed(delay * attempts); // Exponential backoff
       }
     }
@@ -44,25 +46,31 @@ class EmergencyContactsApiService {
   }
 
   /// Get all emergency contacts for a user
-  Future<List<EmergencyContactApiModel>> getEmergencyContacts(String userId) async {
+  Future<List<EmergencyContactApiModel>> getEmergencyContacts(
+    String userId,
+  ) async {
     return await _retryApiCall(() async {
       Logger.info('Fetching emergency contacts for user: $userId');
-      
+
       final response = await _apiClient.get(
         ApiEndpoints.getEmergencyContacts(userId),
       );
 
       if (response.statusCode == 200 && response.data != null) {
         Logger.debug('API Response for getEmergencyContacts: ${response.data}');
-        
+
         try {
           final apiResponse = EmergencyContactsResponse.fromJson(response.data);
-          
+
           if (apiResponse.success) {
-            Logger.info('Successfully fetched ${apiResponse.data.length} emergency contacts');
+            Logger.info(
+              'Successfully fetched ${apiResponse.data.length} emergency contacts',
+            );
             return apiResponse.data;
           } else {
-            throw Exception(apiResponse.message ?? 'Failed to fetch emergency contacts');
+            throw Exception(
+              apiResponse.message ?? 'Failed to fetch emergency contacts',
+            );
           }
         } catch (parseError) {
           Logger.error('Failed to parse API response', error: parseError);
@@ -71,7 +79,9 @@ class EmergencyContactsApiService {
         }
       } else {
         Logger.error('Invalid response status: ${response.statusCode}');
-        throw Exception('Invalid response from server (Status: ${response.statusCode})');
+        throw Exception(
+          'Invalid response from server (Status: ${response.statusCode})',
+        );
       }
     });
   }
@@ -85,7 +95,7 @@ class EmergencyContactsApiService {
   }) async {
     try {
       Logger.info('Adding emergency contact: $name for user: $userId');
-      
+
       final request = AddEmergencyContactRequest(
         userId: userId,
         name: name,
@@ -98,17 +108,22 @@ class EmergencyContactsApiService {
         data: request.toJson(),
       );
 
-      if (response.statusCode == 200 && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         final apiResponse = EmergencyContactResponse.fromJson(response.data);
-        
+
         if (apiResponse.success && apiResponse.data != null) {
-          Logger.info('Successfully added emergency contact: ${apiResponse.message}');
+          Logger.info(
+            'Successfully added emergency contact: ${apiResponse.message}',
+          );
           return apiResponse.data!;
         } else {
           throw Exception(apiResponse.message);
         }
       } else {
-        throw Exception('Invalid response from server');
+        throw Exception(
+          'Invalid response from server (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
       Logger.error('Failed to add emergency contact', error: e);
@@ -126,7 +141,7 @@ class EmergencyContactsApiService {
   }) async {
     try {
       Logger.info('Updating emergency contact: $contactId for user: $userId');
-      
+
       final request = UpdateEmergencyContactRequest(
         name: name,
         phoneNumber: phoneNumber,
@@ -140,9 +155,11 @@ class EmergencyContactsApiService {
 
       if (response.statusCode == 200 && response.data != null) {
         final apiResponse = EmergencyContactResponse.fromJson(response.data);
-        
+
         if (apiResponse.success && apiResponse.data != null) {
-          Logger.info('Successfully updated emergency contact: ${apiResponse.message}');
+          Logger.info(
+            'Successfully updated emergency contact: ${apiResponse.message}',
+          );
           return apiResponse.data!;
         } else {
           throw Exception(apiResponse.message);
@@ -163,16 +180,18 @@ class EmergencyContactsApiService {
   }) async {
     try {
       Logger.info('Deleting emergency contact: $contactId for user: $userId');
-      
+
       final response = await _apiClient.delete(
         ApiEndpoints.deleteEmergencyContact(userId, contactId),
       );
 
       if (response.statusCode == 200 && response.data != null) {
         final apiResponse = EmergencyContactResponse.fromJson(response.data);
-        
+
         if (apiResponse.success) {
-          Logger.info('Successfully deleted emergency contact: ${apiResponse.message}');
+          Logger.info(
+            'Successfully deleted emergency contact: ${apiResponse.message}',
+          );
         } else {
           throw Exception(apiResponse.message);
         }
