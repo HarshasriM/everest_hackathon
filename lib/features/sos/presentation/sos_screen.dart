@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/color_scheme.dart';
-import '../../../core/utils/constants.dart';
 import '../../../core/dependency_injection/di_container.dart' as di;
+// import '../../../core/theme/app_color_scheme.dart';
+import "package:everest_hackathon/core/theme/color_scheme.dart";
+import '../../../core/utils/constants.dart';
+import '../../../routes/app_routes.dart';
 import '../bloc/sos_bloc.dart';
 import '../bloc/sos_event.dart';
 import '../bloc/sos_state.dart';
@@ -18,8 +20,8 @@ class SosScreen extends StatefulWidget {
   State<SosScreen> createState() => _SosScreenState();
 }
 
-class _SosScreenWrapper extends StatelessWidget {
-  const _SosScreenWrapper();
+class SosScreenPage extends StatelessWidget {
+  const SosScreenPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +51,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
     );
     
     _holdAnimationController = AnimationController(
-      duration: const Duration(seconds: 3), // 3 second hold
+      duration: const Duration(seconds: 1), // 1 second hold
       vsync: this,
     );
     
@@ -130,24 +132,50 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   }
 
   void _showErrorDialog(String message) {
+    // Check if the error is related to missing emergency contacts
+    final lowercaseMessage = message.toLowerCase();
+    final isEmergencyContactsError = lowercaseMessage.contains('emergency contacts') || 
+                                   lowercaseMessage.contains('no contacts') ||
+                                   lowercaseMessage.contains('contacts found') ||
+                                   lowercaseMessage.contains('add contacts') ||
+                                   lowercaseMessage.contains('no emergency contacts found');
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         icon: Icon(
-          Icons.error,
-          color: AppColorScheme.sosRedColor,
+          isEmergencyContactsError ? Icons.contacts : Icons.error,
+          color: isEmergencyContactsError ? Colors.orange : AppColorScheme.sosRedColor,
           size: 64.sp,
         ),
-        title: const Text('Failed to Send SOS'),
+        title: Text(isEmergencyContactsError ? 'No Emergency Contacts' : 'Failed to Send SOS'),
         content: Text(message),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<SosBloc>().add(const SosReset());
-            },
-            child: const Text('Try Again'),
-          ),
+          if (isEmergencyContactsError) ...[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to emergency contacts screen
+                context.push(AppRoutes.emergencyContacts);
+              },
+              child: const Text('Add Emergency Contacts'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<SosBloc>().add(const SosReset());
+              },
+              child: const Text('Cancel'),
+            ),
+          ] else ...[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<SosBloc>().add(const SosReset());
+              },
+              child: const Text('Try Again'),
+            ),
+          ],
         ],
       ),
     );
@@ -259,7 +287,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
           ),
           SizedBox(height: 24.h),
           Text(
-            'Press and hold the SOS button for 3\nseconds to send an emergency alert to\nyour contacts',
+            'Press and hold the SOS button for 1\nsecond to send an emergency alert to\nyour contacts',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Colors.grey[600],
             ),
@@ -544,14 +572,14 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
 }
 
 // Export the wrapper as the main widget
-class SosScreenPage extends StatelessWidget {
-  const SosScreenPage({super.key});
+// class SosScreenPage extends StatelessWidget {
+//   const SosScreenPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di.sl<SosBloc>(),
-      child: const SosScreen(),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocProvider(
+//       create: (context) => di.sl<SosBloc>(),
+//       child: const SosScreen(),
+//     );
+//   }
+// }
