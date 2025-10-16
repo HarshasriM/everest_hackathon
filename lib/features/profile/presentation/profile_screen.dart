@@ -20,14 +20,26 @@ class ProfileScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            ProfileHeader(
-              phoneNumber: '+91 9392235952',
+            // Load phone number from preferences; fall back to the hardcoded number
+            FutureBuilder<String?>(
+              future: DIContainer.instance
+                  .get<AppPreferencesService>()
+                  .getUserPhoneNumber(),
+              builder: (context, snapshot) {
+                final phone = snapshot.connectionState == ConnectionState.done
+                    ? (snapshot.data ?? '+91 9392235952')
+                    : '+91 9392235952';
+                return ProfileHeader(
+                  phoneNumber: "${phone.substring(0, 3)} ${phone.substring(3)}",
+                );
+
+              },
             ),
             const SizedBox(height: 20),
             ProfileActionButtons(),
             const SizedBox(height: 20),
             const SettingsCard(),
-            const SizedBox(height: 160),
+            const SizedBox(height: 250),
             const AppVersionFooter(),
             const SizedBox(height: 20),
           ],
@@ -41,10 +53,7 @@ class ProfileScreen extends StatelessWidget {
 class ProfileHeader extends StatelessWidget {
   final String phoneNumber;
 
-  const ProfileHeader({
-    super.key,
-    required this.phoneNumber,
-  });
+  const ProfileHeader({super.key, required this.phoneNumber});
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +90,7 @@ class ProfileHeader extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             phoneNumber,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-            ),
+            style: const TextStyle(fontSize: 16, color: Colors.black),
           ),
         ],
       ),
@@ -108,10 +114,10 @@ class ProfileActionButtons extends StatelessWidget {
             label: 'Edit Profile',
             color: Colors.pink,
             onTap: () {
-              context.push(AppRoutes.profileSetup, extra: {
-                'isEditMode': true,
-                'useProfileBloc': true,
-              });
+              context.push(
+                AppRoutes.profileSetup,
+                extra: {'isEditMode': true, 'useProfileBloc': true},
+              );
             },
           ),
           ActionButton(
@@ -177,10 +183,7 @@ class ActionButton extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -237,7 +240,8 @@ class SettingsCard extends StatelessWidget {
     _showConfirmationDialog(
       context: context,
       title: 'Delete account',
-      content: 'Your account will be deleted permanently. Are you sure you want to proceed?',
+      content:
+          'Your account will be deleted permanently. Are you sure you want to proceed?',
       confirmText: 'Ok',
       confirmColor: Colors.red,
       onConfirm: () {
@@ -280,26 +284,29 @@ class SettingsCard extends StatelessWidget {
     final appPreferences = DIContainer.instance.get<AppPreferencesService>();
     final authBloc = BlocProvider.of<AuthBloc>(context);
 
-    appPreferences.clearAuthData().then((_) {
-      Logger.info('User ID and session data cleared from app preferences');
-      authBloc.add(const AuthEvent.logout());
+    appPreferences
+        .clearAuthData()
+        .then((_) {
+          Logger.info('User ID and session data cleared from app preferences');
+          authBloc.add(const AuthEvent.logout());
 
-      authBloc.stream.listen((state) {
-        state.maybeWhen(
-          unauthenticated: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            context.go(AppRoutes.login);
-          },
-          orElse: () {},
-        );
-      });
-    }).catchError((error) {
-      Logger.error('Error during logout', error: error);
-      Navigator.of(context, rootNavigator: true).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logout failed. Please try again.')),
-      );
-    });
+          authBloc.stream.listen((state) {
+            state.maybeWhen(
+              unauthenticated: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                context.go(AppRoutes.login);
+              },
+              orElse: () {},
+            );
+          });
+        })
+        .catchError((error) {
+          Logger.error('Error during logout', error: error);
+          Navigator.of(context, rootNavigator: true).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Logout failed. Please try again.')),
+          );
+        });
   }
 }
 
@@ -363,7 +370,8 @@ class DottedDivider extends StatelessWidget {
         builder: (context, constraints) {
           const dashWidth = 4.0;
           const dashSpace = 4.0;
-          final dashCount = (constraints.constrainWidth() / (dashWidth + dashSpace)).floor();
+          final dashCount =
+              (constraints.constrainWidth() / (dashWidth + dashSpace)).floor();
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(dashCount, (_) {
@@ -414,10 +422,7 @@ class ConfirmationDialog extends StatelessWidget {
             Navigator.of(context).pop();
             onConfirm();
           },
-          child: Text(
-            confirmText,
-            style: TextStyle(color: confirmColor),
-          ),
+          child: Text(confirmText, style: TextStyle(color: confirmColor)),
         ),
       ],
     );
@@ -428,10 +433,7 @@ class ConfirmationDialog extends StatelessWidget {
 class AppVersionFooter extends StatelessWidget {
   final String version;
 
-  const AppVersionFooter({
-    super.key,
-    this.version = '1.0.0',
-  });
+  const AppVersionFooter({super.key, this.version = '1.0.0'});
 
   @override
   Widget build(BuildContext context) {
