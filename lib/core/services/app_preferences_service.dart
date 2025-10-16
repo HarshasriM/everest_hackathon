@@ -26,11 +26,8 @@ class AppPreferencesService {
   
   // Keys for shared preferences (non-sensitive data)
   static const String _keyLanguageCode = 'language_code';
-  static const String _keyThemeMode = 'theme_mode';
-  static const String _keyFirstLaunch = 'first_launch';
   static const String _keyBiometricEnabled = 'biometric_enabled';
   static const String _keyLocationPermission = 'location_permission';
-  static const String _keyNotificationEnabled = 'notification_enabled';
   static const String _keyOnboardingCompleted = 'onboarding_completed';
   static const String _keyPanicButtonPosition = 'panic_button_position';
 
@@ -234,26 +231,6 @@ class AppPreferencesService {
     return _memoryStorage[_keyLanguageCode] as String? ?? 'en';
   }
 
-  Future<void> saveThemeMode(String themeMode) async {
-    await _ensureInitialized();
-    _memoryStorage[_keyThemeMode] = themeMode;
-  }
-
-  Future<String> getThemeMode() async {
-    await _ensureInitialized();
-    return _memoryStorage[_keyThemeMode] as String? ?? 'system';
-  }
-
-  Future<void> setFirstLaunch(bool isFirstLaunch) async {
-    await _ensureInitialized();
-    _memoryStorage[_keyFirstLaunch] = isFirstLaunch;
-  }
-
-  Future<bool> isFirstLaunch() async {
-    await _ensureInitialized();
-    return _memoryStorage[_keyFirstLaunch] as bool? ?? true;
-  }
-
   Future<void> setBiometricEnabled(bool enabled) async {
     await _ensureInitialized();
     _memoryStorage[_keyBiometricEnabled] = enabled;
@@ -272,16 +249,6 @@ class AppPreferencesService {
   Future<bool> hasLocationPermission() async {
     await _ensureInitialized();
     return _memoryStorage[_keyLocationPermission] as bool? ?? false;
-  }
-
-  Future<void> setNotificationEnabled(bool enabled) async {
-    await _ensureInitialized();
-    _memoryStorage[_keyNotificationEnabled] = enabled;
-  }
-
-  Future<bool> isNotificationEnabled() async {
-    await _ensureInitialized();
-    return _memoryStorage[_keyNotificationEnabled] as bool? ?? true;
   }
 
   Future<void> setOnboardingCompleted(bool completed) async {

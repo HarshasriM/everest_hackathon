@@ -2,6 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/utils/logger.dart';
 import '../../models/auth_model.dart';
 import '../../models/user_model.dart';
+import '../../models/profile_update_request.dart';
 
 /// Remote data source for authentication
 abstract class AuthRemoteSource {
@@ -11,6 +12,10 @@ abstract class AuthRemoteSource {
   Future<UserModel> updateProfile(
     String userId,
     Map<String, dynamic> profileData,
+  );
+  Future<UserModel> updateProfileWithRequest(
+    String userId,
+    ProfileUpdateRequest request,
   );
   Future<void> logout(String userId);
 }
@@ -142,6 +147,48 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       return UserModel.fromJson(userData);
     } catch (e) {
       Logger.error('Error updating user profile', error: e);
+      throw Exception('Failed to update user profile: $e');
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfileWithRequest(
+    String userId,
+    ProfileUpdateRequest request,
+  ) async {
+    try {
+      Logger.network('Updating user profile for $userId with request model');
+      Logger.debug('Profile update request: ${request.toJson()}');
+
+      // Validate the request
+      if (!request.isValid) {
+        throw Exception('Invalid profile data: ${request.nameError}');
+      }
+
+      if (request.emailError != null) {
+        throw Exception('Invalid email: ${request.emailError}');
+      }
+
+      final response = await _apiClient.put(
+        '/api/users/$userId',
+        data: request.toJson(),
+      );
+
+      Logger.debug('Profile update response: ${response.data}');
+
+      // Check if the request was successful
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}: ${response.data}');
+      }
+
+      // The API returns the updated user object
+      final userData = response.data['user'] ?? response.data;
+      return UserModel.fromJson(userData);
+    } catch (e) {
+      Logger.error('Error updating user profile with request', error: e);
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Failed to update user profile: $e');
     }
   }

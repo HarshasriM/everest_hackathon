@@ -6,6 +6,10 @@ import 'package:everest_hackathon/features/contacts/bloc/contacts_bloc.dart';
 import 'package:everest_hackathon/features/track/bloc/track_bloc.dart';
 
 import '../../core/network/api_client.dart';
+import '../../data/repositories_impl/profile_repository_impl.dart';
+import '../../domain/repositories/profile_repository.dart';
+import '../../domain/usecases/update_profile_usecase.dart';
+import '../../features/profile/bloc/bloc/profile_bloc.dart';
 import '../../core/services/app_preferences_service.dart';
 import '../../core/services/contact_storage_service.dart';
 import '../../core/services/location_service.dart';
@@ -79,6 +83,11 @@ void _registerRepositories() {
   // Contacts Repository
   sl.registerLazySingleton<ContactsRepository>(() => ContactsRepositoryImpl());
 
+  // Profile Repository
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl<AuthRemoteSource>()),
+  );
+
   //  Add SOS Repository when implemented
   // sl.registerLazySingleton<SosRepository>(
   //   () => SosRepositoryImpl(
@@ -97,6 +106,9 @@ void _registerUseCases() {
   // Contacts Use Cases
   sl.registerLazySingleton<GetContactsUseCase>(() => GetContactsUseCase(sl()));
   sl.registerLazySingleton<AddContactUseCase>(() => AddContactUseCase(sl()));
+
+  // Profile Use Cases
+  sl.registerLazySingleton<UpdateProfileUseCase>(() => UpdateProfileUseCase(sl()));
 }
 
 /// Register BLoCs
@@ -126,4 +138,12 @@ void _registerBlocs() {
 
   // FakeCall BLoC
   sl.registerFactory<FakeCallBloc>(() => FakeCallBloc());
+
+  // Profile BLoC
+  sl.registerFactory<ProfileBloc>(
+    () => ProfileBloc(
+      updateProfileUseCase: sl<UpdateProfileUseCase>(),
+      profileRepository: sl<ProfileRepository>(),
+    ),
+  );
 }
