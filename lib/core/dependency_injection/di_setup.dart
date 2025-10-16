@@ -1,9 +1,15 @@
-import 'package:everest_hackathon/data/repositories_impl/contacts_repository_impl.dart';
+import 'package:everest_hackathon/data/repositories_impl/contacts_api_repository_impl.dart';
 import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
 import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
 import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 import 'package:everest_hackathon/features/contacts/bloc/contacts_bloc.dart';
 import 'package:everest_hackathon/features/track/bloc/track_bloc.dart';
+
+// SOS imports
+import '../../data/datasources/remote/sos_remote_source.dart';
+import '../../data/repositories_impl/sos_repository_impl.dart';
+import '../../domain/usecases/sos/send_sos_alert_usecase.dart';
+import '../../features/sos/bloc/sos_bloc.dart';
 
 import '../../core/network/api_client.dart';
 import '../../data/repositories_impl/profile_repository_impl.dart';
@@ -15,6 +21,7 @@ import '../../core/services/contact_storage_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/location_sharing_service.dart';
 import '../../data/datasources/remote/auth_remote_source.dart';
+import '../../data/datasources/remote/emergency_contacts_api_service.dart';
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/send_otp_usecase.dart';
@@ -71,6 +78,14 @@ Future<void> _registerCore() async {
 void _registerDataSources() {
   // Auth Remote Data Source
   sl.registerLazySingleton<AuthRemoteSource>(() => AuthRemoteSourceImpl(sl()));
+  
+  // Emergency Contacts API Service
+  sl.registerLazySingleton<EmergencyContactsApiService>(
+    () => EmergencyContactsApiService(apiClient: sl()),
+  );
+  
+  // SOS Remote Data Source
+  sl.registerLazySingleton<SosRemoteSource>(() => SosRemoteSourceImpl(sl()));
 }
 
 /// Register repositories
@@ -81,20 +96,20 @@ void _registerRepositories() {
   );
 
   // Contacts Repository
-  sl.registerLazySingleton<ContactsRepository>(() => ContactsRepositoryImpl());
+  sl.registerLazySingleton<ContactsRepository>(
+    () => ContactsApiRepositoryImpl(
+      apiService: sl(),
+      preferencesService: sl(),
+    ),
+  );
 
   // Profile Repository
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(sl<AuthRemoteSource>()),
   );
 
-  //  Add SOS Repository when implemented
-  // sl.registerLazySingleton<SosRepository>(
-  //   () => SosRepositoryImpl(
-  //     remoteSource: sl(),
-  //     localSource: sl(),
-  //   ),
-  // );
+  // SOS Repository
+  sl.registerLazySingleton<SosRepositoryImpl>(() => SosRepositoryImpl(sl()));
 }
 
 /// Register use cases
@@ -109,6 +124,9 @@ void _registerUseCases() {
 
   // Profile Use Cases
   sl.registerLazySingleton<UpdateProfileUseCase>(() => UpdateProfileUseCase(sl()));
+  
+  // SOS Use Cases
+  sl.registerLazySingleton<SendSosAlertUseCase>(() => SendSosAlertUseCase(sl()));
 }
 
 /// Register BLoCs
@@ -146,4 +164,7 @@ void _registerBlocs() {
       profileRepository: sl<ProfileRepository>(),
     ),
   );
+  
+  // SOS BLoC
+  sl.registerFactory<SosBloc>(() => SosBloc(sl(), sl(), sl(), sl()));
 }
