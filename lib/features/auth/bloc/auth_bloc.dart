@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/utils/logger.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/repositories/auth_repository.dart';
@@ -29,7 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await event.when(
         checkAuthStatus: () => _onCheckAuthStatus(emit),
         sendOtp: (phoneNumber) => _onSendOtp(phoneNumber, emit),
-        resendOtp: () => _onResendOtp(emit),
+        resendOtp: (phoneNumber) => _onResendOtp(phoneNumber, emit),
         verifyOtp: (phoneNumber, otp) => _onVerifyOtp(phoneNumber, otp, emit),
         updateProfile: (name, email) => 
             _onUpdateProfile(name, email, emit),
@@ -100,9 +101,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onResendOtp(Emitter<AuthState> emit) async {
-    if (_lastPhoneNumber != null) {
-      await _onSendOtp(_lastPhoneNumber!, emit);
+  Future<void> _onResendOtp(String? phoneNumber, Emitter<AuthState> emit) async {
+    Logger.bloc('AuthBloc', 'ResendOtp', data: {'phone': phoneNumber ?? _lastPhoneNumber});
+    
+    // Use provided phone number or fall back to last phone number
+    final phoneToUse = phoneNumber ?? _lastPhoneNumber;
+    
+    debugPrint('Resending OTP for phone: $phoneToUse');
+    
+    if (phoneToUse != null) {
+      // Store this as the last phone number for future resends
+      _lastPhoneNumber = phoneToUse;
+      await _onSendOtp(phoneToUse, emit);
+    } else {
+      // No phone number available
+      emit(const AuthState.error(
+        message: 'No phone number available for resending OTP',
+      ));
     }
   }
 

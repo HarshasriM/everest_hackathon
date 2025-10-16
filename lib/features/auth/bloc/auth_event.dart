@@ -12,7 +12,7 @@ abstract class AuthEvent with _$AuthEvent {
   const factory AuthEvent.sendOtp({required String phoneNumber}) = _SendOtp;
 
   /// Resend OTP event
-  const factory AuthEvent.resendOtp() = _ResendOtp;
+  const factory AuthEvent.resendOtp({String? phoneNumber}) = _ResendOtp;
 
   /// Verify OTP event
   const factory AuthEvent.verifyOtp({
