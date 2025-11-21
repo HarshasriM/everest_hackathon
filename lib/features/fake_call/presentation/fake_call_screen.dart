@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/dependency_injection/di_container.dart';
 import '../../../core/theme/color_scheme.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
@@ -10,7 +9,6 @@ import '../bloc/fake_call_event.dart';
 import '../bloc/fake_call_state.dart';
 import 'caller_details_screen.dart';
 import 'incoming_call_screen.dart';
-import 'in_call_screen.dart';
 
 /// Fake Call screen - Main screen
 class FakeCallScreen extends StatelessWidget {
@@ -19,7 +17,8 @@ class FakeCallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<FakeCallBloc>()..add(const FakeCallEvent.initialize()),
+      create: (context) =>
+          sl<FakeCallBloc>()..add(const FakeCallEvent.initialize()),
       child: const _FakeCallScreenContent(),
     );
   }
@@ -45,14 +44,12 @@ class _FakeCallScreenContent extends StatelessWidget {
               ),
             );
           },
+
+          // ❌ REMOVE callEnded navigation/reset — handled only by InCallScreen
           callEnded: () {
-            // Navigate back to main screen
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            }
-            // Reset the bloc
-            context.read<FakeCallBloc>().add(const FakeCallEvent.reset());
+            // Do nothing here.
           },
+
           error: (message) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -99,7 +96,6 @@ class _FakeCallScreenContent extends StatelessWidget {
 
                   // Get a call button
                   _buildGetCallButton(context, state),
-                  
                   SizedBox(height: 20.h),
                 ],
               ),
@@ -111,11 +107,15 @@ class _FakeCallScreenContent extends StatelessWidget {
   }
 
   Widget _buildCallerDetailsCard(BuildContext context, FakeCallState state) {
-    // Get saved details
     String? savedName;
     String? savedNumber;
-    
+
+    // Read caller details from all relevant states
     state.maybeWhen(
+      settingUp: (name, number, image, timer) {
+        savedName = name;
+        savedNumber = number;
+      },
       detailsSaved: (name, number, image, timer) {
         savedName = name;
         savedNumber = number;
@@ -124,14 +124,24 @@ class _FakeCallScreenContent extends StatelessWidget {
         savedName = name;
         savedNumber = number;
       },
+      incomingCall: (name, number, image) {
+        savedName = name;
+        savedNumber = number;
+      },
+      inCall: (name, number, image, duration) {
+        savedName = name;
+        savedNumber = number;
+      },
+      callEnded: () {
+        // Keep previous details
+      },
       orElse: () {},
     );
 
-    final hasDetails = savedName != null && savedName!.isNotEmpty;
+    final hasDetails = (savedName != null && savedName!.isNotEmpty);
 
     return GestureDetector(
       onTap: () async {
-        // Navigate to caller details screen
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => BlocProvider.value(
@@ -170,7 +180,7 @@ class _FakeCallScreenContent extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    hasDetails ? savedNumber ?? '' : 'Set caller details',
+                    hasDetails ? (savedNumber ?? '') : 'Set caller details',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey[600],
@@ -192,7 +202,11 @@ class _FakeCallScreenContent extends StatelessWidget {
 
   Widget _buildGetCallButton(BuildContext context, FakeCallState state) {
     final canStartCall = state.maybeWhen(
+      settingUp: (name, number, image, timer) => true,
       detailsSaved: (name, number, image, timer) => true,
+      waiting: (name, number, image, remaining) => true,
+      incomingCall: (name, number, image) => true,
+      inCall: (name, number, image, duration) => true,
       orElse: () => false,
     );
 
@@ -223,9 +237,9 @@ class _FakeCallScreenContent extends StatelessWidget {
           child: InkWell(
             onTap: canStartCall && !isWaiting
                 ? () {
-                    context.read<FakeCallBloc>().add(
-                          const FakeCallEvent.startFakeCall(),
-                        );
+                    context
+                        .read<FakeCallBloc>()
+                        .add(const FakeCallEvent.startFakeCall());
                   }
                 : null,
             borderRadius: BorderRadius.circular(28.r),
