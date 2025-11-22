@@ -29,7 +29,7 @@ import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
 
 import '../../features/fake_call/bloc/fake_call_bloc.dart';
-
+import '../../features/fake_call/data/fake_call_local_storage.dart';
 import 'di_container.dart';
 
 /// Setup dependency injection
@@ -145,6 +145,9 @@ void _registerBlocs() {
     () => TrackBloc(locationService: sl(), locationSharingService: sl()),
   );
 
+  //fake call
+  sl.registerLazySingleton<FakeCallLocalStorage>(() => FakeCallLocalStorage());
+
   // Contacts BLoC
   sl.registerFactory<ContactsBloc>(
     () => ContactsBloc(
@@ -155,7 +158,8 @@ void _registerBlocs() {
   );
 
   // FakeCall BLoC
-  sl.registerFactory<FakeCallBloc>(() => FakeCallBloc());
+
+sl.registerLazySingleton<FakeCallBloc>(() => FakeCallBloc(FakeCallLocalStorage()));
 
   // Profile BLoC
   sl.registerFactory<ProfileBloc>(
