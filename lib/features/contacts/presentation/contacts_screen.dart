@@ -79,8 +79,31 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       state.contacts.isNotEmpty) {
                     _hasContacts = true;
                   }
+                  // Reset flag if all contacts are deleted (list is empty and not searching)
+                  else if (_searchController.text.isEmpty &&
+                      state.contacts.isEmpty) {
+                    _hasContacts = false;
+                  }
                   // If search is active but we previously had contacts, keep flag true
                   // (don't reset _hasContacts to false)
+                } else if (state is ContactsSuccess) {
+                  // Handle success state similarly
+                  if (_searchController.text.isEmpty &&
+                      state.contacts.isNotEmpty) {
+                    _hasContacts = true;
+                  } else if (_searchController.text.isEmpty &&
+                      state.contacts.isEmpty) {
+                    _hasContacts = false;
+                  }
+                } else if (state is ContactsWarning) {
+                  // Handle warning state similarly
+                  if (_searchController.text.isEmpty &&
+                      state.contacts.isNotEmpty) {
+                    _hasContacts = true;
+                  } else if (_searchController.text.isEmpty &&
+                      state.contacts.isEmpty) {
+                    _hasContacts = false;
+                  }
                 }
                 return _hasContacts
                     ? Padding(
