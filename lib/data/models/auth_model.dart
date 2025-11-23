@@ -28,12 +28,14 @@ class OtpSendResponseModel {
 class AuthModel {
   final String message;
   final String userId;
+  final String? token;
   final UserModel? user;
   final bool isProfileComplete;
 
   const AuthModel({
     required this.message,
     required this.userId,
+    this.token,
     this.user,
     required this.isProfileComplete,
   });
@@ -43,6 +45,7 @@ class AuthModel {
       return AuthModel(
         message: json['message']?.toString() ?? 'Authentication successful',
         userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
+        token: json['token']?.toString() ?? json['accessToken']?.toString(),
         user: json['user'] != null
             ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
             : null,
@@ -60,6 +63,7 @@ class AuthModel {
     return {
       'message': message,
       'userId': userId,
+      'token': token,
       'user': user?.toJson(),
       'isProfileComplete': isProfileComplete,
     };
@@ -69,6 +73,7 @@ class AuthModel {
   AuthEntity toEntity() {
     return AuthEntity(
       userId: userId,
+      token: token,
       isProfileComplete: isProfileComplete,
       user: user?.toEntity(),
     );
@@ -79,6 +84,7 @@ class AuthModel {
     return AuthModel(
       message: 'Success',
       userId: entity.userId,
+      token: entity.token,
       user: entity.user != null ? UserModel.fromEntity(entity.user!) : null,
       isProfileComplete: entity.isProfileComplete,
     );
