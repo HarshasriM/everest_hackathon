@@ -40,6 +40,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
     super.dispose();
   }
 
+  void _showSnackbar(String message, {bool isSuccess = false}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isSuccess ? Colors.green : Colors.orange,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -148,67 +160,120 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _buildContactsList() {
-    return BlocBuilder<ContactsBloc, ContactsState>(
+    return BlocListener<ContactsBloc, ContactsState>(
       bloc: _contactsBloc,
-      builder: (context, state) {
-        print(
-          '[ContactsScreen] Building contacts list with state: ${state.runtimeType}',
-        );
-        if (state is ContactsInitial || state is ContactsLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is ContactsLoaded) {
-          if (state.contacts.isEmpty) {
-            // If user is searching and no match found, show specialized message
-            final searching = _searchController.text.isNotEmpty;
-            return _buildEmptyState(searching: searching);
-          }
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            itemCount: state.contacts.length,
-            itemBuilder: (context, index) {
-              final contact = state.contacts[index];
-              return ContactCard(
-                contact: contact,
-                onCall: () => _callContact(contact),
-                onMessage: () => _messageContact(contact),
-                onEdit: () => _editContact(contact),
-                onDelete: () => _deleteContact(contact),
-              );
-            },
-          );
-        } else if (state is ContactsError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, size: 64.sp, color: Colors.red),
-                SizedBox(height: 16.h),
-                Text(
-                  'Error loading contacts',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  state.message,
-                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 24.h),
-                ElevatedButton(
-                  onPressed: () {
-                    _contactsBloc.add(const LoadContactsEvent());
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
+      listener: (context, state) {
+        // Show warning snackbar for duplicate/already exists errors
+        if (state is ContactsWarning) {
+          _showSnackbar(state.message, isSuccess: false);
         }
-        return const SizedBox.shrink();
+        // Show success snackbar when contact operation is successful
+        else if (state is ContactsSuccess) {
+          _showSnackbar(state.message, isSuccess: true);
+        }
       },
+      child: BlocBuilder<ContactsBloc, ContactsState>(
+        bloc: _contactsBloc,
+        builder: (context, state) {
+          print(
+            '[ContactsScreen] Building contacts list with state: ${state.runtimeType}',
+          );
+          if (state is ContactsInitial || state is ContactsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ContactsLoaded) {
+            if (state.contacts.isEmpty) {
+              // If user is searching and no match found, show specialized message
+              final searching = _searchController.text.isNotEmpty;
+              return _buildEmptyState(searching: searching);
+            }
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              itemCount: state.contacts.length,
+              itemBuilder: (context, index) {
+                final contact = state.contacts[index];
+                return ContactCard(
+                  contact: contact,
+                  onCall: () => _callContact(contact),
+                  onMessage: () => _messageContact(contact),
+                  onEdit: () => _editContact(contact),
+                  onDelete: () => _deleteContact(contact),
+                );
+              },
+            );
+          } else if (state is ContactsSuccess) {
+            // Show the contacts list after successful operation
+            if (state.contacts.isEmpty) {
+              final searching = _searchController.text.isNotEmpty;
+              return _buildEmptyState(searching: searching);
+            }
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              itemCount: state.contacts.length,
+              itemBuilder: (context, index) {
+                final contact = state.contacts[index];
+                return ContactCard(
+                  contact: contact,
+                  onCall: () => _callContact(contact),
+                  onMessage: () => _messageContact(contact),
+                  onEdit: () => _editContact(contact),
+                  onDelete: () => _deleteContact(contact),
+                );
+              },
+            );
+          } else if (state is ContactsWarning) {
+            // Show the contacts list even when there's a warning
+            if (state.contacts.isEmpty) {
+              final searching = _searchController.text.isNotEmpty;
+              return _buildEmptyState(searching: searching);
+            }
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              itemCount: state.contacts.length,
+              itemBuilder: (context, index) {
+                final contact = state.contacts[index];
+                return ContactCard(
+                  contact: contact,
+                  onCall: () => _callContact(contact),
+                  onMessage: () => _messageContact(contact),
+                  onEdit: () => _editContact(contact),
+                  onDelete: () => _deleteContact(contact),
+                );
+              },
+            );
+          } else if (state is ContactsError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error, size: 64.sp, color: Colors.red),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Error loading contacts',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    state.message,
+                    style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 24.h),
+                  ElevatedButton(
+                    onPressed: () {
+                      _contactsBloc.add(const LoadContactsEvent());
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 
@@ -303,7 +368,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
             color: Colors.black87,
           ),
         ),
-        content: Text( 'Are you sure you want to delete ${contact.name}?', style: TextStyle(fontSize: 16, color: Colors.black87), ),
+        content: Text(
+          'Are you sure you want to delete ${contact.name}?',
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+        ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           Row(
