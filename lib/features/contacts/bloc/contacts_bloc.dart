@@ -72,12 +72,22 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       // Repository has updated cache, so get cached contacts without API call
       final contacts = (_repository as ContactsApiRepositoryImpl)
           .getCachedContacts();
-      emit(ContactsLoaded(contacts));
+      emit(ContactsSuccess('Contact added successfully!', contacts));
 
       Logger.info('Contact added successfully in BLoC: ${addedContact.name}');
     } catch (e) {
       Logger.error('Failed to add contact in BLoC', error: e);
-      emit(ContactsError('Failed to add contact: ${e.toString()}'));
+      final errorMessage = e.toString();
+
+      // Handle duplicate contact error gracefully with warning
+      if (errorMessage.contains('already exists') ||
+          errorMessage.contains('duplicate')) {
+        final contacts = (_repository as ContactsApiRepositoryImpl)
+            .getCachedContacts();
+        emit(ContactsWarning(errorMessage, contacts));
+      } else {
+        emit(ContactsError('Failed to add contact: $errorMessage'));
+      }
     }
   }
 
@@ -97,7 +107,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       emit(const ContactsLoading());
       await _repository.updateContact(event.contact);
       final contacts = await _getContactsUseCase();
-      emit(ContactsLoaded(contacts));
+      emit(ContactsSuccess('Contact updated successfully!', contacts));
     } catch (e) {
       Logger.error('Failed to update contact', error: e);
       emit(ContactsError(e.toString()));
@@ -118,7 +128,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       emit(const ContactsLoading());
       await _repository.deleteContact(event.contactId);
       final contacts = await _getContactsUseCase();
-      emit(ContactsLoaded(contacts));
+      emit(ContactsSuccess('Contact deleted successfully!', contacts));
     } catch (e) {
       Logger.error('Failed to delete contact', error: e);
       emit(ContactsError(e.toString()));
