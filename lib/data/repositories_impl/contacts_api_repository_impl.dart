@@ -18,8 +18,8 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
   ContactsApiRepositoryImpl({
     required EmergencyContactsApiService apiService,
     required AppPreferencesService preferencesService,
-  })  : _apiService = apiService,
-        _preferencesService = preferencesService;
+  }) : _apiService = apiService,
+       _preferencesService = preferencesService;
 
   void _notifyListeners() {
     _contactsController.add(List.from(_contacts));
@@ -39,10 +39,12 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
     try {
       Logger.info('Fetching emergency contacts from API');
       final userId = await _getCurrentUserId();
-      
+
       final apiContacts = await _apiService.getEmergencyContacts(userId);
-      _contacts = apiContacts.map((apiContact) => apiContact.toEntity()).toList();
-      
+      _contacts = apiContacts
+          .map((apiContact) => apiContact.toEntity())
+          .toList();
+
       Logger.info('Successfully fetched ${_contacts.length} contacts from API');
       _notifyListeners();
       return List.from(_contacts);
@@ -71,7 +73,7 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
       );
 
       final newContact = apiContact.toEntity();
-      
+
       // Add to local cache immediately for instant UI update
       _contacts.add(newContact);
       _notifyListeners();
@@ -87,7 +89,12 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
   @override
   Future<Contact> updateContact(Contact contact) async {
     try {
-      Logger.info('Updating contact via API: ${contact.name}');
+      Logger.info(
+        'Updating contact via API - id: "${contact.id}", name: "${contact.name}"',
+      );
+      if (contact.id.isEmpty) {
+        throw Exception('Cannot update contact: Contact ID is empty');
+      }
       final userId = await _getCurrentUserId();
 
       final apiContact = await _apiService.updateEmergencyContact(
@@ -124,7 +131,10 @@ class ContactsApiRepositoryImpl implements ContactsRepository {
   @override
   Future<void> deleteContact(String contactId) async {
     try {
-      Logger.info('Deleting contact via API: $contactId');
+      Logger.info('Deleting contact via API - contactId: "$contactId"');
+      if (contactId.isEmpty) {
+        throw Exception('Cannot delete contact: Contact ID is empty');
+      }
       final userId = await _getCurrentUserId();
 
       await _apiService.deleteEmergencyContact(

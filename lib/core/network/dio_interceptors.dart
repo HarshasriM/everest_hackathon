@@ -6,20 +6,36 @@ import '../../core/utils/logger.dart';
 /// Authentication interceptor to add auth token to requests
 class AuthInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    final prefs = AppPreferencesService();
-    await prefs.init();
-    final token = await prefs.getAuthToken();
-    
-    if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    _handleRequest(options, handler);
+  }
+
+  Future<void> _handleRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    try {
+      final prefs = AppPreferencesService();
+      await prefs.init();
+      final token = await prefs.getAuthToken();
+
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        Logger.warning(
+          'No auth token available for request to ${options.path}',
+        );
+      }
+
+      // Add device info headers
+      options.headers['X-Device-Type'] = defaultTargetPlatform.name;
+      options.headers['X-Request-Time'] = DateTime.now().toIso8601String();
+
+      handler.next(options);
+    } catch (e) {
+      Logger.error('Error in AuthInterceptor', error: e);
+      handler.next(options);
     }
-    
-    // Add device info headers
-    options.headers['X-Device-Type'] = defaultTargetPlatform.name;
-    options.headers['X-Request-Time'] = DateTime.now().toIso8601String();
-    
-    super.onRequest(options, handler);
   }
 
   @override
@@ -28,10 +44,10 @@ class AuthInterceptor extends Interceptor {
       // Token might be expired, try to refresh
       final prefs = AppPreferencesService();
       await prefs.init();
-      
+
       // Clear stored token and redirect to login
       await prefs.clearAuthData();
-      
+
       // You can emit an event here to notify the app about unauthorized access
       // EventBus().fire(UnauthorizedEvent());
     }
@@ -56,7 +72,9 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (kDebugMode) {
-      Logger.debug('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+      Logger.debug(
+        'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+      );
       Logger.debug('Response: ${response.data}');
     }
     super.onResponse(response, handler);
@@ -65,7 +83,9 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
-      Logger.error('ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
+      Logger.error(
+        'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}',
+      );
       Logger.error('Error: ${err.message}');
       if (err.response != null) {
         Logger.error('Error Response: ${err.response?.data}');
@@ -84,16 +104,14 @@ class ErrorInterceptor extends Interceptor {
       final data = err.response?.data;
       if (data is Map<String, dynamic>) {
         // Check for common error message fields
-        final message = data['message'] ?? 
-                       data['error'] ?? 
-                       data['error_description'] ?? 
-                       data['detail'];
-        
+        final message =
+            data['message'] ??
+            data['error'] ??
+            data['error_description'] ??
+            data['detail'];
+
         if (message != null) {
-          err = err.copyWith(
-            error: message,
-            message: message.toString(),
-          );
+          err = err.copyWith(error: message, message: message.toString());
         }
 
         // Handle validation errors
@@ -102,15 +120,12 @@ class ErrorInterceptor extends Interceptor {
           final errorMessages = errors.values
               .expand((e) => e is List ? e : [e])
               .join(', ');
-          
-          err = err.copyWith(
-            error: errorMessages,
-            message: errorMessages,
-          );
+
+          err = err.copyWith(error: errorMessages, message: errorMessages);
         }
       }
     }
-    
+
     super.onError(err, handler);
   }
 }
@@ -120,27 +135,28 @@ class RetryInterceptor extends Interceptor {
   final int maxRetries;
   final int retryDelay;
 
-  RetryInterceptor({
-    this.maxRetries = 3,
-    this.retryDelay = 1000,
-  });
+  RetryInterceptor({this.maxRetries = 3, this.retryDelay = 1000});
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldRetry(err)) {
       final options = err.requestOptions;
       final retryCount = options.extra['retry_count'] ?? 0;
-      
+
       if (retryCount < maxRetries) {
         options.extra['retry_count'] = retryCount + 1;
-        
+
         if (kDebugMode) {
-          Logger.debug('Retrying request... Attempt ${retryCount + 1}/$maxRetries');
+          Logger.debug(
+            'Retrying request... Attempt ${retryCount + 1}/$maxRetries',
+          );
         }
-        
+
         // Add delay before retry
-        await Future.delayed(Duration(milliseconds: retryDelay * (retryCount + 1) as int));
-        
+        await Future.delayed(
+          Duration(milliseconds: retryDelay * (retryCount + 1) as int),
+        );
+
         try {
           final response = await Dio().fetch(options);
           return handler.resolve(response);
@@ -149,14 +165,13 @@ class RetryInterceptor extends Interceptor {
         }
       }
     }
-    
+
     super.onError(err, handler);
   }
 
   bool _shouldRetry(DioException err) {
     return err.type == DioExceptionType.connectionError ||
-           err.type == DioExceptionType.connectionTimeout ||
-           (err.response?.statusCode != null && 
-            err.response!.statusCode! >= 500);
+        err.type == DioExceptionType.connectionTimeout ||
+        (err.response?.statusCode != null && err.response!.statusCode! >= 500);
   }
 }

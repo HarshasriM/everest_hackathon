@@ -65,16 +65,16 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   ) async {
     try {
       Logger.info('Adding contact in BLoC: ${event.contact.name}');
-      
+
       // Add the contact via use case (repository will update cache and notify)
       final addedContact = await _addContactUseCase(event.contact);
-      
+
       // Repository has updated cache, so get cached contacts without API call
-      final contacts = (_repository as ContactsApiRepositoryImpl).getCachedContacts();
+      final contacts = (_repository as ContactsApiRepositoryImpl)
+          .getCachedContacts();
       emit(ContactsLoaded(contacts));
-      
+
       Logger.info('Contact added successfully in BLoC: ${addedContact.name}');
-      
     } catch (e) {
       Logger.error('Failed to add contact in BLoC', error: e);
       emit(ContactsError('Failed to add contact: ${e.toString()}'));
@@ -86,11 +86,20 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     Emitter<ContactsState> emit,
   ) async {
     try {
+      Logger.info(
+        'Update contact event - contactId: "${event.contact.id}", name: "${event.contact.name}"',
+      );
+      if (event.contact.id.isEmpty) {
+        throw Exception(
+          'Cannot update contact: Contact ID is empty or invalid',
+        );
+      }
       emit(const ContactsLoading());
       await _repository.updateContact(event.contact);
       final contacts = await _getContactsUseCase();
       emit(ContactsLoaded(contacts));
     } catch (e) {
+      Logger.error('Failed to update contact', error: e);
       emit(ContactsError(e.toString()));
     }
   }
@@ -100,11 +109,18 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     Emitter<ContactsState> emit,
   ) async {
     try {
+      Logger.info('Delete contact event - contactId: ${event.contactId}');
+      if (event.contactId.isEmpty) {
+        throw Exception(
+          'Cannot delete contact: Contact ID is empty or invalid',
+        );
+      }
       emit(const ContactsLoading());
       await _repository.deleteContact(event.contactId);
       final contacts = await _getContactsUseCase();
       emit(ContactsLoaded(contacts));
     } catch (e) {
+      Logger.error('Failed to delete contact', error: e);
       emit(ContactsError(e.toString()));
     }
   }

@@ -204,7 +204,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       hintText: 'Enter 10-digit mobile number',
-                      helperText: 'Number will be saved with +91 prefix',
+                      // helperText: 'Number will be saved with +91 prefix',
                       helperStyle: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey[600],

@@ -15,7 +15,8 @@ class EmergencyContactsResponse {
   factory EmergencyContactsResponse.fromJson(Map<String, dynamic> json) {
     return EmergencyContactsResponse(
       success: json['success'] ?? false,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((item) => EmergencyContactApiModel.fromJson(item))
               .toList() ??
           [],
@@ -64,8 +65,10 @@ class EmergencyContactApiModel {
   });
 
   factory EmergencyContactApiModel.fromJson(Map<String, dynamic> json) {
+    // Handle multiple ID field names from API responses
+    final id = json['_id'] ?? json['id'] ?? json['contact_id'] ?? '';
     return EmergencyContactApiModel(
-      id: json['_id'] ?? json['id'] ?? '',
+      id: id,
       user: json['user'] ?? '',
       name: json['name'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
