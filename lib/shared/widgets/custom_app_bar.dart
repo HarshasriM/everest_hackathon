@@ -6,25 +6,19 @@ import 'package:go_router/go_router.dart';
 
 /// Custom AppBar for SHE - Woman Safety Application
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({
-    super.key,
-  });
+  const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Colors.white.withOpacity(0.95),
-          ],
-        ),
+        gradient: AppColorScheme.getSurfaceGradient(isDark),
         boxShadow: [
           BoxShadow(
-            color: AppColorScheme.primaryColor.withOpacity(0.08),
+            color: theme.colorScheme.primary.withOpacity(0.08),
             blurRadius: 2,
             offset: const Offset(0, 2),
           ),
@@ -47,7 +41,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 isAvatar: true,
               ),
               const SizedBox(width: 16),
-              
+
               // App Title with Enhanced Styling
               Expanded(
                 child: Column(
@@ -56,7 +50,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     ShaderMask(
                       shaderCallback: (bounds) =>
-                          AppColorScheme.primaryGradient.createShader(bounds),
+                          AppColorScheme.getPrimaryGradient(
+                            isDark,
+                          ).createShader(bounds),
                       child: const Text(
                         'SHE',
                         style: TextStyle(
@@ -74,14 +70,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade600,
+                        color: theme.colorScheme.onSurfaceVariant,
                         letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // AI Assistant with Badge
               _AppBarIconButton(
                 icon: Icons.support_agent,
@@ -135,9 +131,10 @@ class _AppBarIconButtonState extends State<_AppBarIconButton>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.92,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -148,6 +145,9 @@ class _AppBarIconButtonState extends State<_AppBarIconButton>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Tooltip(
       message: widget.tooltip,
       child: GestureDetector(
@@ -164,23 +164,23 @@ class _AppBarIconButtonState extends State<_AppBarIconButton>
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: widget.isAvatar
-                      ? AppColorScheme.primaryGradient
+                      ? AppColorScheme.getPrimaryGradient(isDark)
                       : LinearGradient(
                           colors: [
-                            AppColorScheme.primaryColor.withOpacity(0.1),
-                            AppColorScheme.primaryColor.withOpacity(0.05),
+                            theme.colorScheme.primary.withOpacity(0.1),
+                            theme.colorScheme.primary.withOpacity(0.05),
                           ],
                         ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: widget.isAvatar
                         ? Colors.transparent
-                        : AppColorScheme.primaryColor.withOpacity(0.2),
+                        : theme.colorScheme.primary.withOpacity(0.2),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColorScheme.primaryColor.withOpacity(0.15),
+                      color: theme.colorScheme.primary.withOpacity(0.15),
                       blurRadius: 2,
                       offset: const Offset(0, 2),
                     ),
@@ -190,8 +190,8 @@ class _AppBarIconButtonState extends State<_AppBarIconButton>
                   widget.icon,
                   size: 24,
                   color: widget.isAvatar
-                      ? Colors.white
-                      : AppColorScheme.primaryColor,
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.primary,
                 ),
               ),
               // Online/Active Badge
@@ -208,7 +208,7 @@ class _AppBarIconButtonState extends State<_AppBarIconButton>
                       ),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         width: 2,
                       ),
                       boxShadow: [
