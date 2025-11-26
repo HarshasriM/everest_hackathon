@@ -56,9 +56,13 @@ class EmergencyContactsApiService {
         ApiEndpoints.getEmergencyContacts(userId),
       );
 
-      if (response.statusCode == 200 && response.data != null) {
-        Logger.debug('API Response for getEmergencyContacts: ${response.data}');
+      Logger.debug('Get contacts response status: ${response.statusCode}');
+      Logger.debug('Get contacts response data: ${response.data}');
+      Logger.debug(
+        'Get contacts response data type: ${response.data.runtimeType}',
+      );
 
+      if (response.statusCode == 200 && response.data != null) {
         try {
           final apiResponse = EmergencyContactsResponse.fromJson(response.data);
 
@@ -68,9 +72,9 @@ class EmergencyContactsApiService {
             );
             return apiResponse.data;
           } else {
-            throw Exception(
-              apiResponse.message ?? 'Failed to fetch emergency contacts',
-            );
+            final errorMsg =
+                apiResponse.message ?? 'Failed to fetch emergency contacts';
+            throw Exception(errorMsg);
           }
         } catch (parseError) {
           Logger.error('Failed to parse API response', error: parseError);
@@ -108,17 +112,31 @@ class EmergencyContactsApiService {
         data: request.toJson(),
       );
 
+      Logger.debug('Add response status: ${response.statusCode}');
+      Logger.debug('Add response data: ${response.data}');
+      Logger.debug('Add response data type: ${response.data.runtimeType}');
+
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           response.data != null) {
-        final apiResponse = EmergencyContactResponse.fromJson(response.data);
+        try {
+          final apiResponse = EmergencyContactResponse.fromJson(response.data);
 
-        if (apiResponse.success && apiResponse.data != null) {
-          Logger.info(
-            'Successfully added emergency contact: ${apiResponse.message}',
-          );
-          return apiResponse.data!;
-        } else {
-          throw Exception(apiResponse.message);
+          if (apiResponse.success && apiResponse.data != null) {
+            Logger.info(
+              'Successfully added emergency contact: ${apiResponse.message}',
+            );
+            return apiResponse.data!;
+          } else {
+            throw Exception(
+              apiResponse.message.isNotEmpty
+                  ? apiResponse.message
+                  : 'Failed to add emergency contact',
+            );
+          }
+        } catch (parseError) {
+          Logger.error('Failed to parse add response', error: parseError);
+          Logger.debug('Raw response: ${response.data}');
+          throw Exception('Invalid response format from server');
         }
       } else {
         throw Exception(
@@ -140,7 +158,14 @@ class EmergencyContactsApiService {
     required String relationship,
   }) async {
     try {
-      Logger.info('Updating emergency contact: $contactId for user: $userId');
+      Logger.info(
+        'Updating emergency contact - contactId: "$contactId", userId: "$userId"',
+      );
+      if (contactId.isEmpty || userId.isEmpty) {
+        throw Exception(
+          'Cannot update: contactId or userId is empty (contactId: "$contactId", userId: "$userId")',
+        );
+      }
 
       final request = UpdateEmergencyContactRequest(
         name: name,
@@ -148,24 +173,42 @@ class EmergencyContactsApiService {
         relationship: relationship,
       );
 
+      final endpoint = ApiEndpoints.updateEmergencyContact(userId, contactId);
+      Logger.info('Update endpoint: $endpoint');
       final response = await _apiClient.put(
-        ApiEndpoints.updateEmergencyContact(userId, contactId),
-        data: request.toJson(),
-      );
+        endpoint, 
+        data: request.toJson());
 
-      if (response.statusCode == 200 && response.data != null) {
-        final apiResponse = EmergencyContactResponse.fromJson(response.data);
+      Logger.debug('Update response status: ${response.statusCode}');
+      Logger.debug('Update response data: ${response.data}');
+      Logger.debug('Update response data type: ${response.data.runtimeType}');
 
-        if (apiResponse.success && apiResponse.data != null) {
-          Logger.info(
-            'Successfully updated emergency contact: ${apiResponse.message}',
-          );
-          return apiResponse.data!;
-        } else {
-          throw Exception(apiResponse.message);
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
+        try {
+          final apiResponse = EmergencyContactResponse.fromJson(response.data);
+
+          if (apiResponse.success && apiResponse.data != null) {
+            Logger.info(
+              'Successfully updated emergency contact: ${apiResponse.message}',
+            );
+            return apiResponse.data!;
+          } else {
+            // Handle case where success is false but we still got 200 (e.g., Twilio unverified number)
+            final errorMessage = apiResponse.message.isNotEmpty
+                ? apiResponse.message
+                : 'Failed to update emergency contact';
+            throw Exception(errorMessage);
+          }
+        } catch (parseError) {
+          Logger.error('Failed to parse update response', error: parseError);
+          Logger.debug('Raw response: ${response.data}');
+          throw Exception('Invalid response format from server');
         }
       } else {
-        throw Exception('Invalid response from server');
+        throw Exception(
+          'Invalid response from server (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
       Logger.error('Failed to update emergency contact', error: e);
@@ -179,24 +222,51 @@ class EmergencyContactsApiService {
     required String contactId,
   }) async {
     try {
-      Logger.info('Deleting emergency contact: $contactId for user: $userId');
-
-      final response = await _apiClient.delete(
-        ApiEndpoints.deleteEmergencyContact(userId, contactId),
+      Logger.info(
+        'Deleting emergency contact - contactId: "$contactId", userId: "$userId"',
       );
+      if (contactId.isEmpty || userId.isEmpty) {
+        throw Exception(
+          'Cannot delete: contactId or userId is empty (contactId: "$contactId", userId: "$userId")',
+        );
+      }
 
-      if (response.statusCode == 200 && response.data != null) {
-        final apiResponse = EmergencyContactResponse.fromJson(response.data);
+      final endpoint = ApiEndpoints.deleteEmergencyContact(userId, contactId);
+      Logger.info('Delete endpoint: $endpoint');
+      final response = await _apiClient.delete(endpoint);
 
-        if (apiResponse.success) {
-          Logger.info(
-            'Successfully deleted emergency contact: ${apiResponse.message}',
-          );
-        } else {
-          throw Exception(apiResponse.message);
+      Logger.debug('Delete response status: ${response.statusCode}');
+      Logger.debug('Delete response data: ${response.data}');
+      Logger.debug('Delete response data type: ${response.data.runtimeType}');
+
+      if ((response.statusCode == 200 || response.statusCode == 204) &&
+          response.data != null) {
+        try {
+          final apiResponse = EmergencyContactResponse.fromJson(response.data);
+
+          if (apiResponse.success) {
+            Logger.info(
+              'Successfully deleted emergency contact: ${apiResponse.message}',
+            );
+          } else {
+            throw Exception(
+              apiResponse.message.isNotEmpty
+                  ? apiResponse.message
+                  : 'Failed to delete emergency contact',
+            );
+          }
+        } catch (parseError) {
+          Logger.error('Failed to parse delete response', error: parseError);
+          Logger.debug('Raw response: ${response.data}');
+          throw Exception('Invalid response format from server');
         }
+      } else if (response.statusCode == 204) {
+        // No content response is also valid for delete
+        Logger.info('Successfully deleted emergency contact (no content)');
       } else {
-        throw Exception('Invalid response from server');
+        throw Exception(
+          'Invalid response from server (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
       Logger.error('Failed to delete emergency contact', error: e);

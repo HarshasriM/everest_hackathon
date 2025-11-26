@@ -35,3 +35,15 @@ class PhoneContactsError extends ContactsState {
   final String message;
   const PhoneContactsError(this.message);
 }
+
+class ContactsWarning extends ContactsState {
+  final String message;
+  final List<Contact> contacts;
+  const ContactsWarning(this.message, this.contacts);
+}
+
+class ContactsSuccess extends ContactsState {
+  final String message;
+  final List<Contact> contacts;
+  const ContactsSuccess(this.message, this.contacts);
+}

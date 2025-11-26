@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(height: 40.h),
                         
                         // Terms and Privacy
-                        Center(
+                        Center( 
                           child: Padding(
                             padding: EdgeInsets.only(bottom: 20.h),
                             child: Text.rich(

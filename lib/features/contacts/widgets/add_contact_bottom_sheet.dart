@@ -204,7 +204,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       hintText: 'Enter 10-digit mobile number',
-                      helperText: 'Number will be saved with +91 prefix',
+                      // helperText: 'Number will be saved with +91 prefix',
                       helperStyle: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey[600],
@@ -225,19 +225,22 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a phone number';
                       }
-                      
+
                       // Remove any non-digit characters for validation
-                      final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
-                      
+                      final digitsOnly = value.replaceAll(
+                        RegExp(r'[^0-9]'),
+                        '',
+                      );
+
                       if (digitsOnly.length != 10) {
                         return 'Enter a valid 10-digit mobile number';
                       }
-                      
+
                       // Check if it's a valid Indian mobile number (starts with 6-9)
                       if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(digitsOnly)) {
                         return 'Enter a valid Indian mobile number';
                       }
-                      
+
                       return null;
                     },
                   ),
@@ -389,16 +392,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.contact == null
-                  ? 'Contact added successfully!'
-                  : 'Contact updated successfully!',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Don't show success snackbar here - let the BLoC handle success/error states
       }
     } catch (e) {
       if (mounted) {
@@ -420,22 +414,22 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
   String _formatPhoneWithCountryCode(String input) {
     // Remove all non-digit characters
     String digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     // If it's a 10-digit number, add +91 prefix
     if (digitsOnly.length == 10) {
       return '+91$digitsOnly';
     }
-    
+
     // If it already has country code (13 digits starting with 91), add + if missing
     if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
       return '+$digitsOnly';
     }
-    
+
     // If it already has + and country code, return as is
     if (input.startsWith('+91') && digitsOnly.length == 12) {
       return input;
     }
-    
+
     // Default: add +91 to whatever digits we have
     return '+91$digitsOnly';
   }
