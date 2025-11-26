@@ -45,23 +45,21 @@ class _FakeCallScreenContent extends StatelessWidget {
             );
           },
 
-          // ❌ REMOVE callEnded navigation/reset — handled only by InCallScreen
-          callEnded: () {
-            // Do nothing here.
-          },
-
+          // callEnded is ignored here (handled elsewhere)
+          callEnded: () {},
           error: (message) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: Colors.red,
-              ),
+              SnackBar(content: Text(message), backgroundColor: Colors.red),
             );
           },
           orElse: () {},
         );
       },
       builder: (context, state) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        final isDark = theme.brightness == Brightness.dark;
+
         return Scaffold(
           appBar: const CustomAppBar(),
           body: SafeArea(
@@ -76,7 +74,8 @@ class _FakeCallScreenContent extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 32.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black.withAlpha(180),
+                      // subtle in dark, strong in light
+                      color: colorScheme.onSurface.withOpacity(isDark ? 0.92 : 0.95),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -84,7 +83,7 @@ class _FakeCallScreenContent extends StatelessWidget {
                     'Place a fake phone call and pretend you are talking to someone.',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   SizedBox(height: 32.h),
@@ -139,6 +138,9 @@ class _FakeCallScreenContent extends StatelessWidget {
     );
 
     final hasDetails = (savedName != null && savedName!.isNotEmpty);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () async {
@@ -154,12 +156,12 @@ class _FakeCallScreenContent extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface, // adapts for theme
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: theme.shadowColor.withOpacity(isDark ? 0.35 : 0.06),
+              blurRadius: isDark ? 8 : 10,
               offset: const Offset(0, 4),
             ),
           ],
@@ -175,25 +177,18 @@ class _FakeCallScreenContent extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     hasDetails ? (savedNumber ?? '') : 'Set caller details',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.edit,
-              color: AppColorScheme.primaryColor,
-              size: 24.sp,
-            ),
+            Icon(Icons.edit, color: colorScheme.primary, size: 24.sp),
           ],
         ),
       ),
@@ -215,17 +210,25 @@ class _FakeCallScreenContent extends StatelessWidget {
       orElse: () => false,
     );
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Button background (use primary, but slightly muted in dark)
+    final buttonColor = colorScheme.primary;
+    final buttonShadowColor = colorScheme.primary.withOpacity(isDark ? 0.18 : 0.3);
+
     return Center(
       child: Container(
         width: 200.w,
         height: 52.h,
         decoration: BoxDecoration(
-          color: AppColorScheme.primaryColor,
+          color: buttonColor,
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: canStartCall
               ? [
                   BoxShadow(
-                    color: AppColorScheme.primaryColor.withOpacity(0.3),
+                    color: buttonShadowColor,
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -237,9 +240,9 @@ class _FakeCallScreenContent extends StatelessWidget {
           child: InkWell(
             onTap: canStartCall && !isWaiting
                 ? () {
-                    context
-                        .read<FakeCallBloc>()
-                        .add(const FakeCallEvent.startFakeCall());
+                    context.read<FakeCallBloc>().add(
+                          const FakeCallEvent.startFakeCall(),
+                        );
                   }
                 : null,
             borderRadius: BorderRadius.circular(28.r),
@@ -251,7 +254,7 @@ class _FakeCallScreenContent extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       orElse: () => const SizedBox(),
@@ -261,7 +264,7 @@ class _FakeCallScreenContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
             ),
