@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -36,7 +37,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   // Map settings
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(28.6139, 77.2090), // Default to Delhi
-    zoom: 15,
+    zoom: 19,
   );
 
   Set<Marker> _markers = {};
@@ -121,8 +122,12 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               GoogleMap(
                 mapType: MapType.normal,
                 initialCameraPosition: _initialPosition,
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (GoogleMapController controller) async {
                   _mapController.complete(controller);
+                  final String style = await rootBundle.loadString(
+                    'assets/map/snazzy_style.json',
+                  );
+                  controller.setMapStyle(style);
                 },
                 markers: _markers,
                 myLocationEnabled: true,
