@@ -240,9 +240,9 @@ class _FakeCallScreenContent extends StatelessWidget {
           child: InkWell(
             onTap: canStartCall && !isWaiting
                 ? () {
-                    context.read<FakeCallBloc>().add(
-                          const FakeCallEvent.startFakeCall(),
-                        );
+                    context
+                        .read<FakeCallBloc>()
+                        .add(const FakeCallEvent.startFakeCall());
                   }
                 : null,
             borderRadius: BorderRadius.circular(28.r),

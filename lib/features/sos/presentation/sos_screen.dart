@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/dependency_injection/di_container.dart' as di;
 import 'package:everest_hackathon/core/theme/color_scheme.dart';
+// import '../../../core/theme/app_color_scheme.dart';
+import "package:everest_hackathon/core/theme/color_scheme.dart";
 import '../../../core/utils/constants.dart';
 import '../../../routes/app_routes.dart';
 import '../bloc/sos_bloc.dart';

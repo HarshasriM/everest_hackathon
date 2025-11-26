@@ -92,7 +92,6 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                     children: [
                       SizedBox(height: 60.h),
 
-                      // Caller name
                       Text(
                         callerName,
                         style: TextStyle(
@@ -103,7 +102,6 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                       ),
                       SizedBox(height: 10.h),
 
-                      // Caller number
                       Text(
                         callerNumber.isNotEmpty ? "Phone $callerNumber" : "",
                         style: TextStyle(
@@ -280,7 +278,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(20.w),
+                padding: const EdgeInsets.all(20),
                 child: Text(
                   "Answer",
                   style: TextStyle(
