@@ -15,7 +15,39 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Load phone number from preferences; fall back to the hardcoded number
+            FutureBuilder<String?>(
+              future: DIContainer.instance
+                  .get<AppPreferencesService>()
+                  .getUserPhoneNumber(),
+              builder: (context, snapshot) {
+                final phone = snapshot.connectionState == ConnectionState.done
+                    ? (snapshot.data ?? '+919392235952')
+                    : '+919392235952';
+                // Format phone like +91 9392235952 -> +91 93922 35952 or keep your original formatting:
+                final displayPhone = phone.length > 3
+                    ? "${phone.substring(0, 3)} ${phone.substring(3)}"
+                    : phone;
+                return ProfileHeader(
+                  phoneNumber: displayPhone,
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            const ProfileActionButtons(),
+            const SizedBox(height: 20),
+            const SettingsCard(),
+            const SizedBox(height: 250),
+            const AppVersionFooter(),
+            const SizedBox(height: 20),
+          ],
       backgroundColor: const Color(0xFFF0F0F6),
       body: Stack(
         children:[ SingleChildScrollView(
@@ -67,6 +99,8 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+// ---------- IMPROVED WIDGETS (dark mode tuned) ----------
+
 // Reusable Header Widget
 class ProfileHeader extends StatelessWidget {
   final String phoneNumber;
@@ -75,6 +109,21 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
+
+    // subtle gradient: darker at top in dark mode; softer in light mode
+    final gradientColors = isDark
+        ? [
+            cs.surface.withOpacity(0.98),
+            cs.surfaceVariant.withOpacity(0.9),
+          ]
+        : [
+            cs.primary.withOpacity(0.12),
+            cs.surface,
+          ];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40),
@@ -82,33 +131,43 @@ class ProfileHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColorScheme.primaryColor.withAlpha(64),
-            const Color(0xFFF0F0F6),
-          ],
+          colors: gradientColors,
         ),
+        // subtle bottom shadow to separate header from body
+        boxShadow: [
+          BoxShadow(
+            color: (cs.shadow ?? Colors.black).withOpacity(isDark ? 0.12 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircleAvatar(
+          // make avatar pop in dark mode using a slightly lighter container
+          CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.white,
-            child: Icon(Icons.person, size: 50, color: Colors.grey),
+            backgroundColor: isDark ? cs.surfaceVariant : Colors.white,
+            child: Icon(
+              Icons.person,
+              size: 50,
+              color: isDark ? cs.onSurface : Colors.grey.shade700,
+            ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Your Account',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             phoneNumber,
-            style: const TextStyle(fontSize: 16, color: Colors.black),
+            style: TextStyle(fontSize: 16, color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -177,6 +236,10 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -184,24 +247,45 @@ class ActionButton extends StatelessWidget {
         width: 100,
         height: 90,
         decoration: BoxDecoration(
-          color: Colors.white,
+          // use surfaceVariant but slightly more visible in dark mode
+          color: cs.surfaceVariant.withOpacity(isDark ? 0.06 : 0.08),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(2, 3),
-            ),
+            if (!isDark)
+              BoxShadow(
+                color: (cs.shadow ?? Colors.black).withOpacity(0.06),
+                blurRadius: 8,
+                offset: const Offset(2, 3),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 6),
+            // icon inside a tiny circle to keep contrast consistent across icons
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
             ),
           ],
         ),
@@ -216,11 +300,23 @@ class SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: (cs.shadow ?? Colors.black).withOpacity(isDark ? 0.12 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: cs.onSurface.withOpacity(isDark ? 0.06 : 0.02)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -345,6 +441,9 @@ class SettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -352,22 +451,30 @@ class SettingItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 22),
+            // small colored icon background for consistency
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: iconColor,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface, // ensure readability in both modes
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Color(0xFF7D6CA0),
+              color: cs.onSurfaceVariant,
             ),
           ],
         ),
@@ -382,22 +489,25 @@ class DottedDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lineColor = Theme.of(context).colorScheme.onSurface.withOpacity(isDark ? 0.06 : 0.04);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          const dashWidth = 4.0;
-          const dashSpace = 4.0;
+          const dashWidth = 6.0;
+          const dashSpace = 6.0;
           final dashCount =
-              (constraints.constrainWidth() / (dashWidth + dashSpace)).floor();
+              (constraints.constrainWidth() / (dashWidth + dashSpace)).floor().clamp(1, 100);
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(dashCount, (_) {
-              return const SizedBox(
+              return SizedBox(
                 width: dashWidth,
                 height: 1,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: Color(0xFFDDDDDD)),
+                  decoration: BoxDecoration(color: lineColor),
                 ),
               );
             }),
@@ -427,20 +537,23 @@ class ConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AlertDialog(
-      title: Text(title),
-      content: Text(content),
+      backgroundColor: cs.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      title: Text(title, style: TextStyle(color: cs.onSurface)),
+      content: Text(content, style: TextStyle(color: cs.onSurfaceVariant)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('Cancel', style: TextStyle(color: cs.primary)),
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
             onConfirm();
           },
-          child: Text(confirmText, style: TextStyle(color: confirmColor)),
+          child: Text(confirmText, style: TextStyle(color: confirmColor ?? cs.error)),
         ),
       ],
     );
@@ -455,9 +568,13 @@ class AppVersionFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'App version $version',
-      style: const TextStyle(color: Colors.grey, fontSize: 14),
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        'App version $version',
+        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
+      ),
     );
   }
 }

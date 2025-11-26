@@ -10,23 +10,20 @@ import './helpline_card.dart';
 class HelplineScreen extends StatelessWidget {
   const HelplineScreen({super.key});
 
-  static const Color secondaryColor = Color(0xFF9C27B0);
-  static const Color tertiaryColor = Color(0xFFFF5722);
-  static const Color backgroundColor = Color(0xFFFAFAFC);
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color textPrimaryColor = Color(0xFF1A1A2E);
-  static const Color textSecondaryColor = Color(0xFF6B7280);
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final size = MediaQuery.of(context).size;
     final isLargeScreen = size.width > 600;
 
     return BlocProvider(
       create: (_) => HelplineBloc()..add(LoadHelplines()),
       child: Scaffold(
-        backgroundColor: backgroundColor,
-        appBar: CustomAppBar(),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: const CustomAppBar(),
         body: BlocConsumer<HelplineBloc, HelplineState>(
           listener: (context, state) {
             if (state is HelplineError) {
@@ -34,44 +31,70 @@ class HelplineScreen extends StatelessWidget {
                 SnackBar(
                   content: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.white),
+                      Icon(Icons.error_outline, color: colorScheme.onError),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           state.message,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
+                            color: colorScheme.onError,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  backgroundColor: tertiaryColor,
+                  backgroundColor: colorScheme.error,
                   behavior: SnackBarBehavior.floating,
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 4,
                 ),
               );
             }
           },
           builder: (context, state) {
             if (state is HelplineLoading) {
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(
-                  // valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                  valueColor: AlwaysStoppedAnimation(colorScheme.primary),
                 ),
               );
             }
-            
+
             if (state is HelplineLoaded) {
+              // Theme-aware card colors
+              final baseSurface = colorScheme.surface;
+
+              final c1 = isDark
+                  ? baseSurface.withOpacity(0.06)
+                  : AppColorScheme.primaryColor.withValues(alpha: 0.08);
+
+              final c2 = isDark
+                  ? baseSurface.withOpacity(0.05)
+                  : const Color(0xFFD0F0F0);
+
+              final c3 = isDark
+                  ? baseSurface.withOpacity(0.04)
+                  : const Color(0xFFE0F7FA);
+
+              final c4 = isDark
+                  ? baseSurface.withOpacity(0.045)
+                  : const Color(0xFFE3F2FD);
+
+              final cardColors = [
+                [c1, colorScheme.primary],
+                [c2, colorScheme.secondary],
+                [c3, colorScheme.primary],
+                [c4, colorScheme.primary],
+              ];
+
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-                  // Professional Header Section
+                  // HEADER
                   SliverToBoxAdapter(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(
@@ -83,56 +106,48 @@ class HelplineScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                            
-                              
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Emergency Support',
-                                      style: TextStyle(
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.w700,
-                                        color: textPrimaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Available 24/7 for immediate assistance',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: textSecondaryColor,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'Emergency Support',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Available 24/7 for immediate assistance',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                              height: 1.4,
+                            ),
                           ),
                           const SizedBox(height: 20),
+
+                          // INFO BANNER
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColorScheme.primaryColor.withValues(alpha: 0.08),
+                              color: isDark
+                                  ? colorScheme.surface.withOpacity(0.07)
+                                  : AppColorScheme.primaryColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColorScheme.primaryColor.withValues(alpha: 0.15),
-                                width: 1,
+                                color: isDark
+                                    ? colorScheme.onSurface.withOpacity(0.06)
+                                    : AppColorScheme.primaryColor.withValues(alpha: 0.15),
                               ),
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.info_outline_rounded,
-                                  color: AppColorScheme.primaryColor,
+                                  color: colorScheme.primary,
                                   size: 17,
                                 ),
                                 const SizedBox(width: 12),
@@ -141,7 +156,7 @@ class HelplineScreen extends StatelessWidget {
                                     'Tap any helpline to call instantly',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: AppColorScheme.primaryColor.withValues(alpha: 0.9),
+                                      color: colorScheme.primary.withOpacity(0.95),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -154,7 +169,7 @@ class HelplineScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Helplines List
+                  // HELPLINE LIST
                   SliverPadding(
                     padding: EdgeInsets.symmetric(
                       horizontal: isLargeScreen ? 24 : 20,
@@ -164,19 +179,11 @@ class HelplineScreen extends StatelessWidget {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final helpline = state.helplines[index];
-                          final colors = [
-                            [const Color(0xFFE0F2F1), AppColorScheme.primaryColor.withAlpha(180)],   // soft mint + deep teal
-                            [const Color(0xFFD0F0F0), AppColorScheme.secondaryColor.withAlpha(180)], // light teal + teal-green
-                            [const Color(0xFFE0F7FA), const Color(0xFF4D6A6D).withAlpha(200)],       // sky aqua + bright cyan
-                            [const Color(0xFFE3F2FD), const Color(0xFF0277BD).withAlpha(180)],       // light blue + ocean blue
-                          ];
-                          final colorPair = colors[index % colors.length];
+                          final colors = cardColors[index % cardColors.length];
 
                           return TweenAnimationBuilder<double>(
-                            duration: Duration(
-                              milliseconds: 200 + (index * 80),
-                            ),
-                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: Duration(milliseconds: 200 + (index * 80)),
+                            tween: Tween(begin: 0, end: 1),
                             curve: Curves.easeOutCubic,
                             builder: (context, value, child) {
                               return Transform.translate(
@@ -198,8 +205,8 @@ class HelplineScreen extends StatelessWidget {
                                     number: helpline.number,
                                     name: helpline.name,
                                     icon: helpline.icon,
-                                    color: colorPair[0],
-                                    textColor: colorPair[1],
+                                    color: Colors.white,
+                                    textColor: colors[1],
                                     onTap: () {
                                       context.read<HelplineBloc>().add(
                                             CallHelpline(helpline.number),
@@ -216,18 +223,15 @@ class HelplineScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Bottom Spacing
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 24),
-                  ),
-
+                  const SliverToBoxAdapter(child: SizedBox(height: 30)),
                 ],
               );
             }
 
-            // Fallback for other states (including initial state)
-            return const Center(
-              child: CircularProgressIndicator(),
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+              ),
             );
           },
         ),

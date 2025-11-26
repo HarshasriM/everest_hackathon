@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light mode launch background color - matches app's light surface color -->
+    <color name="launch_background_light">#F8FBFB</color>
+    <color name="launch_background_dark">#0D1A1A</color>
+</resources>

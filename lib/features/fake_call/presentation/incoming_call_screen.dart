@@ -7,6 +7,7 @@ import '../bloc/fake_call_bloc.dart';
 import '../bloc/fake_call_event.dart';
 import '../bloc/fake_call_state.dart';
 import 'in_call_screen.dart';
+import '../../../core/theme/color_scheme.dart';
 
 class IncomingCallScreen extends StatefulWidget {
   const IncomingCallScreen({super.key});
@@ -26,6 +27,9 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // uploaded local image path (for quick preview/testing)
+    const uploadedImagePath = '/mnt/data/d7d8bce8-6ca0-463e-9a77-3d7c3ae01a47.png';
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -65,11 +69,21 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
           );
         },
         child: Scaffold(
-          backgroundColor: Colors.grey[100],
+          // theme-aware scaffold color
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: BlocBuilder<FakeCallBloc, FakeCallState>(
             builder: (context, state) {
-             final callerName = state.callerName ?? 'Unknown';
-             final callerNumber = state.callerNumber ?? '';
+              final callerName = state.callerName ?? 'Unknown';
+              final callerNumber = state.callerNumber ?? '';
+              final imagePath = state.callerImagePath;
+              final theme = Theme.of(context);
+              final colorScheme = theme.colorScheme;
+              final isDark = theme.brightness == Brightness.dark;
+
+              // helper: resolved image (uploaded local preview fallback)
+              final resolvedImagePath = (imagePath != null && imagePath.isNotEmpty)
+                  ? imagePath
+                  : (File(uploadedImagePath).existsSync() ? uploadedImagePath : null);
 
               return SafeArea(
                 child: Padding(
@@ -83,7 +97,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                         style: TextStyle(
                           fontSize: 36.sp,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       SizedBox(height: 10.h),
@@ -92,35 +106,38 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                         callerNumber.isNotEmpty ? "Phone $callerNumber" : "",
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Colors.grey[700],
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
 
                       const Spacer(),
 
-                      /// Message Button
+                      /// Message Button (themed)
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(30.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.5)
+                                  : Colors.black.withOpacity(0.06),
+                              blurRadius: isDark ? 10 : 8,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.message_outlined, size: 20.sp, color: Colors.grey[700]),
+                            Icon(Icons.message_outlined, size: 20.sp, color: colorScheme.onSurfaceVariant),
                             SizedBox(width: 8.w),
                             Text(
                               "Message",
                               style: TextStyle(
                                 fontSize: 16.sp,
-                                color: Colors.grey[700],
+                                color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                             )
@@ -129,7 +146,95 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                       ),
 
                       SizedBox(height: 60.h),
-                      _buildCallActions(),
+
+                      // caller avatar / preview card
+                      // Container(
+                      //   padding: EdgeInsets.all(18.w),
+                      //   decoration: BoxDecoration(
+                      //     color: colorScheme.surface,
+                      //     borderRadius: BorderRadius.circular(20.r),
+                      //     boxShadow: [
+                      //       BoxShadow(
+                      //         color: isDark ? Colors.black.withOpacity(0.45) : Colors.black.withOpacity(0.06),
+                      //         blurRadius: isDark ? 18 : 12,
+                      //         offset: const Offset(0, 6),
+                      //       ),
+                      //     ],
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       // avatar circle
+                      //       Container(
+                      //         width: 72.w,
+                      //         height: 72.w,
+                      //         decoration: BoxDecoration(
+                      //           shape: BoxShape.circle,
+                      //           gradient: AppColorScheme.getPrimaryGradient(isDark),
+                      //           boxShadow: [
+                      //             BoxShadow(
+                      //               color: isDark ? Colors.black.withOpacity(0.4) : Colors.black.withOpacity(0.08),
+                      //               blurRadius: 8,
+                      //               offset: const Offset(0, 4),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         child: ClipOval(
+                      //           child: resolvedImagePath != null && File(resolvedImagePath).existsSync()
+                      //               ? Image.file(File(resolvedImagePath), fit: BoxFit.cover)
+                      //               : Center(
+                      //                   child: Text(
+                      //                     callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
+                      //                     style: TextStyle(
+                      //                       fontSize: 28.sp,
+                      //                       fontWeight: FontWeight.bold,
+                      //                       color: colorScheme.onPrimary,
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //         ),
+                      //       ),
+
+                            // SizedBox(width: 16.w),
+
+                            // // name + number block
+                            // Expanded(
+                            //   child: Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Text(
+                            //         callerName,
+                            //         style: TextStyle(
+                            //           fontSize: 18.sp,
+                            //           fontWeight: FontWeight.w600,
+                            //           color: colorScheme.onSurface,
+                            //         ),
+                            //       ),
+                            //       SizedBox(height: 6.h),
+                            //       Text(
+                            //         callerNumber.isNotEmpty ? callerNumber : 'Unknown number',
+                            //         style: TextStyle(
+                            //           fontSize: 14.sp,
+                            //           color: colorScheme.onSurfaceVariant,
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+
+                            // small action (decline icon)
+                            // IconButton(
+                            //   onPressed: () => fakeCallBloc.add(const FakeCallEvent.declineCall()),
+                            //   icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+                      //       // ),
+                      //     ],
+                      //   ),
+                      // ),
+
+                      // SizedBox(height: 40.h),
+
+                      // Swipe control (themed)
+                      _buildCallActions(colorScheme, isDark),
+
                       SizedBox(height: 40.h),
                     ],
                   ),
@@ -143,14 +248,18 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   /// Swipe Decline / Answer
-  Widget _buildCallActions() {
+  Widget _buildCallActions(ColorScheme colorScheme, bool isDark) {
+    final declineColor = Colors.redAccent;
+    final answerColor = Colors.greenAccent.shade700;
+
     return Container(
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 30.w),
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8E8E8),
+        color: colorScheme.surfaceVariant.withOpacity(0.02), // subtle background
         borderRadius: BorderRadius.circular(50.r),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.04)),
       ),
       child: Stack(
         children: [
@@ -158,11 +267,11 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20.w),
                 child: Text(
                   "Decline",
                   style: TextStyle(
-                    color: Colors.red[700],
+                    color: declineColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -173,7 +282,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                 child: Text(
                   "Answer",
                   style: TextStyle(
-                    color: Colors.green[700],
+                    color: answerColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -182,9 +291,11 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
             ],
           ),
 
+          // draggable button center
           Center(
             child: GestureDetector(
               onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == null) return;
                 if (details.primaryVelocity! < 0) {
                   fakeCallBloc.add(const FakeCallEvent.declineCall());
                 } else if (details.primaryVelocity! > 0) {
@@ -197,9 +308,16 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
               child: Container(
                 width: 55.w,
                 height: 55.w,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
+                decoration: BoxDecoration(
+                  color: answerColor,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: answerColor.withOpacity(isDark ? 0.28 : 0.18),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
                 ),
                 child: Icon(Icons.call, color: Colors.white, size: 30.sp),
               ),

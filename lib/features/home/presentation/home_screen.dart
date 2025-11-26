@@ -106,35 +106,164 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Build individual nav item
   Widget _buildNavItem(int navIndex, int screenIndex) {
-    return InkWell(
-      onTap: () {
-        setState(() => _selectedIndex = screenIndex);
-        // }
-      },
-      child: SizedBox(
-        width: 70.w,
-        height: 70.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+  final isSelected = _selectedIndex == screenIndex;
+  final gradient = AppColorScheme.getPrimaryGradient(isDark);
+
+  return InkWell(
+    onTap: () => setState(() => _selectedIndex = screenIndex),
+    child: SizedBox(
+      width: 70.w,
+      height: 70.h,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Icon: gradient when selected, grey otherwise
+          if (isSelected)
+            ShaderMask(
+              shaderCallback: (bounds) => gradient.createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: Icon(
+                _navItems[navIndex].icon,
+                size: 24.sp,
+                color: Colors.white, // color is replaced by shader
+              ),
+            )
+          else
             Icon(
               _navItems[navIndex].icon,
-              color: _selectedIndex == screenIndex
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey,
+              size: 24.sp,
+              color: Colors.grey,
             ),
-            SizedBox(height: 4.h),
+
+          SizedBox(height: 4.h),
+
+          // Label: gradient when selected, grey otherwise
+          if (isSelected)
+            ShaderMask(
+              shaderCallback: (bounds) => gradient.createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: Text(
+                _navItems[navIndex].label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white, // replaced by shader
+                ),
+              ),
+            )
+          else
             Text(
               _navItems[navIndex].label,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: _selectedIndex == screenIndex
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
+                color: Colors.grey,
               ),
             ),
-          ],
+        ],
+      ),
+    ),
+  );
+}
+
+
+  // Build SOS button for the nav bar
+  // Handle SOS button tap with emergency contacts check
+  Future<void> _handleSosButtonTap() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    
+    try {
+      // Get user ID and check for emergency contacts
+      final preferencesService = di.sl<AppPreferencesService>();
+      final userId = await preferencesService.getUserId();
+      
+      if (userId == null) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog('User not authenticated. Please login again.');
+        return;
+      }
+      
+      // Check if user has emergency contacts
+      final sosRemoteSource = di.sl<SosRemoteSource>();
+      final contactsResponse = await sosRemoteSource.getEmergencyContacts(userId);
+      
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      if (!contactsResponse.success || contactsResponse.data.isEmpty) {
+        // Show popup to add emergency contacts
+        _showEmergencyContactsDialog();
+      } else {
+        // Navigate to SOS screen if contacts exist
+        if (mounted) {
+          context.push(AppRoutes.sos);
+        }
+      }
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      _showErrorDialog('Failed to check emergency contacts. Please try again.');
+    }
+  }
+  
+  // Show dialog when no emergency contacts are found
+  void _showEmergencyContactsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.contacts,
+          color: Colors.orange,
+          size: 64.sp,
         ),
+        title: const Text('No Emergency Contacts'),
+        content: const Text('You need to add emergency contacts before using SOS. Please add at least one contact to continue.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate to emergency contacts screen
+              context.push(AppRoutes.emergencyContacts);
+            },
+            child: const Text('Add Emergency Contacts'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Show error dialog
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.error,
+          color: Colors.red,
+          size: 64.sp,
+        ),
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

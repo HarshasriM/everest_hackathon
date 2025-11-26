@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../bloc/fake_call_bloc.dart';
 import '../bloc/fake_call_event.dart';
 import '../bloc/fake_call_state.dart';
+import '../../../core/theme/color_scheme.dart';
 
 class InCallScreen extends StatefulWidget {
   const InCallScreen({super.key});
@@ -47,6 +48,9 @@ class _InCallScreenState extends State<InCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // reference image uploaded by user (local path)
+    final uploadedImagePath = '/mnt/data/d7d8bce8-6ca0-463e-9a77-3d7c3ae01a47.png';
+
     return WillPopScope(
       onWillPop: () async => false,
       child: BlocListener<FakeCallBloc, FakeCallState>(
@@ -62,7 +66,7 @@ class _InCallScreenState extends State<InCallScreen> {
           );
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: BlocBuilder<FakeCallBloc, FakeCallState>(
             builder: (context, state) {
               final callerName = state.callerName ?? 'Unknown';
@@ -71,75 +75,111 @@ class _InCallScreenState extends State<InCallScreen> {
 
               final displayDuration = _callSeconds;
 
+              final theme = Theme.of(context);
+              final colorScheme = theme.colorScheme;
+              final isDark = theme.brightness == Brightness.dark;
+
               return SafeArea(
                 child: Column(
                   children: [
                     SizedBox(height: 20.h),
+
+                    // duration
                     Text(
                       _formatDuration(displayDuration),
                       style: TextStyle(
                         fontSize: 18.sp,
-                        color: Colors.grey[700],
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 30.h),
 
+                    // caller name
                     Text(
                       callerName,
                       style: TextStyle(
                         fontSize: 32.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 8.h),
 
+                    // caller number
                     if (callerNumber.isNotEmpty)
                       Text(
                         'Phone $callerNumber',
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Colors.grey[600],
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
 
                     SizedBox(height: 60.h),
 
+                    // avatar circle (uses gradient in dark/light)
                     Container(
                       width: 140.w,
                       height: 140.w,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF80DEEA),
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
+                        gradient: AppColorScheme.getPrimaryGradient(isDark),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.5)
+                                : Colors.black.withOpacity(0.08),
+                            blurRadius: isDark ? 8 : 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: (imagePath != null && imagePath.isNotEmpty && File(imagePath).existsSync())
-                          ? ClipOval(child: Image.file(File(imagePath), fit: BoxFit.cover))
-                          : Center(
-                              child: Text(
-                                callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
-                                style: TextStyle(fontSize: 64.sp, fontWeight: FontWeight.bold, color: Colors.black87),
+                      child: ClipOval(
+                        child: (imagePath != null &&
+                                imagePath.isNotEmpty &&
+                                File(imagePath).existsSync())
+                            ? Image.file(File(imagePath), fit: BoxFit.cover)
+                            : Center(
+                                child: Text(
+                                  callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
+                                  style: TextStyle(
+                                    fontSize: 64.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
                               ),
-                            ),
+                      ),
                     ),
 
                     const Spacer(),
 
+                    // bottom control sheet
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 35.h, horizontal: 20.w),
+                      padding: EdgeInsets.symmetric(vertical: 28.h, horizontal: 20.w),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0F0F6),
-                        borderRadius: BorderRadius.circular(30),
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(24.r),
+                          topRight: Radius.circular(24.r),
+                        ),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 4)),
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.45)
+                                : Colors.black.withOpacity(0.06),
+                            blurRadius: isDark ? 30 : 20,
+                            offset: const Offset(0, -6),
+                          ),
                         ],
                       ),
                       child: Column(
                         children: [
                           _buildCallControls(context),
-                          SizedBox(height: 30.h),
+                          SizedBox(height: 24.h),
                           InkWell(
                             onTap: () {
                               context.read<FakeCallBloc>().add(const FakeCallEvent.endCall());
@@ -148,17 +188,27 @@ class _InCallScreenState extends State<InCallScreen> {
                                 Navigator.of(context).pop();
                               }
                             },
+                            borderRadius: BorderRadius.circular(32.r),
                             child: Container(
                               width: 160.w,
                               height: 56.h,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD32F2F),
+                                color: colorScheme.error,
                                 borderRadius: BorderRadius.circular(32.r),
                                 boxShadow: [
-                                  BoxShadow(color: const Color(0xFFD32F2F).withOpacity(0.1), blurRadius: 12, offset: const Offset(0, 2)),
+                                  BoxShadow(
+                                    color: colorScheme.error.withOpacity(isDark ? 0.14 : 0.12),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
                                 ],
                               ),
-                              child: Center(child: Icon(Icons.call_end, color: Colors.white, size: 28.sp)),
+                              child: Center(
+                                  child: Icon(
+                                Icons.call_end,
+                                color: colorScheme.onError,
+                                size: 28.sp,
+                              )),
                             ),
                           ),
                         ],
@@ -175,32 +225,53 @@ class _InCallScreenState extends State<InCallScreen> {
   }
 
   Widget _buildCallControls(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildControlButton(Icons.dialpad, 'Keypad'),
-        _buildControlButton(Icons.mic, 'Mute'),
-        _buildControlButton(Icons.volume_up, 'Speaker'),
-        _buildControlButton(Icons.more_vert, 'More'),
+        _buildControlButton(icon: Icons.dialpad, label: 'Keypad', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.mic, label: 'Mute', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.volume_up, label: 'Speaker', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.more_vert, label: 'More', colorScheme: colorScheme, isDark: isDark),
       ],
     );
   }
 
-  Widget _buildControlButton(IconData icon, String label) {
+  Widget _buildControlButton({
+    required IconData icon,
+    required String label,
+    required ColorScheme colorScheme,
+    required bool isDark,
+  }) {
     return Column(
       children: [
         Container(
           width: 65.w,
           height: 65.w,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? colorScheme.surface : colorScheme.onPrimary.withOpacity(0.98),
             shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))],
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withOpacity(0.45) : Colors.black.withOpacity(0.08),
+                blurRadius: isDark ? 10 : 8,
+                offset: const Offset(0, 3),
+              )
+            ],
+            border: Border.all(
+              color: isDark ? colorScheme.onSurface.withOpacity(0.06) : Colors.transparent,
+            ),
           ),
-          child: Icon(icon, color: Colors.grey[800], size: 28.sp),
+          child: Icon(icon, color: colorScheme.onSurfaceVariant, size: 28.sp),
         ),
         SizedBox(height: 10.h),
-        Text(label, style: TextStyle(fontSize: 13.sp, color: Colors.grey[700], fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
