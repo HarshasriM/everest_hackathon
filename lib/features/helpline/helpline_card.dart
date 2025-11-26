@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:everest_hackathon/core/theme/color_scheme.dart';
 
 class HelplineCard extends StatefulWidget {
   final String number;
@@ -10,14 +9,14 @@ class HelplineCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const HelplineCard({
-    Key? key,
+    super.key,
     required this.number,
     required this.name,
     required this.icon,
     required this.color,
     this.textColor = const Color(0xFFE91E63),
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<HelplineCard> createState() => _HelplineCardState();
@@ -73,7 +72,7 @@ class _HelplineCardState extends State<HelplineCard>
     final tint = widget.color;
     final primary = cs.primary;
     final onSurface = cs.onSurface;
-    final onSurfaceVariant = cs.onSurfaceVariant;
+    // final onSurfaceVariant = cs.onSurfaceVariant;
 
     // textColor param is preserved but prefer theme primary/onPrimary for accessibility
     final effectiveTextColor = widget.textColor == const Color(0xFFE91E63)
@@ -98,8 +97,8 @@ class _HelplineCardState extends State<HelplineCard>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                tint.withOpacity(0.14),
-                tint.withOpacity(0.06),
+                tint.withOpacity(0.71),
+                tint.withOpacity(0.61),
               ],
             ),
       border: Border.all(
