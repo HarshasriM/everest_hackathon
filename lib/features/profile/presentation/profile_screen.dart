@@ -17,33 +17,51 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F0F6),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Load phone number from preferences; fall back to the hardcoded number
-            FutureBuilder<String?>(
-              future: DIContainer.instance
-                  .get<AppPreferencesService>()
-                  .getUserPhoneNumber(),
-              builder: (context, snapshot) {
-                final phone = snapshot.connectionState == ConnectionState.done
-                    ? (snapshot.data ?? '+91 9392235952')
-                    : '+91 9392235952';
-                return ProfileHeader(
-                  phoneNumber: "${phone.substring(0, 3)} ${phone.substring(3)}",
-                );
-
-              },
-            ),
-            const SizedBox(height: 20),
-            ProfileActionButtons(),
-            const SizedBox(height: 20),
-            const SettingsCard(),
-            const SizedBox(height: 250),
-            const AppVersionFooter(),
-            const SizedBox(height: 20),
-          ],
+      body: Stack(
+        children:[ SingleChildScrollView(
+          child: Column(
+            children: [
+              // Load phone number from preferences; fall back to the hardcoded number
+              FutureBuilder<String?>(
+                future: DIContainer.instance
+                    .get<AppPreferencesService>()
+                    .getUserPhoneNumber(),
+                builder: (context, snapshot) {
+                  final phone = snapshot.connectionState == ConnectionState.done
+                      ? (snapshot.data ?? '+91 9392235952')
+                      : '+91 9392235952';
+                  return ProfileHeader(
+                    phoneNumber: "${phone.substring(0, 3)} ${phone.substring(3)}",
+                  );
+        
+                },
+              ),
+              const SizedBox(height: 20),
+              ProfileActionButtons(),
+              const SizedBox(height: 20),
+              const SettingsCard(),
+              const SizedBox(height: 250),
+              const AppVersionFooter(),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
+
+        //floating action button for back
+
+        Positioned(
+        top: 40,      // adjust if needed for safe area
+        left: 16,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            width: 40,
+            height: 40,
+            child: const Icon(Icons.arrow_back, size: 22, color: Colors.black),
+          ),
+        ),
+      ),
+        ]
       ),
     );
   }
