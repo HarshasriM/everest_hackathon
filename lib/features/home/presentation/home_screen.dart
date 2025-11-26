@@ -106,38 +106,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Build individual nav item
   Widget _buildNavItem(int navIndex, int screenIndex) {
-    return InkWell(
-      onTap: () {
-        setState(() => _selectedIndex = screenIndex);
-        // }
-      },
-      child: SizedBox(
-        width: 70.w,
-        height: 70.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+  final isSelected = _selectedIndex == screenIndex;
+  final gradient = AppColorScheme.getPrimaryGradient(isDark);
+
+  return InkWell(
+    onTap: () => setState(() => _selectedIndex = screenIndex),
+    child: SizedBox(
+      width: 70.w,
+      height: 70.h,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Icon: gradient when selected, grey otherwise
+          if (isSelected)
+            ShaderMask(
+              shaderCallback: (bounds) => gradient.createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: Icon(
+                _navItems[navIndex].icon,
+                size: 24.sp,
+                color: Colors.white, // color is replaced by shader
+              ),
+            )
+          else
             Icon(
               _navItems[navIndex].icon,
-              color: _selectedIndex == screenIndex
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey,
+              size: 24.sp,
+              color: Colors.grey,
             ),
-            SizedBox(height: 4.h),
+
+          SizedBox(height: 4.h),
+
+          // Label: gradient when selected, grey otherwise
+          if (isSelected)
+            ShaderMask(
+              shaderCallback: (bounds) => gradient.createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: Text(
+                _navItems[navIndex].label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white, // replaced by shader
+                ),
+              ),
+            )
+          else
             Text(
               _navItems[navIndex].label,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: _selectedIndex == screenIndex
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
+                color: Colors.grey,
               ),
             ),
-          ],
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // Build SOS button for the nav bar
   // Handle SOS button tap with emergency contacts check
