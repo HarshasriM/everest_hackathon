@@ -4,8 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/dependency_injection/di_container.dart' as di;
-// import '../../../core/theme/app_color_scheme.dart';
-import "package:everest_hackathon/core/theme/color_scheme.dart";
+import 'package:everest_hackathon/core/theme/color_scheme.dart';
 import '../../../core/utils/constants.dart';
 import '../../../routes/app_routes.dart';
 import '../bloc/sos_bloc.dart';
@@ -38,7 +37,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _holdAnimation;
-  
+
   Timer? _holdTimer;
   bool _isHolding = false;
 
@@ -49,12 +48,12 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _holdAnimationController = AnimationController(
       duration: const Duration(seconds: 1), // 1 second hold
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.1,
@@ -62,7 +61,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _pulseAnimation = Tween<double>(
       begin: 0.8,
       end: 1.2,
@@ -70,7 +69,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _holdAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -78,7 +77,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
       parent: _holdAnimationController,
       curve: Curves.linear,
     ));
-    
+
     _holdAnimationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _startCountdown();
@@ -107,24 +106,37 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   }
 
   void _showSuccessDialog(String message) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        backgroundColor: cs.surface,
         icon: Icon(
           Icons.check_circle,
           color: AppColorScheme.successColor,
           size: 64.sp,
         ),
-        title: const Text('SOS Alert Sent'),
-        content: Text(message),
+        title: Text(
+          'SOS Alert Sent',
+          style: TextStyle(color: cs.onSurface),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: cs.onSurfaceVariant),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.pop();
             },
-            child: const Text('OK'),
+            child: Text(
+              'OK',
+              style: TextStyle(color: cs.primary),
+            ),
           ),
         ],
       ),
@@ -132,40 +144,56 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   }
 
   void _showErrorDialog(String message) {
-    // Check if the error is related to missing emergency contacts
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     final lowercaseMessage = message.toLowerCase();
-    final isEmergencyContactsError = lowercaseMessage.contains('emergency contacts') || 
-                                   lowercaseMessage.contains('no contacts') ||
-                                   lowercaseMessage.contains('contacts found') ||
-                                   lowercaseMessage.contains('add contacts') ||
-                                   lowercaseMessage.contains('no emergency contacts found');
-    
+    final isEmergencyContactsError =
+        lowercaseMessage.contains('emergency contacts') ||
+            lowercaseMessage.contains('no contacts') ||
+            lowercaseMessage.contains('contacts found') ||
+            lowercaseMessage.contains('add contacts') ||
+            lowercaseMessage.contains('no emergency contacts found');
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: cs.surface,
         icon: Icon(
           isEmergencyContactsError ? Icons.contacts : Icons.error,
-          color: isEmergencyContactsError ? Colors.orange : AppColorScheme.sosRedColor,
+          color:
+              isEmergencyContactsError ? Colors.orange : AppColorScheme.sosRedColor,
           size: 64.sp,
         ),
-        title: Text(isEmergencyContactsError ? 'No Emergency Contacts' : 'Failed to Send SOS'),
-        content: Text(message),
+        title: Text(
+          isEmergencyContactsError ? 'No Emergency Contacts' : 'Failed to Send SOS',
+          style: TextStyle(color: cs.onSurface),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: cs.onSurfaceVariant),
+        ),
         actions: [
           if (isEmergencyContactsError) ...[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Navigate to emergency contacts screen
                 context.push(AppRoutes.emergencyContacts);
               },
-              child: const Text('Add Emergency Contacts'),
+              child: Text(
+                'Add Emergency Contacts',
+                style: TextStyle(color: cs.primary),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 context.read<SosBloc>().add(const SosReset());
               },
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: cs.onSurfaceVariant),
+              ),
             ),
           ] else ...[
             TextButton(
@@ -173,7 +201,10 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
                 Navigator.of(context).pop();
                 context.read<SosBloc>().add(const SosReset());
               },
-              child: const Text('Try Again'),
+              child: Text(
+                'Try Again',
+                style: TextStyle(color: cs.primary),
+              ),
             ),
           ],
         ],
@@ -188,7 +219,9 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
         if (state is SosSuccess) {
           _animationController.stop();
           _animationController.reset();
-          _showSuccessDialog('Emergency alerts sent successfully to ${state.response.results.length} contacts');
+          _showSuccessDialog(
+            'Emergency alerts sent successfully to ${state.response.results.length} contacts',
+          );
         } else if (state is SosError) {
           _animationController.stop();
           _animationController.reset();
@@ -207,26 +240,26 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
       },
       child: BlocBuilder<SosBloc, SosState>(
         builder: (context, state) {
+          final theme = Theme.of(context);
+          final cs = theme.colorScheme;
           final isCountingDown = state is SosCountdown;
           final isSending = state is SosSending;
           final isActive = isCountingDown || isSending;
-          
+
           return Scaffold(
-            backgroundColor: isActive
-                ? Colors.black
-                : Colors.white,
+            backgroundColor:
+                isActive ? Colors.black : theme.scaffoldBackgroundColor,
             appBar: AppBar(
               title: Text(
                 'Emergency SOS',
                 style: TextStyle(
-                  color: isActive ? Colors.white : Colors.black,
+                  color: isActive ? Colors.white : cs.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              backgroundColor: isActive
-                  ? Colors.red
-                  : Colors.white,
-              foregroundColor: isActive ? Colors.white : Colors.black,
+              backgroundColor:
+                  isActive ? AppColorScheme.sosRedColor : theme.scaffoldBackgroundColor,
+              foregroundColor: isActive ? Colors.white : cs.onSurface,
               elevation: 0,
             ),
             body: SafeArea(
@@ -235,26 +268,19 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
                   padding: EdgeInsets.all(AppConstants.defaultPadding.w),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height - 
-                          AppBar().preferredSize.height - 
-                          MediaQuery.of(context).padding.top - 
+                      minHeight: MediaQuery.of(context).size.height -
+                          AppBar().preferredSize.height -
+                          MediaQuery.of(context).padding.top -
                           MediaQuery.of(context).padding.bottom,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Status Display
                         Center(child: _buildStatusDisplay(state)),
-                        
                         SizedBox(height: 48.h),
-                        
-                        // SOS Button
                         Center(child: _buildSosButton(state)),
-                        
                         SizedBox(height: 48.h),
-                        
-                        // Instructions
                         Center(child: _buildInstructions(state)),
                       ],
                     ),
@@ -269,27 +295,30 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildStatusDisplay(SosState state) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     if (state is SosInitial) {
       return Column(
         children: [
           Icon(
             Icons.warning,
             size: 80.sp,
-            color: Colors.orange,
+            color: AppColorScheme.sosRedColor,
           ),
           SizedBox(height: 32.h),
           Text(
             'Emergency SOS',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            style: theme.textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: cs.onSurface,
             ),
           ),
           SizedBox(height: 24.h),
           Text(
             'Press and hold the SOS button for 1\nsecond to send an emergency alert to\nyour contacts',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: cs.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -300,8 +329,8 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
         children: [
           Text(
             'SENDING SOS IN',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.red,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: AppColorScheme.sosRedColor,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),
@@ -316,7 +345,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.red,
+                    color: AppColorScheme.sosRedColor,
                     width: 3,
                   ),
                 ),
@@ -326,7 +355,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
                     style: TextStyle(
                       fontSize: 48.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: AppColorScheme.sosRedColor,
                     ),
                   ),
                 ),
@@ -351,7 +380,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
           SizedBox(height: 24.h),
           Text(
             'Sending Emergency Alerts...',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
               color: AppColorScheme.sosRedColor,
               fontWeight: FontWeight.bold,
             ),
@@ -359,7 +388,9 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
           SizedBox(height: 16.h),
           Text(
             'Getting your location and notifying contacts',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -375,7 +406,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
           SizedBox(height: 24.h),
           Text(
             'SOS Alert Cancelled',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColorScheme.warningColor,
             ),
@@ -393,7 +424,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
     });
     _holdAnimationController.forward();
   }
-  
+
   void _resetHold() {
     setState(() {
       _isHolding = false;
@@ -405,7 +436,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
     final isCountingDown = state is SosCountdown;
     final isSending = state is SosSending;
     final isActive = isCountingDown || isSending;
-    
+
     return GestureDetector(
       onLongPressStart: (_) {
         if (!isActive) {
@@ -433,30 +464,32 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
           return Stack(
             alignment: Alignment.center,
             children: [
-              // Hold progress indicator
               if (_isHolding)
-                Container(
+                SizedBox(
                   width: 220.w,
                   height: 220.h,
                   child: CircularProgressIndicator(
                     value: _holdAnimation.value,
                     strokeWidth: 6,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
                     backgroundColor: Colors.white.withOpacity(0.3),
                   ),
                 ),
-              // Main SOS Button
               Container(
                 width: 200.w,
                 height: 200.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: isActive 
+                    colors: isActive
                         ? [Colors.red, Colors.orange]
                         : _isHolding
-                          ? [Colors.red.withOpacity(0.8), Colors.orange.withOpacity(0.8)]
-                          : [Colors.orange, Colors.red],
+                            ? [
+                                Colors.red.withOpacity(0.8),
+                                Colors.orange.withOpacity(0.8)
+                              ]
+                            : [Colors.orange, Colors.red],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -512,14 +545,18 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildInstructions(SosState state) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     if (state is SosInitial) {
-      return const SizedBox.shrink(); // Remove instructions for cleaner look
+      // keeping it empty for minimal initial screen, as you had
+      return const SizedBox.shrink();
     } else if (state is SosCountdown) {
       return Padding(
         padding: EdgeInsets.only(top: 32.h),
         child: Text(
           'Tap the button to cancel',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: theme.textTheme.bodyLarge?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w500,
           ),
@@ -529,15 +566,15 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
     } else if (state is SosSending) {
       return Text(
         'Please wait while we send your emergency alerts...',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: cs.onSurfaceVariant,
         ),
         textAlign: TextAlign.center,
       );
     } else if (state is SosCancelled) {
       return Text(
         'Emergency alert was cancelled successfully',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyLarge?.copyWith(
           color: AppColorScheme.warningColor,
         ),
         textAlign: TextAlign.center,
@@ -545,41 +582,4 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
     }
     return const SizedBox.shrink();
   }
-
-  Widget _buildInstructionItem(String text) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 4.h),
-      child: Row(
-        children: [
-          SizedBox(width: 16.w),
-          Icon(
-            Icons.check_circle_outline,
-            size: 16.sp,
-            color: AppColorScheme.successColor,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }
-
-// Export the wrapper as the main widget
-// class SosScreenPage extends StatelessWidget {
-//   const SosScreenPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocProvider(
-//       create: (context) => di.sl<SosBloc>(),
-//       child: const SosScreen(),
-//     );
-//   }
-// }
