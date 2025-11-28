@@ -27,10 +27,12 @@ class AuthRepositoryImpl implements AuthRepository {
       Logger.info('Sending OTP to ${request.phoneNumber}');
 
       final response = await _remoteSource.sendOtp(request.fullPhoneNumber);
-      
-      // Store the session ID if needed (we can store it as part of auth token for now)
-      // In production, you might want to add a dedicated method for this
-      
+
+      // Store the phone number temporarily for SOS usage even before full verification
+      await _preferencesService.saveUserData({
+        'phoneNumber': request.fullPhoneNumber,
+      });
+
       Logger.info('OTP sent successfully: ${response.message}');
     } catch (e) {
       Logger.error('Failed to send OTP', error: e);
@@ -59,11 +61,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Verify OTP with remote source
       final authModel = await _remoteSource.verifyOtp(request);
-      
+
       // Save user ID and mark as authenticated
       await _preferencesService.saveUserId(authModel.userId);
-      // Authentication is implicit when we have a user ID
-      
+
+      // Save the auth token from the response if provided
+      if (authModel.token != null && authModel.token!.isNotEmpty) {
+        await _preferencesService.saveAuthToken(authModel.token!);
+        Logger.info('Auth token saved from verify OTP response');
+      } else {
+        Logger.warning('No auth token received in verify OTP response');
+      }
+
       // If profile is complete, save user data
       if (authModel.isProfileComplete && authModel.user != null) {
         _cachedUser = authModel.user!.toEntity();
@@ -131,7 +140,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthEntity> refreshToken(String refreshToken) async {
     try {
       Logger.info('Refreshing authentication token');
-      
+
       // For now, we don't have a refresh token endpoint
       // Just return the current auth state
       final userId = await _preferencesService.getUserId();
@@ -179,15 +188,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> updateProfile(UserEntity user) async {
     try {
       Logger.info('Updating user profile');
-      
+
       // Convert entity to profile data map
-      final profileData = {
-        'name': user.name,
-        'email': user.email,
-      };
-      
-      final updatedModel = await _remoteSource.updateProfile(user.id, profileData);
-      
+      final profileData = {'name': user.name, 'email': user.email};
+
+      final updatedModel = await _remoteSource.updateProfile(
+        user.id,
+        profileData,
+      );
+
       // Update cache
       _cachedUser = updatedModel.toEntity();
       await _preferencesService.saveUserData(updatedModel.toJson());

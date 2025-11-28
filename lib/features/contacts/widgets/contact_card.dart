@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/color_scheme.dart';
 
-
 class ContactCard extends StatelessWidget {
   final Contact contact;
   final VoidCallback? onCall;
@@ -23,36 +22,42 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Card(
+      margin: EdgeInsets.only(top: 6.h, bottom: 12.h),
+      color: cs.surface,
+      elevation: isDark ? 3 : 1.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18.r),
+        side: BorderSide(
+          color: cs.onSurface.withOpacity(isDark ? 0.12 : 0.04),
+          width: 0.8,
+        ),
       ),
+      clipBehavior: Clip.none,
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Avatar
                 Container(
                   width: 50.w,
-                  height: 50.h,
+                  height: 50.w,
                   decoration: BoxDecoration(
                     gradient: AppColorScheme.primaryGradient,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
-                      contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
+                      contact.name.isNotEmpty
+                          ? contact.name[0].toUpperCase()
+                          : '?',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20.sp,
@@ -62,7 +67,7 @@ class ContactCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 12.w),
-                
+
                 // Contact Info
                 Expanded(
                   child: Column(
@@ -76,7 +81,7 @@ class ContactCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: cs.onSurface,
                               ),
                             ),
                           ),
@@ -87,7 +92,7 @@ class ContactCard extends StatelessWidget {
                         contact.phone,
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: Colors.grey[600],
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -102,7 +107,7 @@ class ContactCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Action Menu
                 PopupMenuButton<String>(
                   onSelected: (value) {
@@ -115,43 +120,56 @@ class ContactCard extends StatelessWidget {
                         break;
                     }
                   },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
+                          Icon(Icons.edit,
+                              size: 18.sp, color: cs.onSurfaceVariant),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'Edit',
+                            style: TextStyle(color: cs.onSurface),
+                          ),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
+                          Icon(Icons.delete,
+                              size: 18.sp, color: cs.error),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: cs.error),
+                          ),
                         ],
                       ),
                     ),
                   ],
                   child: Icon(
                     Icons.more_vert,
-                    color: Colors.grey[400],
+                    color: cs.onSurfaceVariant.withOpacity(0.7),
+                    size: 20.sp,
                   ),
                 ),
               ],
             ),
-            
+
             SizedBox(height: 12.h),
-            
+
             // Action Buttons
             Row(
               children: [
                 Expanded(
                   child: _buildActionButton(
+                    context: context,
                     icon: Icons.call,
                     label: 'Call',
                     color: Colors.green,
@@ -161,6 +179,7 @@ class ContactCard extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: _buildActionButton(
+                    context: context,
                     icon: Icons.message,
                     label: 'Message',
                     color: Colors.blue,
@@ -176,34 +195,40 @@ class ContactCard extends StatelessWidget {
   }
 
   Widget _buildActionButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required Color color,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // background is a soft tinted chip that works on light & dark
+    final bg = isDark
+        ? color.withOpacity(0.18)
+        : color.withOpacity(0.10);
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8.r),
+      borderRadius: BorderRadius.circular(10.r),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8.r),
+          color: bg,
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 16.sp,
-              color: color,
-            ),
+            Icon(icon, size: 16.sp, color: color),
             SizedBox(width: 4.w),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: color,
               ),
             ),

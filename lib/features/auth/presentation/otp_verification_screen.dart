@@ -88,8 +88,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _handleResendOtp() {
+    
+    final phoneNumber = widget.phoneNumber.trim();
     if (_resendCooldown <= 0) {
-      context.read<AuthBloc>().add(const AuthEvent.resendOtp());
+      context.read<AuthBloc>().add(AuthEvent.resendOtp(
+        phoneNumber:phoneNumber
+      ));
       _startResendTimer();
     }
   }

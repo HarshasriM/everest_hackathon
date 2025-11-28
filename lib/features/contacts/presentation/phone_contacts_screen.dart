@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contacts;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -90,7 +91,6 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
       return contact.displayName;
     }
 
-    // Try to construct name from first and last name
     final firstName = contact.name.first;
     final lastName = contact.name.last;
 
@@ -102,7 +102,6 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
       return lastName;
     }
 
-    // If no name available, use phone number
     if (contact.phones.isNotEmpty) {
       return contact.phones.first.number;
     }
@@ -118,7 +117,6 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
         final lowercaseQuery = query.toLowerCase();
 
         _filteredContacts = _allContacts.where((contact) {
-          // Search in display name and other name fields
           final displayName = contact.displayName.toLowerCase();
           final firstName = contact.name.first.toLowerCase();
           final lastName = contact.name.last.toLowerCase();
@@ -132,7 +130,6 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               middleName.contains(lowercaseQuery) ||
               fullDisplayName.contains(lowercaseQuery);
 
-          // Only search phone numbers if the query looks like a number
           final isNumericQuery = RegExp(r'^\d+$').hasMatch(query.trim());
           final phoneMatch =
               isNumericQuery &&
@@ -150,24 +147,31 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Select Contact',
           style: TextStyle(
-            color: Colors.black87,
+            color: colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        systemOverlayStyle:
+            isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       ),
       body: Column(
         children: [
@@ -178,28 +182,47 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: _filterContacts,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 14.sp,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search contacts...',
                   hintStyle: TextStyle(
-                    color: Colors.grey[400],
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 14.sp,
                   ),
                   prefixIcon: Icon(
                     Icons.search,
-                    color: Colors.grey[400],
+                    color: colorScheme.onSurfaceVariant,
                     size: 20.sp,
                   ),
+                  filled: true,
+                  fillColor: isDark
+                      ? colorScheme.surface.withOpacity(0.06)
+                      : colorScheme.surface.withOpacity(0.6),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: Colors.grey[200]!),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? colorScheme.surface.withOpacity(0.0)
+                          : Colors.grey.shade200,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: Colors.grey[200]!),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? colorScheme.surface.withOpacity(0.0)
+                          : Colors.grey.shade200,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: AppColorScheme.primaryColor),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1.5,
+                    ),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16.w,
@@ -210,28 +233,28 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
             ),
           ],
 
-          // Content
-          Expanded(child: _buildContent()),
+          Expanded(child: _buildContent(context)),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (_isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColorScheme.primaryColor,
-              ),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(colorScheme.primary),
             ),
             SizedBox(height: 16.h),
             Text(
               'Loading contacts...',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -239,31 +262,33 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
     }
 
     if (!_hasPermission || _errorMessage != null) {
-      return _buildErrorState();
+      return _buildErrorState(context);
     }
 
     if (_filteredContacts.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return _buildContactsList();
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.contacts_outlined, size: 64.sp, color: Colors.grey[400]),
+            Icon(Icons.contacts_outlined, size: 64.sp, color: colorScheme.onSurfaceVariant),
             SizedBox(height: 16.h),
             Text(
               'Cannot Access Contacts',
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 8.h),
@@ -271,7 +296,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               _errorMessage ?? 'Permission required to access contacts',
               style: TextStyle(
                 fontSize: 14.sp,
-                color: Colors.grey[600],
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -286,8 +311,8 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColorScheme.primaryColor,
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -305,21 +330,23 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64.sp, color: Colors.grey[400]),
+            Icon(Icons.search_off, size: 64.sp, color: colorScheme.onSurfaceVariant),
             SizedBox(height: 16.h),
             Text(
               'No Contacts Found',
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 8.h),
@@ -327,7 +354,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
               _searchController.text.isNotEmpty
                   ? 'No contacts match your search'
                   : 'No contacts with phone numbers found',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -373,24 +400,35 @@ class _ContactListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
+
+    // avatar background: subtle tint using primary or onSurface variant
+    final avatarBg = isDark
+        ? colorScheme.primary.withOpacity(0.12)
+        : colorScheme.primary.withOpacity(0.12);
+
+    final textColor = colorScheme.onSurface;
+    final subtitleColor = colorScheme.onSurfaceVariant;
+
     return Card(
       margin: EdgeInsets.only(bottom: 8.h),
       elevation: 1,
+      color: colorScheme.surface, // adapts for dark/light
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: ListTile(
         onTap: onTap,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         leading: CircleAvatar(
           radius: 24.r,
-          backgroundColor: AppColorScheme.primaryColor.withValues(alpha: 0.1),
+          backgroundColor: avatarBg,
           child: Text(
-            _PhoneContactsScreenState.getContactDisplayName(
-              contact,
-            )[0].toUpperCase(),
+            _PhoneContactsScreenState.getContactDisplayName(contact)[0].toUpperCase(),
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColorScheme.primaryColor,
+              color: colorScheme.primary,
             ),
           ),
         ),
@@ -399,16 +437,16 @@ class _ContactListTile extends StatelessWidget {
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         subtitle: Text(
           primaryPhone.isNotEmpty ? primaryPhone : 'No phone number',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 14.sp, color: subtitleColor),
         ),
         trailing: Icon(
           Icons.add_circle_outline,
-          color: AppColorScheme.primaryColor,
+          color: colorScheme.primary,
           size: 24.sp,
         ),
       ),

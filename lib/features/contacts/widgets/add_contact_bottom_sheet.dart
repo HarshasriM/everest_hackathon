@@ -42,7 +42,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     super.initState();
     if (widget.contact != null) {
       _nameController.text = widget.contact!.name;
-      _phoneController.text = widget.contact!.phone;
+      String displayPhone = widget.contact!.phone;
+      if (displayPhone.startsWith('+91')) {
+        displayPhone = displayPhone.substring(3);
+      }
+      _phoneController.text = displayPhone;
       _selectedRelationship = widget.contact!.relationship;
       _isPrimary = widget.contact!.isPrimary;
     }
@@ -57,9 +61,21 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // subtle background for sheet to match the theme
+    final sheetBg = colorScheme.surface;
+    final handleColor = colorScheme.onSurface.withOpacity(0.12);
+    final dividerColor = colorScheme.onSurface.withOpacity(0.08);
+    final fieldFill = isDark ? colorScheme.surface.withOpacity(0.03) : colorScheme.surface.withOpacity(0.88);
+    final prefixIconColor = colorScheme.primary;
+    final outlinedBorderColor = colorScheme.primary.withOpacity(0.28);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: sheetBg,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
@@ -84,7 +100,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                       width: 40.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: handleColor,
                         borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
@@ -93,13 +109,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
                   // Title
                   Text(
-                    widget.contact == null
-                        ? 'Add Emergency Contact'
-                        : 'Edit Contact',
+                    widget.contact == null ? 'Add Emergency Contact' : 'Edit Contact',
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 16.h),
@@ -113,29 +127,23 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                         icon: Icon(
                           Icons.contacts,
                           size: 18.sp,
-                          color: AppColorScheme.primaryColor,
+                          color: prefixIconColor,
                         ),
                         label: Text(
                           'Select from Phone Contacts',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: AppColorScheme.primaryColor,
+                            color: prefixIconColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
-                          side: BorderSide(
-                            color: AppColorScheme.primaryColor.withValues(
-                              alpha: 0.3,
-                            ),
-                            width: 1,
-                          ),
+                          side: BorderSide(color: outlinedBorderColor, width: 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
                           ),
-                          backgroundColor: AppColorScheme.primaryColor
-                              .withValues(alpha: 0.05),
+                          backgroundColor: colorScheme.primary.withOpacity(0.03),
                         ),
                       ),
                     ),
@@ -145,7 +153,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     Row(
                       children: [
                         Expanded(
-                          child: Divider(color: Colors.grey[300], thickness: 1),
+                          child: Divider(color: dividerColor, thickness: 1),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -153,13 +161,13 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                             'OR',
                             style: TextStyle(
                               fontSize: 12.sp,
-                              color: Colors.grey[500],
+                              color: colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                         Expanded(
-                          child: Divider(color: Colors.grey[300], thickness: 1),
+                          child: Divider(color: dividerColor, thickness: 1),
                         ),
                       ],
                     ),
@@ -170,13 +178,23 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   // Name Field
                   TextFormField(
                     controller: _nameController,
+                    style: TextStyle(color: colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Name',
                       hintText: 'Enter contact name',
+                      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      filled: true,
+                      fillColor: fieldFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: dividerColor),
                       ),
-                      prefixIcon: const Icon(Icons.person),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: dividerColor),
+                      ),
+                      prefixIcon: Icon(Icons.person, color: prefixIconColor),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -193,30 +211,56 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     keyboardType: TextInputType.phone,
                     maxLength: 10,
                     inputFormatters: [
-                      // Allow only digits
                       FilteringTextInputFormatter.digitsOnly,
                     ],
+                    style: TextStyle(color: colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
-                      hintText: 'Enter phone number',
+                      hintText: 'Enter 10-digit mobile number',
+                      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      helperStyle: TextStyle(
+                        fontSize: 12.sp,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      filled: true,
+                      fillColor: fieldFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: dividerColor),
                       ),
-                      prefixIcon: const Icon(Icons.phone),
-                      counterText: '', // Hide the counter text
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: dividerColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                      ),
+                      prefixIcon: Icon(Icons.phone, color: prefixIconColor),
+                      prefixText: '+91 ',
+                      prefixStyle: TextStyle(
+                        fontSize: 16.sp,
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      counterText: '',
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a phone number';
                       }
-                      final cleaned = _cleanPhone(value);
 
-                      final isValid = RegExp(
-                        r'^\+?[0-9]{10}$',
-                      ).hasMatch(cleaned);
-                      if (!isValid) {
-                        return 'Enter a valid phone (10 digits)';
+                      final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                      if (digitsOnly.length != 10) {
+                        return 'Enter a valid 10-digit mobile number';
                       }
+
+                      if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(digitsOnly)) {
+                        return 'Enter a valid Indian mobile number';
+                      }
+
                       return null;
                     },
                   ),
@@ -227,15 +271,19 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     value: _selectedRelationship,
                     decoration: InputDecoration(
                       labelText: 'Relationship',
+                      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      filled: true,
+                      fillColor: fieldFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: dividerColor),
                       ),
-                      prefixIcon: const Icon(Icons.family_restroom),
+                      prefixIcon: Icon(Icons.family_restroom, color: prefixIconColor),
                     ),
                     items: _relationships.map((relationship) {
                       return DropdownMenuItem(
                         value: relationship,
-                        child: Text(relationship),
+                        child: Text(relationship, style: TextStyle(color: colorScheme.onSurface)),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -244,16 +292,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                       }
                     },
                   ),
-                  // SizedBox(height: 16.h),
 
-                  // Primary Contact Switch
-                  // SwitchListTile(
-                  //   title: const Text('Primary Contact'),
-                  //   subtitle: const Text('This contact will be prioritized in emergencies'),
-                  //   value: _isPrimary,
-                  //   onChanged: (value) => setState(() => _isPrimary = value),
-                  //   activeColor: AppColorScheme.primaryColor,
-                  // ),
                   SizedBox(height: 40.h),
 
                   // Action Buttons
@@ -267,8 +306,14 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.r),
                             ),
+                            side: BorderSide(color: colorScheme.primary.withOpacity(0.18)),
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: colorScheme.primary,
                           ),
-                          child: const Text('Cancel'),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w600),
+                          ),
                         ),
                       ),
                       SizedBox(width: 16.w),
@@ -277,28 +322,26 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _saveContact,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColorScheme.primaryColor,
-                            foregroundColor: Colors.white,
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                             padding: EdgeInsets.symmetric(vertical: 16.h),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                                      colorScheme.onPrimary,
                                     ),
                                   ),
                                 )
                               : Text(
-                                  widget.contact == null
-                                      ? 'Add Contact'
-                                      : 'Update Contact',
+                                  widget.contact == null ? 'Add Contact' : 'Update Contact',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w600,
@@ -326,7 +369,15 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           onContactSelected: (name, phone) {
             setState(() {
               _nameController.text = name;
-              _phoneController.text = phone;
+              String displayPhone = phone;
+              if (displayPhone.startsWith('+91')) {
+                displayPhone = displayPhone.substring(3);
+              }
+              displayPhone = displayPhone.replaceAll(RegExp(r'[^0-9]'), '');
+              if (displayPhone.length > 10) {
+                displayPhone = displayPhone.substring(displayPhone.length - 10);
+              }
+              _phoneController.text = displayPhone;
             });
           },
         ),
@@ -340,11 +391,9 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final cleanedPhone = _cleanPhone(_phoneController.text.trim());
+      final cleanedPhone = _formatPhoneWithCountryCode(_phoneController.text.trim());
       final contact = Contact(
-        id:
-            widget.contact?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.contact?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         phone: cleanedPhone,
         relationship: _selectedRelationship,
@@ -357,16 +406,6 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.contact == null
-                  ? 'Contact added successfully!'
-                  : 'Contact updated successfully!',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
       }
     } catch (e) {
       if (mounted) {
@@ -384,17 +423,21 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     }
   }
 
-  // Remove spaces, dashes and parentheses, keep a single leading '+' if present
-  String _cleanPhone(String input) {
-    String s = input.trim();
-    // Remove spaces, dashes, parentheses
-    s = s.replaceAll(RegExp(r'[\s\-()]+'), '');
-    // If multiple '+', keep only leading one; otherwise remove all '+' then re-add if first char was '+'
-    if (s.startsWith('+')) {
-      s = '+' + s.substring(1).replaceAll('+', '');
-    } else {
-      s = s.replaceAll('+', '');
+  String _formatPhoneWithCountryCode(String input) {
+    String digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (digitsOnly.length == 10) {
+      return '+91$digitsOnly';
     }
-    return s;
+
+    if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
+      return '+$digitsOnly';
+    }
+
+    if (input.startsWith('+91') && digitsOnly.length == 12) {
+      return input;
+    }
+
+    return '+91$digitsOnly';
   }
 }

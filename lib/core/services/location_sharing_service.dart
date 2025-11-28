@@ -10,33 +10,19 @@ class LocationSharingService {
   LocationSharingService._internal();
 
   Timer? _sharingTimer;
-  Timer? _locationUpdateTimer;
   DateTime? _sharingStartTime;
   Duration? _sharingDuration;
   bool _isSharing = false;
 
-  // Current location data
-  double? _currentLatitude;
-  double? _currentLongitude;
-  String? _currentAddress;
-
-  // Location update callback
-  Function(double lat, double lng, String address)? _onLocationUpdate;
 
   // Stream controller for sharing status updates
   final StreamController<LocationSharingStatus> _statusController =
       StreamController<LocationSharingStatus>.broadcast();
 
-  // Stream controller for live location updates
-  final StreamController<LiveLocationUpdate> _locationUpdateController =
-      StreamController<LiveLocationUpdate>.broadcast();
 
   /// Stream to listen to location sharing status changes
   Stream<LocationSharingStatus> get statusStream => _statusController.stream;
 
-  /// Stream to listen to live location updates
-  Stream<LiveLocationUpdate> get locationUpdateStream =>
-      _locationUpdateController.stream;
 
   /// Check if currently sharing location
   bool get isSharing => _isSharing;
@@ -53,12 +39,7 @@ class LocationSharingService {
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
-  /// Set location update callback for live tracking
-  void setLocationUpdateCallback(
-    Function(double lat, double lng, String address) callback,
-  ) {
-    _onLocationUpdate = callback;
-  }
+
 
   /// Start sharing live location with specified duration
   Future<void> startLocationSharing({
@@ -73,11 +54,8 @@ class LocationSharingService {
     _isSharing = true;
     _sharingStartTime = DateTime.now();
     _sharingDuration = duration;
-    _currentLatitude = latitude;
-    _currentLongitude = longitude;
-    _currentAddress = address;
 
-    // Generate initial location message
+    // Generate location message
     final message = _generateLocationMessage(
       latitude: latitude,
       longitude: longitude,
@@ -85,7 +63,7 @@ class LocationSharingService {
       duration: duration,
     );
 
-    // Share the initial location
+    // Share the  location
     await Share.share(message, subject: '📍 Live Location Sharing - SHE App');
 
     // Start timer for status updates (every second)
@@ -105,17 +83,7 @@ class LocationSharingService {
       }
     });
 
-    // Start timer for live location updates (every 30 seconds)
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      if (_isSharing && _onLocationUpdate != null) {
-        // Request location update from the callback
-        _onLocationUpdate!(
-          _currentLatitude!,
-          _currentLongitude!,
-          _currentAddress!,
-        );
-      }
-    });
+
 
     // Emit initial status
     _statusController.add(
@@ -127,54 +95,14 @@ class LocationSharingService {
     );
   }
 
-  /// Update current location during live sharing
-  Future<void> updateCurrentLocation({
-    required double latitude,
-    required double longitude,
-    required String address,
-  }) async {
-    if (!_isSharing) return;
-
-    // Update current location
-    _currentLatitude = latitude;
-    _currentLongitude = longitude;
-    _currentAddress = address;
-
-    // Generate updated location message
-    final message = _generateLocationMessage(
-      latitude: latitude,
-      longitude: longitude,
-      address: address,
-      duration: remainingTime,
-      isUpdate: true,
-    );
-
-    // Share the updated location
-    await Share.share(message, subject: '📍 Live Location Update - SHE App');
-
-    // Emit location update
-    _locationUpdateController.add(
-      LiveLocationUpdate(
-        latitude: latitude,
-        longitude: longitude,
-        address: address,
-        timestamp: DateTime.now(),
-      ),
-    );
-  }
-
+ 
   /// Stop location sharing
   Future<void> stopLocationSharing() async {
     _sharingTimer?.cancel();
-    _locationUpdateTimer?.cancel();
     _sharingTimer = null;
-    _locationUpdateTimer = null;
     _isSharing = false;
     _sharingStartTime = null;
     _sharingDuration = null;
-    _currentLatitude = null;
-    _currentLongitude = null;
-    _currentAddress = null;
 
     _statusController.add(
       const LocationSharingStatus(
@@ -256,21 +184,11 @@ class LocationSharingService {
     required double longitude,
     required String address,
     Duration? duration,
-    bool isUpdate = false,
   }) {
     final googleMapsLink = generateGoogleMapsLink(latitude, longitude);
     final timestamp = DateTime.now();
 
-    String message = isUpdate
-        ? '''📍 Live Location Update - SHE App
-
-📍 Updated Location:
-$address
-
-🗺️ View on Map: $googleMapsLink
-
-📅 Updated at: ${timestamp.toString().substring(0, 19)}'''
-        : '''📍 Live Location Sharing - SHE App
+    String message = '''📍 Live Location Update - SHE App
 
 📍 Current Location:
 $address
@@ -303,9 +221,7 @@ $address
   /// Dispose resources
   void dispose() {
     _sharingTimer?.cancel();
-    _locationUpdateTimer?.cancel();
     _statusController.close();
-    _locationUpdateController.close();
   }
 }
 
@@ -349,27 +265,4 @@ class LocationSharingStatus {
   }
 }
 
-/// Live location update model
-class LiveLocationUpdate {
-  final double latitude;
-  final double longitude;
-  final String address;
-  final DateTime timestamp;
 
-  const LiveLocationUpdate({
-    required this.latitude,
-    required this.longitude,
-    required this.address,
-    required this.timestamp,
-  });
-
-  /// Generate Google Maps link for this location
-  String get googleMapsLink {
-    return 'https://www.google.com/maps?q=$latitude,$longitude';
-  }
-
-  /// Get formatted timestamp
-  String get formattedTimestamp {
-    return timestamp.toString().substring(0, 19);
-  }
-}

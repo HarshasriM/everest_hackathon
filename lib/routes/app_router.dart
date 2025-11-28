@@ -1,21 +1,22 @@
 import 'package:everest_hackathon/core/services/app_preferences_service.dart';
 import 'package:everest_hackathon/features/chat/presentation/chat_screen.dart';
-import 'package:everest_hackathon/features/helpline/bloc/helpline_bloc.dart';
+import 'package:everest_hackathon/features/contacts/presentation/contacts_screen.dart';
 import 'package:everest_hackathon/features/helpline/helpline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import '../core/dependency_injection/di_container.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
 import 'app_routes.dart';
-import '../features/auth/presentation/login_screen.dart';
+import '../features/profile/presentation/profile_setup_screen.dart';
 import '../features/auth/presentation/otp_verification_screen.dart';
-import '../features/auth/presentation/profile_setup_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/sos/presentation/sos_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/auth/presentation/login_screen.dart';
 
 /// App router configuration using go_router
 class AppRouter {
@@ -40,6 +41,8 @@ class AppRouter {
           child: const LoginScreen(),
         ),
       ),
+     
+      
 
       GoRoute(
         path: AppRoutes.otpVerification,
@@ -54,31 +57,41 @@ class AppRouter {
 
       GoRoute(
         path: AppRoutes.profileSetup,
-        builder: (context, state) => BlocProvider.value(
-          value: sl<AuthBloc>(),
-          child: const ProfileSetupScreen(),
-        ),
+        builder: (context, state) {
+          // Check if we should use ProfileBloc and if it's edit mode
+          final extra = state.extra as Map<String, dynamic>?;
+          final useProfileBloc = extra?['useProfileBloc'] as bool? ?? false;
+          final isEditMode = extra?['isEditMode'] as bool? ?? false;
+          
+          return BlocProvider.value(
+            value: sl<AuthBloc>(),
+            child: ProfileSetupScreen(
+              useProfileBloc: useProfileBloc,
+              isEditMode: isEditMode,
+            ),
+          );
+        },
       ),
 
       GoRoute(
         path: AppRoutes.helpline,
         builder: (context, state) => HelplineScreen(),
       ),
-
+  
+      GoRoute(
+        path: AppRoutes.emergencyContacts,
+        builder: (context, state) => ContactsScreen(),
+      ),
       
-        // Nested routes
-
-      // Nested routes
-
       GoRoute(
         path: AppRoutes.helpSupport,
         builder: (context, state) =>
-            const ChatScreen(apiKey: "AIzaSyBuB3oUOwBsxhkxrgN-TmAJ3Kild-V9LjQ"),
+            ChatScreen(apiKey: dotenv.env['GEMINI_API_KEY'] ?? ''),
       ),
       
       GoRoute(
         path: AppRoutes.sos,
-        builder: (context, state) => const SosScreen(),
+        builder: (context, state) => const SosScreenPage(),
       ),
       GoRoute(
         path: AppRoutes.profile,

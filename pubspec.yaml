@@ -58,13 +58,13 @@ dependencies:
   connectivity_plus: ^6.1.0
   json_annotation: ^4.9.0
 
-  flutter_contacts: ^1.1.9+2
   animate_do: ^3.3.4
   image_picker: ^1.1.2
   audioplayers: ^6.1.0
-
   share_plus: ^10.1.2
   speech_to_text: ^7.3.0
+  flutter_dotenv: ^5.1.0
+  shared_preferences: ^2.5.3
 
 
 dev_dependencies:
@@ -97,6 +97,8 @@ flutter:
   assets:
     - assets/audio/
     - assets/images/
+    - assets/map/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

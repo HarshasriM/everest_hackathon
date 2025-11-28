@@ -1,15 +1,23 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../core/theme/color_scheme.dart';
 import '../bloc/fake_call_bloc.dart';
 import '../bloc/fake_call_event.dart';
 import '../bloc/fake_call_state.dart';
+import '../../../core/theme/color_scheme.dart';
 
-/// In Call Screen - Shows ongoing call UI
-class InCallScreen extends StatelessWidget {
+class InCallScreen extends StatefulWidget {
   const InCallScreen({super.key});
+
+  @override
+  State<InCallScreen> createState() => _InCallScreenState();
+}
+
+class _InCallScreenState extends State<InCallScreen> {
+  Timer? _timer;
+  int _callSeconds = 0;
 
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
@@ -18,21 +26,39 @@ class InCallScreen extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // initialize timer from bloc if available
+    final initial = context.read<FakeCallBloc>().state.maybeWhen(
+          inCall: (_, __, ___, duration) => duration,
+          orElse: () => 0,
+        );
+    _callSeconds = initial;
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() => _callSeconds++);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          // Prevent back button, user must end call
-          context.read<FakeCallBloc>().add(const FakeCallEvent.endCall());
-        }
-      },
+    // reference image uploaded by user (local path)
+    final uploadedImagePath = '/mnt/data/d7d8bce8-6ca0-463e-9a77-3d7c3ae01a47.png';
+
+    return WillPopScope(
+      onWillPop: () async => false,
       child: BlocListener<FakeCallBloc, FakeCallState>(
         listener: (context, state) {
           state.maybeWhen(
             callEnded: () {
-              // Navigate back to home
-              if (Navigator.of(context).canPop()) {
+              _timer?.cancel();
+              if (Navigator.of(context).mounted && Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
               }
             },
@@ -40,117 +66,155 @@ class InCallScreen extends StatelessWidget {
           );
         },
         child: Scaffold(
-          backgroundColor: Colors.grey[100],
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: BlocBuilder<FakeCallBloc, FakeCallState>(
             builder: (context, state) {
-              // Extract name and number from state
-              String callerName = 'Unknown';
-              String callerNumber = '';
-              int callDuration = 0;
-              String? imagePath;
-              
-              state.maybeWhen(
-                inCall: (name, number, image, duration) {
-                  callerName = name.isNotEmpty ? name : 'Unknown';
-                  callerNumber = number.isNotEmpty ? number : '';
-                  callDuration = duration;
-                  imagePath = image;
-                },
-                orElse: () {},
-              );
-              
+              final callerName = state.callerName ?? 'Unknown';
+              final callerNumber = state.callerNumber ?? '';
+              final imagePath = state.callerImagePath;
+
+              final displayDuration = _callSeconds;
+
+              final theme = Theme.of(context);
+              final colorScheme = theme.colorScheme;
+              final isDark = theme.brightness == Brightness.dark;
+
               return SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20.h),
+                child: Column(
+                  children: [
+                    SizedBox(height: 20.h),
 
-                      // Call duration
-                      Text(
-                        _formatDuration(callDuration),
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.w500,
-                        ),
+                    // duration
+                    Text(
+                      _formatDuration(displayDuration),
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
                       ),
-                      SizedBox(height: 30.h),
+                    ),
+                    SizedBox(height: 30.h),
 
-                      // Caller name
+                    // caller name
+                    Text(
+                      callerName,
+                      style: TextStyle(
+                        fontSize: 32.sp,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8.h),
+
+                    // caller number
+                    if (callerNumber.isNotEmpty)
                       Text(
-                        callerName,
+                        'Phone $callerNumber',
                         style: TextStyle(
-                          fontSize: 32.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          fontSize: 16.sp,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 8.h),
 
-                      // Caller number
-                      if (callerNumber.isNotEmpty)
-                        Text(
-                          'Phone $callerNumber',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.grey[600],
+                    SizedBox(height: 60.h),
+
+                    // avatar circle (uses gradient in dark/light)
+                    Container(
+                      width: 140.w,
+                      height: 140.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: AppColorScheme.getPrimaryGradient(isDark),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.5)
+                                : Colors.black.withOpacity(0.08),
+                            blurRadius: isDark ? 8 : 12,
+                            offset: const Offset(0, 4),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      SizedBox(height: 60.h),
-
-                      // Avatar
-                      Container(
-                        width: 140.w,
-                        height: 140.w,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF80DEEA),
-                          shape: BoxShape.circle,
-                        ),
-                        child: imagePath != null && imagePath!.isNotEmpty && File(imagePath!).existsSync()
-                            ? ClipOval(
-                                child: Image.file(
-                                  File(imagePath!),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Center(
-                                      child: Text(
-                                        callerName[0].toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 64.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: (imagePath != null &&
+                                imagePath.isNotEmpty &&
+                                File(imagePath).existsSync())
+                            ? Image.file(File(imagePath), fit: BoxFit.cover)
                             : Center(
                                 child: Text(
-                                  callerName[0].toUpperCase(),
+                                  callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
                                   style: TextStyle(
                                     fontSize: 64.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                                    color: colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
                       ),
+                    ),
 
-                      const Spacer(),
+                    const Spacer(),
 
-                      // Call control buttons
-                      _buildCallControls(context),
-                      SizedBox(height: 50.h),
-
-                      // End call button
-                      _buildEndCallButton(context),
-                      SizedBox(height: 30.h),
-                    ],
-                  ),
+                    // bottom control sheet
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 28.h, horizontal: 20.w),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(24.r),
+                          topRight: Radius.circular(24.r),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.45)
+                                : Colors.black.withOpacity(0.06),
+                            blurRadius: isDark ? 30 : 20,
+                            offset: const Offset(0, -6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          _buildCallControls(context),
+                          SizedBox(height: 24.h),
+                          InkWell(
+                            onTap: () {
+                              context.read<FakeCallBloc>().add(const FakeCallEvent.endCall());
+                              _timer?.cancel();
+                              if (Navigator.of(context).mounted && Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(32.r),
+                            child: Container(
+                              width: 160.w,
+                              height: 56.h,
+                              decoration: BoxDecoration(
+                                color: colorScheme.error,
+                                borderRadius: BorderRadius.circular(32.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.error.withOpacity(isDark ? 0.14 : 0.12),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                  child: Icon(
+                                Icons.call_end,
+                                color: colorScheme.onError,
+                                size: 28.sp,
+                              )),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -161,33 +225,17 @@ class InCallScreen extends StatelessWidget {
   }
 
   Widget _buildCallControls(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildControlButton(
-          icon: Icons.dialpad,
-          label: 'Keypad',
-          isActive: false,
-          onTap: () {},
-        ),
-        _buildControlButton(
-          icon: Icons.mic,
-          label: 'Mute',
-          isActive: false,
-          onTap: () {},
-        ),
-        _buildControlButton(
-          icon: Icons.volume_up,
-          label: 'Speaker',
-          isActive: false,
-          onTap: () {},
-        ),
-        _buildControlButton(
-          icon: Icons.more_vert,
-          label: 'More',
-          isActive: false,
-          onTap: () {},
-        ),
+        _buildControlButton(icon: Icons.dialpad, label: 'Keypad', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.mic, label: 'Mute', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.volume_up, label: 'Speaker', colorScheme: colorScheme, isDark: isDark),
+        _buildControlButton(icon: Icons.more_vert, label: 'More', colorScheme: colorScheme, isDark: isDark),
       ],
     );
   }
@@ -195,78 +243,36 @@ class InCallScreen extends StatelessWidget {
   Widget _buildControlButton({
     required IconData icon,
     required String label,
-    required bool isActive,
-    required VoidCallback onTap,
+    required ColorScheme colorScheme,
+    required bool isDark,
   }) {
     return Column(
       children: [
-        InkWell(
-          onTap: onTap,
-          child: Container(
-            width: 65.w,
-            height: 65.w,
-            decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF263238) : Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              icon,
-              color: isActive ? Colors.white : Colors.grey[800],
-              size: 28.sp,
+        Container(
+          width: 65.w,
+          height: 65.w,
+          decoration: BoxDecoration(
+            color: isDark ? colorScheme.surface : colorScheme.onPrimary.withOpacity(0.98),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withOpacity(0.45) : Colors.black.withOpacity(0.08),
+                blurRadius: isDark ? 10 : 8,
+                offset: const Offset(0, 3),
+              )
+            ],
+            border: Border.all(
+              color: isDark ? colorScheme.onSurface.withOpacity(0.06) : Colors.transparent,
             ),
           ),
+          child: Icon(icon, color: colorScheme.onSurfaceVariant, size: 28.sp),
         ),
         SizedBox(height: 10.h),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.grey[700],
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
         ),
       ],
-    );
-  }
-
-  Widget _buildEndCallButton(BuildContext context) {
-    return Center(
-      child: InkWell(
-        onTap: () {
-          context.read<FakeCallBloc>().add(
-                const FakeCallEvent.endCall(),
-              );
-        },
-        child: Container(
-          width: 160.w,
-          height: 56.h,
-          decoration: BoxDecoration(
-            color: const Color(0xFFD32F2F),
-            borderRadius: BorderRadius.circular(32.r),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFD32F2F).withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              Icons.call_end,
-              color: Colors.white,
-              size: 28.sp,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

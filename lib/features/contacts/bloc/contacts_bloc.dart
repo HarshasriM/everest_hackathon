@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:everest_hackathon/data/repositories_impl/contacts_api_repository_impl.dart';
 import 'package:everest_hackathon/domain/entities/contact.dart';
 import 'package:everest_hackathon/domain/repositories/contacts_repository.dart';
 import 'package:everest_hackathon/domain/usecases/add_contact_usecase.dart';
@@ -6,6 +7,7 @@ import 'package:everest_hackathon/domain/usecases/get_contacts_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contacts;
 
+import '../../../core/utils/logger.dart';
 import '../services/phone_contacts_service.dart';
 
 part 'contacts_event.dart';
@@ -62,12 +64,30 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     Emitter<ContactsState> emit,
   ) async {
     try {
-      emit(const ContactsLoading());
-      await _addContactUseCase(event.contact);
-      final contacts = await _getContactsUseCase();
-      emit(ContactsLoaded(contacts));
+      Logger.info('Adding contact in BLoC: ${event.contact.name}');
+
+      // Add the contact via use case (repository will update cache and notify)
+      final addedContact = await _addContactUseCase(event.contact);
+
+      // Repository has updated cache, so get cached contacts without API call
+      final contacts = (_repository as ContactsApiRepositoryImpl)
+          .getCachedContacts();
+      emit(ContactsSuccess('Contact added successfully!', contacts));
+
+      Logger.info('Contact added successfully in BLoC: ${addedContact.name}');
     } catch (e) {
-      emit(ContactsError(e.toString()));
+      Logger.error('Failed to add contact in BLoC', error: e);
+      final errorMessage = e.toString();
+
+      // Handle duplicate contact error gracefully with warning
+      if (errorMessage.contains('already exists') ||
+          errorMessage.contains('duplicate')) {
+        final contacts = (_repository as ContactsApiRepositoryImpl)
+            .getCachedContacts();
+        emit(ContactsWarning(errorMessage, contacts));
+      } else {
+        emit(ContactsError('Failed to add contact: $errorMessage'));
+      }
     }
   }
 
@@ -76,11 +96,20 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     Emitter<ContactsState> emit,
   ) async {
     try {
+      Logger.info(
+        'Update contact event - contactId: "${event.contact.id}", name: "${event.contact.name}"',
+      );
+      if (event.contact.id.isEmpty) {
+        throw Exception(
+          'Cannot update contact: Contact ID is empty or invalid',
+        );
+      }
       emit(const ContactsLoading());
       await _repository.updateContact(event.contact);
       final contacts = await _getContactsUseCase();
-      emit(ContactsLoaded(contacts));
+      emit(ContactsSuccess('Contact updated successfully!', contacts));
     } catch (e) {
+      Logger.error('Failed to update contact', error: e);
       emit(ContactsError(e.toString()));
     }
   }
@@ -90,11 +119,18 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     Emitter<ContactsState> emit,
   ) async {
     try {
+      Logger.info('Delete contact event - contactId: ${event.contactId}');
+      if (event.contactId.isEmpty) {
+        throw Exception(
+          'Cannot delete contact: Contact ID is empty or invalid',
+        );
+      }
       emit(const ContactsLoading());
       await _repository.deleteContact(event.contactId);
       final contacts = await _getContactsUseCase();
-      emit(ContactsLoaded(contacts));
+      emit(ContactsSuccess('Contact deleted successfully!', contacts));
     } catch (e) {
+      Logger.error('Failed to delete contact', error: e);
       emit(ContactsError(e.toString()));
     }
   }

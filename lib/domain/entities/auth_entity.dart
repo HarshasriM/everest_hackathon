@@ -4,12 +4,14 @@ import 'user_entity.dart';
 class AuthEntity {
   final String userId;
   final String? sid; // Session ID from OTP send
+  final String? token; // Authentication token from server
   final bool isProfileComplete;
   final UserEntity? user;
 
   const AuthEntity({
     required this.userId,
     this.sid,
+    this.token,
     required this.isProfileComplete,
     this.user,
   });

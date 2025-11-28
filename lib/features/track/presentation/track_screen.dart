@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:everest_hackathon/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -36,7 +37,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   // Map settings
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(28.6139, 77.2090), // Default to Delhi
-    zoom: 15,
+    zoom: 19,
   );
 
   Set<Marker> _markers = {};
@@ -105,9 +106,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        
-      ),
+      appBar: CustomAppBar(),
       body: BlocConsumer<TrackBloc, TrackState>(
         listener: (context, state) {
           // Update markers when location changes
@@ -123,8 +122,12 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               GoogleMap(
                 mapType: MapType.normal,
                 initialCameraPosition: _initialPosition,
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (GoogleMapController controller) async {
                   _mapController.complete(controller);
+                  final String style = await rootBundle.loadString(
+                    'assets/map/snazzy_style.json',
+                  );
+                  controller.setMapStyle(style);
                 },
                 markers: _markers,
                 myLocationEnabled: true,
@@ -137,7 +140,7 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               // Center location button
               Positioned(
                 right: 16.w,
-                bottom: 200.h,
+                bottom: 150.h,
                 child: FloatingActionButton(
                   onPressed: _centerOnCurrentLocation,
                   backgroundColor: Theme.of(context).primaryColor,
@@ -174,6 +177,11 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
   }
 
   Widget _buildAddressPanel(BuildContext context, TrackState state) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Primary color according to light/dark theme
+    final primary = theme.colorScheme.primary;
     return Container(
       margin: EdgeInsets.all(16.w),
       padding: EdgeInsets.all(20.w),
@@ -197,14 +205,12 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: primary.withOpacity(
+                    isDark ? 0.25 : 0.1,
+                  ), // darker tint in dark mode
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(
-                  Icons.location_on,
-                  color: Theme.of(context).primaryColor,
-                  size: 24.sp,
-                ),
+                child: Icon(Icons.location_on, color: primary, size: 24.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -230,15 +236,13 @@ class _TrackScreenContentState extends State<_TrackScreenContent>
                           child: Container(
                             padding: EdgeInsets.all(4.w),
                             decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor.withOpacity(0.1),
+                              color: primary.withOpacity(isDark ? 0.25 : 0.1),
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Icon(
                               Icons.share,
                               size: 16.sp,
-                              color: Theme.of(context).primaryColor,
+                              color: primary,
                             ),
                           ),
                         ),
@@ -424,13 +428,25 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Container(
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20.r),
-          color: Colors.white,
+          color: cs.surface, // adapts to light/dark
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.5 : 0.12),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -441,12 +457,12 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color: cs.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Icon(
                     Icons.share_location,
-                    color: Theme.of(context).primaryColor,
+                    color: cs.primary,
                     size: 20.sp,
                   ),
                 ),
@@ -459,7 +475,7 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                     style: TextStyle(
                       fontSize: 17.5.sp,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
+                      color: cs.onSurface, // ensure visible on surface
                     ),
                   ),
                 ),
@@ -472,9 +488,9 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  border: Border.all(color: Colors.green.withOpacity(0.35)),
                 ),
                 child: Column(
                   children: [
@@ -525,7 +541,7 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.titleMedium?.color,
+                  color: cs.onSurface,
                 ),
               ),
               SizedBox(height: 18.h),
@@ -535,11 +551,8 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                 width: 190.w,
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
-                    width: 1,
-                  ),
+                  color: cs.surfaceVariant.withOpacity(isDark ? 0.5 : 1),
+                  border: Border.all(color: cs.primary, width: 1),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: DropdownButtonHideUnderline(
@@ -547,20 +560,16 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                     value: selectedDurationIndex,
                     isExpanded: true,
                     borderRadius: BorderRadius.circular(12.r),
-                    dropdownColor: Colors.white,
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    dropdownColor: cs.surface, // dark-aware
+                    icon: Icon(Icons.arrow_drop_down, color: cs.primary),
                     style: TextStyle(
-                      color: Theme.of(context).primaryColor,
+                      color: cs.onSurface,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                     ),
                     items: durations.asMap().entries.map((entry) {
                       final index = entry.key;
                       final duration = entry.value;
-
                       return DropdownMenuItem<int>(
                         value: index,
                         child: Text(_formatDuration(duration)),
@@ -589,6 +598,8 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
+                        side: BorderSide(color: cs.primary.withOpacity(0.6)),
+                        foregroundColor: cs.primary,
                         padding: EdgeInsets.symmetric(vertical: 4.h),
                       ),
                       child: const Text(
@@ -606,13 +617,13 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
                         widget.onStartSharing(durations[selectedDurationIndex]);
                         Navigator.of(context).pop();
                       },
-                      icon: Icon(Icons.share, color: Colors.white, size: 16.sp),
-                      label: const Text(
+                      icon: Icon(Icons.share, color: cs.onPrimary, size: 16.sp),
+                      label: Text(
                         'Share',
-                        style: TextStyle(color: Colors.white, fontSize: 13),
+                        style: TextStyle(color: cs.onPrimary, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: cs.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -630,23 +641,19 @@ class _LocationSharingDialogState extends State<_LocationSharingDialog> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.05),
+                color: cs.primary.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Theme.of(context).primaryColor,
-                    size: 20.sp,
-                  ),
+                  Icon(Icons.location_on, color: cs.primary, size: 20.sp),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       widget.address,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        color: cs.onSurfaceVariant,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
