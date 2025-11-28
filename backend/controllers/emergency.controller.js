@@ -31,10 +31,14 @@ export const addEmergencyContact = async (req, res) => {
 
     user.emergencyContacts.push(newContact);
     await user.save();
+    let username = user.name;
+    if(!username){
+      username = "Your near ones";
+    }
     // Send Twilio message
     const message = `Hi ${name},
 
-  ${user.name} has added you as an emergency contact in SHE - a women's safety app.
+    ${username} has added you as an emergency contact in SHE - a women's safety app.
 
   You will receive SOS alerts with location information if ${user.name} is in danger.
 

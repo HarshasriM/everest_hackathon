@@ -11,11 +11,14 @@ export const sendSosAlert = async (req, res) => {
     const { username, phoneNumbers, location } = req.body;
 
     // phoneNumbers should be an array of strings
-    if (!username || !phoneNumbers || !Array.isArray(phoneNumbers) || phoneNumbers.length === 0 || !location) {
+    if(!username){
+      username = "Your near ones";
+    }
+    if (!phoneNumbers || !Array.isArray(phoneNumbers) || phoneNumbers.length === 0 || !location) {
       return res.status(400).json({ message: "username, phoneNumbers[], and location are required" });
     }
 
-    const message = `${username} may be in danger! 📍Location: ${location}`;
+    const message = `${username} in danger! 📍Location: ${location}`;
 
     const results = [];
 

@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
 
+    // OTP fields for SMS and WhatsApp verification
+    // otpCode: { type: String },
+    // otpExpiry: { type: Date },
 
     isProfileComplete: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
